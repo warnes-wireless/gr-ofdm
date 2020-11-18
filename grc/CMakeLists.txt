@@ -17,7 +17,7 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 install(FILES
-    ofdm_uhd_transmitter.xml
+    ofdm_uhd_transmitter.block.yml
     ofdm_ofdm_pilot_block_inserter.xml
     ofdm_fbmc_snr_filter.xml
     ofdm_snr_filter.xml
@@ -32,10 +32,10 @@ install(FILES
     ofdm_pilot_subcarrier_filter.xml
     ofdm_ber_reference_source.xml
     ofdm_recursive_timing_metric.xml
-    ofdm_accumulator_cc.xml
+    ofdm_accumulator_cc.block.yml
     ofdm_autocorrelator_stage1.xml
     ofdm_autocorrelator_stage2.xml
-    ofdm_accumulator_ff.xml
+    ofdm_accumulator_ff.block.yml
     ofdm_autocorrelator0.xml
     ofdm_autocorrelator.xml
     ofdm_ber_measurement.xml
@@ -135,7 +135,7 @@ install(FILES
     ofdm_encoder_bb.xml
     ofdm_reference_data_source_02_ib.xml
     ofdm_allocation_src.xml
-    ofdm_allocation_buffer.xml
+    ofdm_allocation_buffer.block.yml
     ofdm_tx_mux_ctrl.xml
     ofdm_vector_padding_dc_null.xml
     ofdm_snr_estimator_dc_null.xml
@@ -173,7 +173,7 @@ install(FILES
     ofdm_scfdma_transmitter_bc.xml
     ofdm_scfdma_subcarrier_demapper_vcvc.xml
     ofdm_scfdma_receiver_cb.xml
-    ofdm_add_vcc.xml
+    ofdm_add_vcc.block.yml
     ofdm_fbmc_insert_preamble_mu_vcvc.xml
     ofdm_fbmc_subchannel_processing_mu_vcvc.xml
     ofdm_feedback_sink_vf.xml

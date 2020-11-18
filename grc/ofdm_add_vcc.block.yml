@@ -1,0 +1,18 @@
+id: ofdm_add_vcc
+label: add vcc
+category: '[Ofdm]'
+templates:
+  imports: import ofdm
+  make: ofdm.add_vcc()
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+  vlen: ${ vlen }
+  multiplicity: '2'
+outputs:
+- label: out
+  domain: stream
+  dtype: complex
+  vlen: ${ vlen }
+file_format: 1

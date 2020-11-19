@@ -167,7 +167,8 @@ list(APPEND ofdm_sources
     add_vcc_impl.cc 
     fbmc_subchannel_processing_mu_vcvc_impl.cc 
     feedback_sink_vf_impl.cc
-    vector_element_vff_impl.cc)
+    vector_element_vff_impl.cc
+    )
 
 set(ofdm_sources "${ofdm_sources}" PARENT_SCOPE)
 if(NOT ofdm_sources)
@@ -175,17 +176,18 @@ if(NOT ofdm_sources)
     return()
 endif(NOT ofdm_sources)
 
+# Some optimization flags
 SET ( CMAKE_CXX_FLAGS "-O3 -march=core2 -mfpmath=sse" )
 
 add_library(gnuradio-ofdm SHARED ${ofdm_sources})
 target_link_libraries(gnuradio-ofdm
-    ${Boost_LIBRARIES}
-    ${GNURADIO_RUNTIME_LIBRARIES}
-    ${GNURADIO_FFT_LIBRARIES}
-    ${GNURADIO_BLOCKS_LIBRARIES}
-    ${GNURADIO_FILTER_LIBRARIES}
-    ${GNURADIO_FEC_LIBRARIES}
-    ${GNURADIO_TRELLIS_LIBRARIES}
+    # ${Boost_LIBRARIES}
+    # ${GNURADIO_RUNTIME_LIBRARIES}
+    # ${GNURADIO_FFT_LIBRARIES}
+    # ${GNURADIO_BLOCKS_LIBRARIES}
+    # ${GNURADIO_FILTER_LIBRARIES}
+    # ${GNURADIO_FEC_LIBRARIES}
+    # ${GNURADIO_TRELLIS_LIBRARIES}
     ${ITPP_LIBRARIES}
     ${ZEROMQ_LIBRARIES}
     ${VOLK_LIBRARIES}
@@ -207,6 +209,9 @@ target_include_directories(gnuradio-ofdm
 
 set_target_properties(gnuradio-ofdm PROPERTIES DEFINE_SYMBOL "gnuradio_ofdm_EXPORTS")
 
+########################################################################
+# Apples
+########################################################################
 if(APPLE)
     set_target_properties(gnuradio-ofdm PROPERTIES
         INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"

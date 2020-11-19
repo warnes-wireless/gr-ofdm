@@ -21,7 +21,7 @@
 ########################################################################
 # Project setup
 ########################################################################
-cmake_minimum_required(VERSION3.8)
+cmake_minimum_required(VERSION 3.8)
 project(gr-ofdm
                 LANGUAGES CXX C)
 enable_testing()
@@ -86,7 +86,7 @@ ENDIF()
 ########################################################################
 # Install directories
 ########################################################################
-find_package(Gnuradio "3.8" REQUIRED COMPONENTS filter fft digital analog blocks)
+find_package(Gnuradio "3.8" REQUIRED COMPONENTS filter fft digital analog blocks fec trellis)
 include(GrVersion)
 
 include(GrPlatform) #define LIB_SUFFIX
@@ -163,6 +163,7 @@ find_package(NumPy REQUIRED)
 find_package(ITPP REQUIRED)
 find_package(Qwt REQUIRED)
 find_package(ZeroMQ REQUIRED)
+find_package(GSL REQUIRED)
 
 if(NOT NUMPY_FOUND)
     message(FATAL_ERROR "NumPy required to run gr-ofdm")

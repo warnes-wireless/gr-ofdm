@@ -13,6 +13,7 @@ FIND_PATH(ITPP_INCLUDE_DIR itpp/itbase.h
     ${ITPP_DIR}
     /usr/pkgs64/include
     /usr/include
+    /usr/local/include
     NO_DEFAULT_PATH
     )
 
@@ -25,6 +26,8 @@ FIND_LIBRARY(ITPP_LIBRARY
     /usr/pkgs64/lib
     /usr/lib64
     /usr/lib
+    /usr/local/lib
+    /usr/local/lib64
     NO_DEFAULT_PATH
     )
 

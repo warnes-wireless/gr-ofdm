@@ -20,7 +20,10 @@ if __name__ == "__main__":
             f", check for more __init__.py in dir?"
         )
     else:
-        del py_file_list[init_file_idx[0]]
+        try:
+            del py_file_list[init_file_idx[0]]
+        except IndexError:
+            pass
     
     print(len(py_file_list))
 

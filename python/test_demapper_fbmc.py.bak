@@ -98,13 +98,13 @@ class test_demapper_fbmc:
     # print amp2
     taps = (1)
     if sel_taps == 0: #epa
-        taps = (0.998160541385960, 0.0605566335500750, 0.00290305927764350)
+        taps = (0.998160541385960,0.0605566335500750,0.00290305927764350)
     elif sel_taps == 1: #eva
-        taps = (0.748212004186014, 0.317358833370450, 0.572776845645705, 0, 0.0538952624324030, 0.0874078808126807, 0, 0, 0, 0.0276407988816600, 0, 0, 0, 0.00894438719057275)
+        taps = (0.748212004186014,0.317358833370450,0.572776845645705,0,0.0538952624324030,0.0874078808126807,0,0,0,0.0276407988816600,0,0,0,0.00894438719057275)
     elif sel_taps ==2: #etu
-        taps = (0.463990169152204, 0.816124099344485, 0, 0.292064507384192, 0, 0, 0, 0, 0.146379002496595, 0, 0, 0, 0.0923589067029112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0582745305123628)
-    tx = ofdm.fbmc_transmitter_hier_bc(M, K, qam_size, syms_per_frame, carriers, theta_sel, exclude_preamble, sel_preamble, zero_pads, extra_pad)
-    rx = ofdm.fbmc_receiver_hier_cb(M, K, qam_size, syms_per_frame, carriers, theta_sel, eq_select, exclude_preamble, sel_preamble, zero_pads, extra_pad)
+        taps = (0.463990169152204,0.816124099344485,0,0.292064507384192,0,0,0,0,0.146379002496595,0,0,0,0.0923589067029112,0,0,0,0,0,0,0,0,0,0,0,0,0.0582745305123628)
+    tx = ofdm.fbmc_transmitter_hier_bc(M, K, qam_size, syms_per_frame, carriers, theta_sel, exclude_preamble, sel_preamble,zero_pads,extra_pad)
+    rx = ofdm.fbmc_receiver_hier_cb(M, K, qam_size, syms_per_frame, carriers, theta_sel, eq_select, exclude_preamble, sel_preamble, zero_pads,extra_pad)
         # def __init__(self, M=1024, K=4, qam_size=16, syms_per_frame=10, carriers=924, theta_sel=0, sel_eq=0, exclude_preamble=0, sel_preamble=0, zero_pads=1, extra_pad=False):
 
     # ch = ofdm.fbmc_channel_hier_cc(M, K, syms_per_frame, exclude_multipath, sel_taps, freq_offset, exclude_noise, sel_noise_type, snr_db, exclude_preamble, zero_pads)
@@ -114,7 +114,7 @@ class test_demapper_fbmc:
     head1 = blocks.head(gr.sizeof_char*1, N)
     head0 = blocks.head(gr.sizeof_char*1, N)
     add_block = blocks.add_vcc(1)
-    src = blocks.vector_source_b(list(map(int, numpy.random.randint(0, qam_size, 100000))), True)
+    src = blocks.vector_source_b(map(int, numpy.random.randint(0, qam_size, 100000)), True)
     noise = analog.fastnoise_source_c(analog.GR_GAUSSIAN, amp, 0, 8192)
     dst = blocks.vector_sink_b(vlen=1)
     ch_model = channels.channel_model(
@@ -135,7 +135,7 @@ class test_demapper_fbmc:
     tb.connect((ch_model, 0), (add_block, 0)) 
     tb.connect((noise, 0), (add_block, 1)) #esas
     tb.connect((add_block, 0), (rx, 0)) #esas
-    tb.connect((rx, 0), (head0, 0)) #esas
+    tb.connect((rx, 0),(head0, 0)) #esas
     tb.connect((head0, 0), (xor_block, 1)) #esas
     tb.connect((xor_block, 0), (dst, 0)) #esas  
 
@@ -173,13 +173,13 @@ class test_demapper_fbmc:
       # min_ber = 0
       min_ber = 100. / (N*arity)
       ber_arr = []
-      snr_range = list(range(0, 31, 1))
+      snr_range = range(0, 31, 1)
       for snr_db in snr_range:
         ber = self.sim( arity, snr_db, N )
         ber_arr.append( ber )
         
-        print("For n-arity %d and SNR = %.1f dB, BER is ~%g" \
-               % ( arity, snr_db, ber ))
+        print "For n-arity %d and SNR = %.1f dB, BER is ~%g" \
+               % ( arity, snr_db , ber )
   
         if ber <= min_ber:
           break
@@ -189,23 +189,23 @@ class test_demapper_fbmc:
 
 
       
-    print("snr = [", end=' ')
+    print "snr = [",
     for snr_db in snr_range:
-      print("%.1f," % ( snr_db ), end=' ')
-    print("]")
+      print "%.1f," % ( snr_db ),
+    print "]"
 
 
-    print("ber = [", end=' ')
+    print "ber = [",
     for arity in narity_range:
       curve = ber_curves[arity]
       for x in curve:
-        print("%7g," % (x), end=' ')
+        print "%7g," % (x),
       for i in range( len( snr_range ) - len( curve ) ):
-        print(" 0.0,", end=' ')
-      print(";")
-    print("]")
+        print " 0.0,",
+      print ";"
+    print "]"
     
-    print("ber_ref = [", end=' ')
+    print "ber_ref = [",
     for arity in narity_range:
       curve = ber_curves[arity]
       if arity == 1:
@@ -214,24 +214,24 @@ class test_demapper_fbmc:
         mode = 'psk'
       else:
         mode = 'qam'
-      print("berawgn(snr(1:%d)-10*log10(%d), '%s', %d " \
-               % (len(curve), arity, mode, 2**arity ), end=' ')
+      print "berawgn(snr(1:%d)-10*log10(%d), '%s', %d " \
+               % (len(curve),arity, mode, 2**arity ) ,
       if arity == 2 or arity == 3:
-        print(", 'nondiff'", end=' ')
-      print("), ", end=' ')
+        print ", 'nondiff'",
+      print "), ",
       for i in range( len( snr_range ) - len( curve ) ):
-        print(" 0.0,", end=' ')
-      print(";")
-    print("]")
+        print " 0.0,",
+      print ";"
+    print "]"
     
-    print("semilogy(snr,ber,'--x')")
-    print("hold on")
-    print("semilogy(snr,ber_ref,'--o')")
-    print("legend('QPSK','16QAM','64QAM','256QAM')")
-    print("grid on")
-    print("xlabel 'SNR (dB)'")
-    print("ylabel 'approximate BER'")
-    print("title 'BER over SNR for FBMC system, N=%d window size'" % ( N ))
+    print "semilogy(snr,ber,'--x')"
+    print "hold on"
+    print "semilogy(snr,ber_ref,'--o')"
+    print "legend('QPSK','16QAM','64QAM','256QAM')"
+    print "grid on"
+    print "xlabel 'SNR (dB)'"
+    print "ylabel 'approximate BER'"
+    print "title 'BER over SNR for FBMC system, N=%d window size'" % ( N )
 
 
 if __name__ == '__main__':

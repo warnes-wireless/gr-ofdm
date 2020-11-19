@@ -137,11 +137,11 @@ find_package(Doxygen)
 ########################################################################
 # Setup doxygen option
 ########################################################################
-if(DOXYGEN_FOUND)
-    option(ENABLE_DOXYGEN "Build docs using Doxygen" ON)
-else(DOXYGEN_FOUND)
-    option(ENABLE_DOXYGEN "Build docs using Doxygen" OFF)
-endif(DOXYGEN_FOUND)
+# if(DOXYGEN_FOUND)
+#     option(ENABLE_DOXYGEN "Build docs using Doxygen" ON)
+# else(DOXYGEN_FOUND)
+#     option(ENABLE_DOXYGEN "Build docs using Doxygen" OFF)
+# endif(DOXYGEN_FOUND)
 
 ########################################################################
 # Create uninstall target

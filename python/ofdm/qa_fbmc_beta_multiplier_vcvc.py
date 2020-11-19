@@ -36,20 +36,20 @@ class qa_fbmc_beta_multiplier_vcvc (gr_unittest.TestCase):
 
     def test_001_t (self):
         # set up fg
-        src_data = (1,2,3,4,5,6,7,8)
-        expected_result =(1,2,3,4,5,-6,7,-8)
-        src= blocks.vector_source_c(src_data,vlen=4)
-        bet= ofdm.fbmc_beta_multiplier_vcvc(M=4,K=4,lp=15,offset=0)
+        src_data = (1, 2, 3, 4, 5, 6, 7, 8)
+        expected_result =(1, 2, 3, 4, 5, -6, 7, -8)
+        src= blocks.vector_source_c(src_data, vlen=4)
+        bet= ofdm.fbmc_beta_multiplier_vcvc(M=4, K=4, lp=15, offset=0)
         dst= blocks.vector_sink_c(vlen=4)
-        self.tb.connect(src,bet,dst)
+        self.tb.connect(src, bet, dst)
         self.tb.run ()
         # check data
         result_data = dst.data()
-        self.assertEqual(expected_result,result_data)
+        self.assertEqual(expected_result, result_data)
 
     def test_002_t (self):
         M=128
-        num_elements = pow(2,16)
+        num_elements = pow(2, 16)
         src_data = list()
         expected_result = list()
         vector = 0
@@ -68,10 +68,10 @@ class qa_fbmc_beta_multiplier_vcvc (gr_unittest.TestCase):
 
         
 
-        src = blocks.vector_source_c(src_data,vlen=M)
-        bet = ofdm.fbmc_beta_multiplier_vcvc(M=M,K=4,lp=15,offset=0)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        bet = ofdm.fbmc_beta_multiplier_vcvc(M=M, K=4, lp=15, offset=0)
         dst = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,bet,dst)
+        self.tb.connect(src, bet, dst)
         self.tb.run()
         result_data = dst.data()
         # while vector>0:
@@ -84,7 +84,7 @@ class qa_fbmc_beta_multiplier_vcvc (gr_unittest.TestCase):
         #     counter=(counter+1)%16
         for i in range(vector):
             # print str(i*M)+":"+str(i*M+M)
-            self.assertComplexTuplesAlmostEqual(tuple(expected_result[i*M:i*M+M]),tuple(result_data[i*M:i*M+M]),6)
+            self.assertComplexTuplesAlmostEqual(tuple(expected_result[i*M:i*M+M]), tuple(result_data[i*M:i*M+M]), 6)
 
 
 if __name__ == '__main__':

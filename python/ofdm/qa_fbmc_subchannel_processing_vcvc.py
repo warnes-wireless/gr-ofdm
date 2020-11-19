@@ -36,56 +36,56 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
 
     def test_001_t (self):
         # set up fg
-        src_data = (0,0,0,0,1,-1j,-1,1j,0,0,0,0,
-        	1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,
-        	0,0,0,0,2,-2j,-2,2j,0,0,0,0,
-        	2,2,2,2,4,4,4,4,6,6,6,6,8,8,8,8)
-        expected_result = (0,0,0,0,1,-1j,-1,1j,0,0,0,0,
-        	1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,
-        	0,0,0,0,2,-2j,-2,2j,0,0,0,0,
-        	1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4)
-        src = blocks.vector_source_c(src_data,vlen=4)
-        scp = ofdm.fbmc_subchannel_processing_vcvc(M=4,syms_per_frame=2,preamble=[0,0,0,0,1,-1j,-1,1j,0,0,0,0],sel_eq=0)
+        src_data = (0, 0, 0, 0, 1, -1j, -1, 1j, 0, 0, 0, 0,
+        	1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
+        	0, 0, 0, 0, 2, -2j, -2, 2j, 0, 0, 0, 0,
+        	2, 2, 2, 2, 4, 4, 4, 4, 6, 6, 6, 6, 8, 8, 8, 8)
+        expected_result = (0, 0, 0, 0, 1, -1j, -1, 1j, 0, 0, 0, 0,
+        	1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
+        	0, 0, 0, 0, 2, -2j, -2, 2j, 0, 0, 0, 0,
+        	1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4)
+        src = blocks.vector_source_c(src_data, vlen=4)
+        scp = ofdm.fbmc_subchannel_processing_vcvc(M=4, syms_per_frame=2, preamble=[0, 0, 0, 0, 1, -1j, -1, 1j, 0, 0, 0, 0], sel_eq=0)
         dst = blocks.vector_sink_c(vlen=4)
         dst2 = blocks.vector_sink_c(vlen=4)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),dst)
-        self.tb.connect((scp,1),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), dst)
+        self.tb.connect((scp, 1), dst2)
         self.tb.run ()
         # check data
         result_data = dst.data()
         result_data2 = dst2.data()
         for i in range(len(result_data2)):
-            print str(i)+"\t"+str(result_data2[i])
+            print(str(i)+"\t"+str(result_data2[i]))
         # print result_data
-        self.assertComplexTuplesAlmostEqual(expected_result,result_data,6)
+        self.assertComplexTuplesAlmostEqual(expected_result, result_data, 6)
 
     def test_002_t(self):
         # set up fg
-        src_data = (0,0,0,0,1,-1j,-1,1j,0,0,0,0,
-        	1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,
-        	0,0,0,0,2,-2j,-2,2j,0,0,0,0,
-        	2,2,2,2,4,4,4,4,6,6,6,6,8,8,8,8)
-        expected_result = (0,0,0,0,1,-1j,-1,1j,0,0,0,0,
-        	1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,
-        	0,0,0,0,2,-2j,-2,2j,0,0,0,0,
-        	2,2,2,2,4,4,4,4,6,6,6,6,8,8,8,8)
-        src = blocks.vector_source_c(src_data,vlen=4)
-        scp = ofdm.fbmc_subchannel_processing_vcvc(M=4,syms_per_frame=2,preamble=[0,0,0,0,1,-1j,-1,1j,0,0,0,0],sel_eq=3)
+        src_data = (0, 0, 0, 0, 1, -1j, -1, 1j, 0, 0, 0, 0,
+        	1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
+        	0, 0, 0, 0, 2, -2j, -2, 2j, 0, 0, 0, 0,
+        	2, 2, 2, 2, 4, 4, 4, 4, 6, 6, 6, 6, 8, 8, 8, 8)
+        expected_result = (0, 0, 0, 0, 1, -1j, -1, 1j, 0, 0, 0, 0,
+        	1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
+        	0, 0, 0, 0, 2, -2j, -2, 2j, 0, 0, 0, 0,
+        	2, 2, 2, 2, 4, 4, 4, 4, 6, 6, 6, 6, 8, 8, 8, 8)
+        src = blocks.vector_source_c(src_data, vlen=4)
+        scp = ofdm.fbmc_subchannel_processing_vcvc(M=4, syms_per_frame=2, preamble=[0, 0, 0, 0, 1, -1j, -1, 1j, 0, 0, 0, 0], sel_eq=3)
         dst = blocks.vector_sink_c(vlen=4)
         dst2 = blocks.vector_sink_c(vlen=4)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),dst)
-        self.tb.connect((scp,1),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), dst)
+        self.tb.connect((scp, 1), dst2)
         self.tb.run ()
         # check data
         result_data = dst.data()
         # print result_data
-        self.assertComplexTuplesAlmostEqual(expected_result,result_data,6)
+        self.assertComplexTuplesAlmostEqual(expected_result, result_data, 6)
 
     def test_003_t(self):
         # test no equalizer
-        center_preamble = [1,-1j,-1,1j]
+        center_preamble = [1, -1j, -1, 1j]
         M = 2**5
         syms_per_frame = 20
         num_frames = 2**5
@@ -99,13 +99,13 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
             val = int(random.random()*10)
             src_data.append(val)
             expected_result.append(val)
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M,syms_per_frame=syms_per_frame,preamble=preamble,sel_eq=3)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M, syms_per_frame=syms_per_frame, preamble=preamble, sel_eq=3)
         dst = blocks.vector_sink_c(vlen=M)
         dst2 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),dst)
-        self.tb.connect((scp,1),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), dst)
+        self.tb.connect((scp, 1), dst2)
         self.tb.run ()
         # check data
         result_data = dst.data()
@@ -119,7 +119,7 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
         # for i in range(len(result_data)):
         #     print str(i)+"\t"+str(expected_result[i])+"\t"+str(result_data[i])
         # print result_data
-        self.assertComplexTuplesAlmostEqual(expected_result,result_data,6)
+        self.assertComplexTuplesAlmostEqual(expected_result, result_data, 6)
 
     def test_004_t(self):
         # test with one tap equalizer
@@ -131,7 +131,7 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
         for i in range(2*syms_per_frame*M*num_frames):
             if i%(2*syms_per_frame*M)==0:
                 mul = int(random.random()*10)+1
-                center_preamble = [1*mul,-1j*mul,-1*mul,1j*mul]
+                center_preamble = [1*mul, -1j*mul, -1*mul, 1j*mul]
                 preamble = [0]*M+center_preamble*(M/4)+[0]*M
                 # add preamble
                 src_data.extend(preamble)
@@ -140,15 +140,15 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
             src_data.append(mul*val)
             expected_result.append(val)
         # get original preamble back
-        center_preamble = [1,-1j,-1,1j]
+        center_preamble = [1, -1j, -1, 1j]
         preamble = [0]*M+center_preamble*(M/4)+[0]*M
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M,syms_per_frame=syms_per_frame,preamble=preamble,sel_eq=0)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M, syms_per_frame=syms_per_frame, preamble=preamble, sel_eq=0)
         dst = blocks.vector_sink_c(vlen=M)
         dst2 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),dst)
-        self.tb.connect((scp,1),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), dst)
+        self.tb.connect((scp, 1), dst2)
         self.tb.run ()
         # check data
         result_data = dst.data()
@@ -165,14 +165,14 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
             self.assertComplexTuplesAlmostEqual(tuple(
                 expected_result[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]),
             tuple(
-                result_data[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]),6)
+                result_data[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]), 6)
 
     def test_005_t (self):
         # another test with one tap equalizer
         M = 2**7
         syms_per_frame = 20
         num_frames = 2**8
-        root_center = [1,-1j,-1,1j]
+        root_center = [1, -1j, -1, 1j]
         src_data = list()
         expected_result =list()
         for i in range(2*syms_per_frame*M*num_frames):
@@ -188,13 +188,13 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
             expected_result.append(val)
         # get original preamble back        
         preamble = [0]*M+root_center*(M/4)+[0]*M
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M,syms_per_frame=syms_per_frame,preamble=preamble,sel_eq=0)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M, syms_per_frame=syms_per_frame, preamble=preamble, sel_eq=0)
         dst = blocks.vector_sink_c(vlen=M)
         dst2 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),dst)
-        self.tb.connect((scp,1),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), dst)
+        self.tb.connect((scp, 1), dst2)
         self.tb.run ()
         # check data
         result_data = dst.data()
@@ -211,7 +211,7 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
             self.assertComplexTuplesAlmostEqual(tuple(
                 expected_result[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]),
             tuple(
-                result_data[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]),6)
+                result_data[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]), 6)
 
     def test_006_t (self):
         # test with three-tap equalizer with linear interpolation
@@ -233,7 +233,7 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
         # root_center = list()
         # for i in range(len(mat_par['parameters']['center'][0][0])):
         #     root_center.append(mat_par['parameters']['center'][0][0][0][i])
-        root_center = [1,-1j,-1,1j]*(M/4)
+        root_center = [1, -1j, -1, 1j]*(M/4)
         src_data = list()
         expected_result =list()
         for i in range(len(mat_src['src_data'])):
@@ -244,18 +244,18 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
         # print src_data
         
         preamble = [0]*M+root_center+[0]*M
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M,syms_per_frame=syms_per_frame,preamble=preamble,sel_eq=1)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M, syms_per_frame=syms_per_frame, preamble=preamble, sel_eq=1)
         dst = blocks.vector_sink_c(vlen=M)
         dst2 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),dst)
-        self.tb.connect((scp,1),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), dst)
+        self.tb.connect((scp, 1), dst2)
         self.tb.run ()
         # check data
         result_data = dst.data()
         # print len(result_data)
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data),4)
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data), 4)
 
     def test_007_t(self):
         # test with three-tap equalizer with geometric interpolation
@@ -277,7 +277,7 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
         # root_center = list()
         # for i in range(len(mat_par['parameters']['center'][0][0])):
         #     root_center.append(mat_par['parameters']['center'][0][0][0][i])
-        root_center = [1,-1j,-1,1j]*(M/4)
+        root_center = [1, -1j, -1, 1j]*(M/4)
         src_data = list()
         expected_result =list()
         for i in range(len(mat_src['src_data'])):
@@ -288,25 +288,25 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
         # print src_data
         
         preamble = [0]*M+root_center+[0]*M
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M,syms_per_frame=syms_per_frame,preamble=preamble,sel_eq=2)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M, syms_per_frame=syms_per_frame, preamble=preamble, sel_eq=2)
         dst = blocks.vector_sink_c(vlen=M)
         dst2 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),dst)
-        self.tb.connect((scp,1),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), dst)
+        self.tb.connect((scp, 1), dst2)
         self.tb.run ()
         # check data
         result_data = dst.data()
         # print len(result_data)
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data),4)
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data), 4)
 
     def test_008_t(self):
         # test estimation with a different size of preamble
         M = 2**10
         syms_per_frame = 20
         num_frames = 2**8
-        root_center = [1,-1j,-1,1j]
+        root_center = [1, -1j, -1, 1j]
         src_data = list()
         expected_result =list()
         for i in range(2*syms_per_frame*M*num_frames):
@@ -322,13 +322,13 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
             expected_result.append(val)
         # get original preamble back        
         preamble = [0]*4*M+root_center*(M/4)+[0]*4*M
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M,syms_per_frame=syms_per_frame,preamble=preamble,sel_eq=0)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M, syms_per_frame=syms_per_frame, preamble=preamble, sel_eq=0)
         dst = blocks.vector_sink_c(vlen=M)
         dst2 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),dst)
-        self.tb.connect((scp,1),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), dst)
+        self.tb.connect((scp, 1), dst2)
         self.tb.run ()
         # check data
         result_data = dst.data()
@@ -345,14 +345,14 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
             self.assertComplexTuplesAlmostEqual(tuple(
                 expected_result[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]),
             tuple(
-                result_data[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]),6)
+                result_data[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]), 6)
 
     def test_009_t(self):
         # test estimation with a different size of preamble
         M = 2**10
         syms_per_frame = 20
         num_frames = 2**8
-        root_center = [1,-1j,-1,1j]
+        root_center = [1, -1j, -1, 1j]
         src_data = list()
         expected_result =list()
         for i in range(2*syms_per_frame*M*num_frames):
@@ -368,13 +368,13 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
             expected_result.append(val)
         # get original preamble back        
         preamble = [0]*5*M+root_center*(M/4)+[0]*5*M
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M,syms_per_frame=syms_per_frame,preamble=preamble,sel_eq=0)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_vcvc(M=M, syms_per_frame=syms_per_frame, preamble=preamble, sel_eq=0)
         dst = blocks.vector_sink_c(vlen=M)
         dst2 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),dst)
-        self.tb.connect((scp,1),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), dst)
+        self.tb.connect((scp, 1), dst2)
         self.tb.run ()
         # check data
         result_data = dst.data()
@@ -391,7 +391,7 @@ class qa_fbmc_subchannel_processing_vcvc (gr_unittest.TestCase):
             self.assertComplexTuplesAlmostEqual(tuple(
                 expected_result[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]),
             tuple(
-                result_data[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]),6)
+                result_data[(i+1)*len(preamble)+i*(2*syms_per_frame*M):(i+1)*len(preamble)+(i+1)*(2*syms_per_frame*M)]), 6)
 
 
 if __name__ == '__main__':

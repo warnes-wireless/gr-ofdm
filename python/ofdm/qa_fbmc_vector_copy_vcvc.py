@@ -46,17 +46,17 @@ class qa_fbmc_vector_copy_vcvc (gr_unittest.TestCase):
         			expected_result.extend(src_data[i+1-M:i+1])
 
     	# print expected_result
-    	src = blocks.vector_source_c(src_data,vlen=M)
-    	vcp = ofdm.fbmc_vector_copy_vcvc(M,interpolation)
+    	src = blocks.vector_source_c(src_data, vlen=M)
+    	vcp = ofdm.fbmc_vector_copy_vcvc(M, interpolation)
     	dst = blocks.vector_sink_c(vlen=M)
 
-    	self.tb.connect(src,vcp,dst)
+    	self.tb.connect(src, vcp, dst)
     	self.tb.run()
 
     	result_data = dst.data()
     	# print result_data
 
-    	self.assertComplexTuplesAlmostEqual(tuple(expected_result),result_data)
+    	self.assertComplexTuplesAlmostEqual(tuple(expected_result), result_data)
 
 
 if __name__ == '__main__':

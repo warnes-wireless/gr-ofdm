@@ -20,18 +20,18 @@
 # Boston, MA 02110-1301, USA.
 #
 
-from numpy import concatenate,abs,numarray,argmin,argmax,zeros,inf,sqrt,log10
+from numpy import concatenate, abs, numarray, argmin, argmax, zeros, inf, sqrt, log10
 from scipy.special import erfcinv
 import numpy
 import time
 
-from resource_manager_base import resource_manager_base,start_resource_manager
+from .resource_manager_base import resource_manager_base, start_resource_manager
 
 from corba_stubs import ofdm_ti
 
 class resource_manager (resource_manager_base):
-  def __init__(self,orb):
-    resource_manager_base.__init__(self,orb)
+  def __init__(self, orb):
+    resource_manager_base.__init__(self, orb)
 
     # set initial parameters
     self.required_ber = 1e-4
@@ -73,16 +73,16 @@ class resource_manager (resource_manager_base):
     #  self.ac_vector (if sounder connected)
 
     if self.is_reset_mode():
-      print "Current mode is reset mode"
+      print("Current mode is reset mode")
       self.pa_vector = [1.0]*self.subcarriers
       self.mod_map = [2]*self.subcarriers
       self.assignment_map = [1] * self.subcarriers
       pass
     elif self.is_margin_adaptive_policy():
-      print "Current mode is margin adaptive mode"
+      print("Current mode is margin adaptive mode")
       pass
     elif self.is_rate_adaptive_policy():
-      print "Current mode is rate adaptive mode"
+      print("Current mode is rate adaptive mode")
       self.rate_adaptive_policy(ctf, cur_tx_power, cur_tx_constraint, snr_mean, current_ber)
 
     # Modify:
@@ -93,8 +93,8 @@ class resource_manager (resource_manager_base):
     #  self.ac_vector:      artificial channel, channel impulse response (complex)
     #                       if sounder not connected
 
-  def rate_adaptive_policy(self,ctf,cur_tx_power,cur_tx_constraint,snr_db,cur_ber):
-    ber = max(self.required_ber,1e-7)
+  def rate_adaptive_policy(self, ctf, cur_tx_power, cur_tx_constraint, snr_db, cur_ber):
+    ber = max(self.required_ber, 1e-7)
     
 #    a=0.0004
 #    b=0.00001
@@ -113,12 +113,12 @@ class resource_manager (resource_manager_base):
 
     gamma = (2.0/3.0)*(erfcinv(ber)**2.0)   *3.2
     #gamma = ((2./3.)*(erfcinv(ber))**2.0)
-    print "input ber",ber,"required ber",self.required_ber
-    print "snr gap (dB) for req. ber",10*log10(gamma)
+    print("input ber", ber, "required ber", self.required_ber)
+    print("snr gap (dB) for req. ber", 10*log10(gamma))
 
     N = self.subcarriers
 
-    (b,e) = levin_campello(self.mod_map, N, cur_tx_constraint,
+    (b, e) = levin_campello(self.mod_map, N, cur_tx_constraint,
                            snr_db, ctf, gamma, cur_tx_power)
 
     b = numarray.array(b)
@@ -126,7 +126,7 @@ class resource_manager (resource_manager_base):
     a = numarray.array(zeros(len(self.assignment_map)))
 
     if sum(b < 0) > 0:
-      print "WARNING: bit loading < 0"
+      print("WARNING: bit loading < 0")
       b[b < 0] = 0
 
     a[b > 0] = 1
@@ -134,8 +134,8 @@ class resource_manager (resource_manager_base):
     txpow = sum(e)
     e = e / txpow * N
 
-    print "txpow", txpow
-    print "tx amplitude",sqrt(txpow)
+    print("txpow", txpow)
+    print("tx amplitude", sqrt(txpow))
 #    print numarray.array(map(lambda x: "%.2f" % (x), e))
 #    print numarray.array(map(lambda x: "%d" % (x),b))
 
@@ -150,7 +150,7 @@ class resource_manager (resource_manager_base):
     bits_per_frame = sum(b)*9                   # FIXME constant
     frame_duration = frame_length_samples/self.bandwidth
     self.data_rate = bits_per_frame/frame_duration
-    print "Datarate",self.data_rate
+    print("Datarate", self.data_rate)
 
 ################################################################################
 
@@ -183,7 +183,7 @@ class resource_manager (resource_manager_base):
 #
 #  return (b,e)
 
-def levin_campello(b,N,constraint,snr_db,ctf,gamma,txpow):
+def levin_campello(b, N, constraint, snr_db, ctf, gamma, txpow):
   ctf = numarray.array(ctf)
   b = numarray.array(b)
 
@@ -195,39 +195,39 @@ def levin_campello(b,N,constraint,snr_db,ctf,gamma,txpow):
 
   # prepare
   beta = 1
-  gn = prepare_table(g,gamma,beta)
-  min_ie = lambda b : min_c(gn,b/beta)
-  max_ie = lambda b : max_c(gn,b/beta)
-  energy = lambda b,n : gamma/g[n]*(2.0**b[n]-1)
+  gn = prepare_table(g, gamma, beta)
+  min_ie = lambda b : min_c(gn, b/beta)
+  max_ie = lambda b : max_c(gn, b/beta)
+  energy = lambda b, n : gamma/g[n]*(2.0**b[n]-1)
 
   # energy efficiency
-  b = EF(b,beta,min_ie,max_ie)
+  b = EF(b, beta, min_ie, max_ie)
 
   # e-tightness
-  S = sum(map(lambda x : energy(b,x),range(N)))
-  b = ET(b,beta,constraint,S,min_ie,max_ie)
+  S = sum([energy(b, x) for x in range(N)])
+  b = ET(b, beta, constraint, S, min_ie, max_ie)
 
   # set changes
-  e = map(lambda x :energy(b,x),range(N))
-  print "sum(e)",sum(e)
+  e = [energy(b, x) for x in range(N)]
+  print("sum(e)", sum(e))
 
   b = list(b)
-  return (b,e)
+  return (b, e)
 
 
-def prepare_table(g,gamma,beta):
+def prepare_table(g, gamma, beta):
   max_nbits = 8
   nsubc = len(g)
 
-  gn = zeros((max_nbits/beta+1,nsubc))
+  gn = zeros((max_nbits/beta+1, nsubc))
 
-  for b in range(beta,max_nbits+beta,beta):
+  for b in range(beta, max_nbits+beta, beta):
     for n in range(nsubc):
         gn[b/beta][n] = gamma/g[n]*(2.0**b)*(1.0-2.0**(-beta))
 
   return gn
 
-def min_c(gn,ind):
+def min_c(gn, ind):
     # constrained minimum search over incremental energies
     # for each index in ind(:), find minimum gn(index) if index within bounds
 
@@ -244,9 +244,9 @@ def min_c(gn,ind):
             ie = gn[i][n]
             c = n
 
-    return (ie,c)
+    return (ie, c)
 
-def max_c(gn,ind):
+def max_c(gn, ind):
     # constrained maximum search over incremental energies
     # for each index in ind(:), find maximum gn(index) if index within bounds
 
@@ -264,7 +264,7 @@ def max_c(gn,ind):
         if ie < gn[i][n]:
             ie = gn[i][n]
             c = n
-    return (ie,c)
+    return (ie, c)
 
 # Energy efficiency
 #
@@ -274,9 +274,9 @@ def max_c(gn,ind):
 # bit loading: b
 # minimum search over incremental energy: min_ie
 # maximum search over incremental energy: max:ie
-def EF(b,beta,min_ie,max_ie):
-  (ie_m,m) = min_ie(b+beta)
-  (ie_n,n) = max_ie(b)
+def EF(b, beta, min_ie, max_ie):
+  (ie_m, m) = min_ie(b+beta)
+  (ie_n, n) = max_ie(b)
 
   # EF
   while (m >= 0 and n >= 0) and (ie_m < ie_n): # inc_energy(b+beta,m) < inc_energy(b,n)
@@ -285,8 +285,8 @@ def EF(b,beta,min_ie,max_ie):
 
 #      print "Swapping bits from %d to %d" %(m,n)
 
-      (ie_m,m) = min_ie(b+beta)
-      (ie_n,n) = max_ie(b)
+      (ie_m, m) = min_ie(b+beta)
+      (ie_n, n) = max_ie(b)
 
   return b
 
@@ -325,18 +325,18 @@ def EF(b,beta,min_ie,max_ie):
 # minimum search over incremental energy: min_ie
 # maximum search over incremental energy: max:ie
 
-def ET(b,beta,K,S,min_ie,max_ie):
+def ET(b, beta, K, S, min_ie, max_ie):
 #function [b] = ET(b,beta,K,S,min_ie,max_ie)
 
-  (ie_m,m) = min_ie(b+beta)
+  (ie_m, m) = min_ie(b+beta)
 
-  print "Constraint K",K
-  print "Energy level S",S
+  print("Constraint K", K)
+  print("Energy level S", S)
 
   # ET
   while ((m >= 0) and ((K - S) >= ie_m)) or ((K - S) < 0):
       if (K-S) < 0:
-          (ie_n,n) = max_ie(b)
+          (ie_n, n) = max_ie(b)
           if ie_n >= 0 and n >= 0:
               S = S - ie_n
               b[n] = b[n] - beta
@@ -344,17 +344,17 @@ def ET(b,beta,K,S,min_ie,max_ie):
           else:
 #              raise SystemError, \
 #                  "ERROR: exceeding constraint, but maximum incremental energy to be reduced is zero"
-              print "ERROR: exceeding constraint, but maximum incremental energy to be reduced is zero"
+              print("ERROR: exceeding constraint, but maximum incremental energy to be reduced is zero")
               break
       else:
           S = S + ie_m
           b[m] = b[m] + beta;
 #          print "Increasing bit loading for subchannel %d to achieve constraint" % (m)
 
-      (ie_m,m) = min_ie(b+beta);
+      (ie_m, m) = min_ie(b+beta);
 
 
-  print "Energy level S",S
+  print("Energy level S", S)
 
   return b
 #

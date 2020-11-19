@@ -3,19 +3,19 @@ from ofdm import multiply_const_ccf
 import math
 
 class ofdm_rms_amplifier( gr.hier_block2 ):
-  def __init__(self,amplitude,subcarriers):
+  def __init__(self, amplitude, subcarriers):
     #config = station_configuration()
 
     total_subc = subcarriers
     vlen = total_subc
 
-    gr.hier_block2.__init__(self,"ofdm_rms_amplifier_grc",
-      gr.io_signature(1,1,gr.sizeof_gr_complex),
-      gr.io_signature(1,1,gr.sizeof_gr_complex))
+    gr.hier_block2.__init__(self, "ofdm_rms_amplifier_grc",
+      gr.io_signature(1, 1, gr.sizeof_gr_complex),
+      gr.io_signature(1, 1, gr.sizeof_gr_complex))
     
     amp = self._amplifier = multiply_const_ccf(1.0)
     self._subcarriers = subcarriers
-    self.connect(self,amp,self)
+    self.connect(self, amp, self)
     self.set_rms_amplitude(amplitude)
 
   def set_rms_amplitude(self, ampl):

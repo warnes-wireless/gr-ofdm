@@ -35,18 +35,18 @@ class qa_peakdetector (gr_unittest.TestCase):
 
   def test_001 (self):
     x = [0.1*i for i in range(10)]
-    x = numpy.concatenate([x,[1.0],x[::-1],[0.0]*10])
+    x = numpy.concatenate([x, [1.0], x[::-1], [0.0]*10])
 
     src = gr.vector_source_f(x)
     dst = gr.vector_sink_b()
     #blk = ofdm.peak_detector2_fb(10)
     blk = peak_detector2_fb(10)
 
-    self.fg.connect(src,blk,dst)
+    self.fg.connect(src, blk, dst)
     self.fg.run()
     y = [0]*len(dst.data())
     y[10] = 1
-    self.assertEqual(y,list(dst.data()))
+    self.assertEqual(y, list(dst.data()))
 
 #  def test_002 (self):
 #    x = [0.1*i for i in range(10)]
@@ -64,19 +64,19 @@ class qa_peakdetector (gr_unittest.TestCase):
 
   def test_003 (self):
     x = [0.1*i for i in range(10)]
-    x = numpy.concatenate([x,[1.0],x[::-1]])
-    x = numpy.concatenate([x,x,[0.0]*10])
+    x = numpy.concatenate([x, [1.0], x[::-1]])
+    x = numpy.concatenate([x, x, [0.0]*10])
 
     src = gr.vector_source_f(x)
     dst = gr.vector_sink_b()
     blk = ofdm.peak_detector2_fb(10)
 
-    self.fg.connect(src,blk,dst)
+    self.fg.connect(src, blk, dst)
     self.fg.run()
     y = [0]*len(dst.data())
     y[10] = 1
     y[31] = 1
-    self.assertEqual(y,list(dst.data()))
+    self.assertEqual(y, list(dst.data()))
 
 #  def test_004 (self):
 #    x = [0.1*i for i in range(10)]

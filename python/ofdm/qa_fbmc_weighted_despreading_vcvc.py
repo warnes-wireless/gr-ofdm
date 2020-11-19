@@ -36,28 +36,28 @@ class qa_fbmc_weighted_despreading_vcvc (gr_unittest.TestCase):
 
     def test_001_t (self):
         # set up fg
-        src_data =[1,2j,3,4j]
+        src_data =[1, 2j, 3, 4j]
         expected_result = src_data
         src = blocks.vector_source_c(src_data, vlen=4)
-        ws = ofdm.fbmc_weighted_spreading_vcvc(M=4,K=4)
-        wd = ofdm.fbmc_weighted_despreading_vcvc(M=4,K=4)
+        ws = ofdm.fbmc_weighted_spreading_vcvc(M=4, K=4)
+        wd = ofdm.fbmc_weighted_despreading_vcvc(M=4, K=4)
         dst = blocks.vector_sink_c(vlen=4)
-        self.tb.connect(src,ws,wd,dst)
+        self.tb.connect(src, ws, wd, dst)
         self.tb.run ()
         # check data
         output = dst.data()
         result_data = [output[0].real, (output[1].imag)*1j, output[2].real, (output[3].imag)*1j]
         # print result_data
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data),6)
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data), 6)
 
     def test_002_t(self):
-    	src_data =[1,2j,3,4j,5,6j,7,8j]
+    	src_data =[1, 2j, 3, 4j, 5, 6j, 7, 8j]
         expected_result = src_data
         src = blocks.vector_source_c(src_data, vlen=8)
-        ws = ofdm.fbmc_weighted_spreading_vcvc(M=8,K=4)
-        wd = ofdm.fbmc_weighted_despreading_vcvc(M=8,K=4)
+        ws = ofdm.fbmc_weighted_spreading_vcvc(M=8, K=4)
+        wd = ofdm.fbmc_weighted_despreading_vcvc(M=8, K=4)
         dst = blocks.vector_sink_c(vlen=8)
-        self.tb.connect(src,ws,wd,dst)
+        self.tb.connect(src, ws, wd, dst)
         self.tb.run ()
         # check data
         output = dst.data()
@@ -68,16 +68,16 @@ class qa_fbmc_weighted_despreading_vcvc (gr_unittest.TestCase):
         	else:
         		result_data.append(output[i].imag*1j)
         # print result_data
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data),6)
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data), 6)
 
     def test_003_t(self):
-    	src_data =[1,2j,3,4j,5,6j,7,8j,1j,2,3j,4,5j,6,7j,8]
+    	src_data =[1, 2j, 3, 4j, 5, 6j, 7, 8j, 1j, 2, 3j, 4, 5j, 6, 7j, 8]
         expected_result = src_data
         src = blocks.vector_source_c(src_data, vlen=8)
-        ws = ofdm.fbmc_weighted_spreading_vcvc(M=8,K=4)
-        wd = ofdm.fbmc_weighted_despreading_vcvc(M=8,K=4)
+        ws = ofdm.fbmc_weighted_spreading_vcvc(M=8, K=4)
+        wd = ofdm.fbmc_weighted_despreading_vcvc(M=8, K=4)
         dst = blocks.vector_sink_c(vlen=8)
-        self.tb.connect(src,ws,wd,dst)
+        self.tb.connect(src, ws, wd, dst)
         self.tb.run ()
         # check data
         output = dst.data()
@@ -93,20 +93,20 @@ class qa_fbmc_weighted_despreading_vcvc (gr_unittest.TestCase):
         	else:
         		result_data.append(output[i+8].real)
         # print result_data
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data),6)
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data), 6)
 
     def test_004_t(self):
-        M = int(math.pow(2,7))
-        num = int(math.pow(2,15))
+        M = int(math.pow(2, 7))
+        num = int(math.pow(2, 15))
         src_data = list()
         for i in range(M*num):
             src_data.extend([int(random.random()*10), int(random.random()*10)*1j])
         expected_result = src_data
         src = blocks.vector_source_c(src_data, vlen=M)
-        ws = ofdm.fbmc_weighted_spreading_vcvc(M=M,K=4)
-        wd = ofdm.fbmc_weighted_despreading_vcvc(M=M,K=4)
+        ws = ofdm.fbmc_weighted_spreading_vcvc(M=M, K=4)
+        wd = ofdm.fbmc_weighted_despreading_vcvc(M=M, K=4)
         dst = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,ws,wd,dst)
+        self.tb.connect(src, ws, wd, dst)
         self.tb.run ()
         # check data
         output = dst.data()
@@ -118,7 +118,7 @@ class qa_fbmc_weighted_despreading_vcvc (gr_unittest.TestCase):
                 else:
                     result_data.append(output[i+k*M].imag*1j)
 
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data),6)
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data), 6)
 
 
 if __name__ == '__main__':

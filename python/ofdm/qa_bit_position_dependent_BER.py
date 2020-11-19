@@ -61,7 +61,7 @@ class qa_bit_position_dependent_BER(gr_unittest.TestCase):
     
     ret = numpy.array( uut.get_cntr_vec() )
     
-    self.assert_( (ret==ref).all() )
+    self.assertTrue( (ret==ref).all() )
     
   
   def test_002( self ):
@@ -74,10 +74,10 @@ class qa_bit_position_dependent_BER(gr_unittest.TestCase):
     
     
     ref = numpy.array([0]*(vlen/2))
-    for x in range(N/2,N):
+    for x in range(N/2, N):
       ref[x%(vlen/2)] += 1 if refdata[x] != data[x] else 0
     
-    vlen = concatenate( [ [vlen]*(_n/2),[vlen/2]*(_n)] ) 
+    vlen = concatenate( [ [vlen]*(_n/2), [vlen/2]*(_n)] ) 
     src0 = gr.vector_source_b( refdata.tolist() )
     src1 = gr.vector_source_b( data.tolist() )
     src2 = gr.vector_source_i( vlen.tolist() )
@@ -91,15 +91,15 @@ class qa_bit_position_dependent_BER(gr_unittest.TestCase):
     if os.path.exists("test_000.uint"):
       os.remove("test_000.uint")
     
-    self.assert_( not os.path.exists("test_000.uint") )
+    self.assertTrue( not os.path.exists("test_000.uint") )
     
     self.tb.run()
     
     ret = numpy.array( uut.get_cntr_vec() )
 
-    self.assert_( (ret==ref).all() )
+    self.assertTrue( (ret==ref).all() )
     
-    self.assert_( os.path.exists("test_000.uint"))  
+    self.assertTrue( os.path.exists("test_000.uint"))  
     
     
   def test_003( self ):
@@ -110,7 +110,7 @@ class qa_bit_position_dependent_BER(gr_unittest.TestCase):
     refdata = random_integers(0, 1, N)
     data = random_integers(0, 1, N)
     
-    vlen = concatenate( [ [vlen]*(_n/2),[vlen/2]*(_n/2),[vlen/4]*(_n)] ) 
+    vlen = concatenate( [ [vlen]*(_n/2), [vlen/2]*(_n/2), [vlen/4]*(_n)] ) 
     src0 = gr.vector_source_b( refdata.tolist() )
     src1 = gr.vector_source_b( data.tolist() )
     src2 = gr.vector_source_i( vlen.tolist() )
@@ -126,13 +126,13 @@ class qa_bit_position_dependent_BER(gr_unittest.TestCase):
     if os.path.exists("test_001.uint"):
       os.remove("test_001.uint")
       
-    self.assert_( not os.path.exists("test_000.uint") )
-    self.assert_( not os.path.exists("test_001.uint") )
+    self.assertTrue( not os.path.exists("test_000.uint") )
+    self.assertTrue( not os.path.exists("test_001.uint") )
     
     self.tb.run()
     
-    self.assert_( os.path.exists("test_000.uint"))
-    self.assert_( os.path.exists("test_001.uint"))
+    self.assertTrue( os.path.exists("test_000.uint"))
+    self.assertTrue( os.path.exists("test_001.uint"))
 
     
 if __name__ == '__main__':

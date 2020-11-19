@@ -21,7 +21,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from fbmc_symbol_creation_bvc import fbmc_symbol_creation_bvc
+from .fbmc_symbol_creation_bvc import fbmc_symbol_creation_bvc
 
 class qa_fbmc_symbol_creation_bvc (gr_unittest.TestCase):
 

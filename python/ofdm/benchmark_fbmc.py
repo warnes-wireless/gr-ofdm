@@ -22,24 +22,24 @@
 
 from gnuradio import gr, blocks, analog, zeromq
 from gnuradio import eng_notation
-from configparse import OptionParser
+from .configparse import OptionParser
 from gnuradio import filter
 
-from station_configuration import station_configuration
+from .station_configuration import station_configuration
 
-from math import log10 ,sqrt
+from math import log10, sqrt
 
 import sys
 import os
 
-from fbmc_transmit_path import transmit_path
-from fbmc_receive_path import receive_path
+from .fbmc_transmit_path import transmit_path
+from .fbmc_receive_path import receive_path
 from ofdm import throughput_measure, vector_sampler
-import common_options
-from gr_tools import log_to_file, ms_to_file
-from moms import moms
+from . import common_options
+from .gr_tools import log_to_file, ms_to_file
+from .moms import moms
 
-import fusb_options
+from . import fusb_options
 
 
 import ofdm as ofdm
@@ -52,7 +52,7 @@ import numpy
 import copy
 
 
-import channel
+from . import channel
 
 #import os
 #print 'Blocked waiting for GDB attach (pid = %d)' % (os.getpid(),)
@@ -85,23 +85,23 @@ class fbmc_benchmark (gr.top_block):
 
     self._interpolation = 1
 
-    f1 = numpy.array([-107,0,445,0,-1271,0,2959,0,-6107,0,11953,
-                      0,-24706,0,82359,262144/2,82359,0,-24706,0,
-                      11953,0,-6107,0,2959,0,-1271,0,445,0,-107],
+    f1 = numpy.array([-107, 0, 445, 0, -1271, 0, 2959, 0, -6107, 0, 11953,
+                      0, -24706, 0, 82359, 262144/2, 82359, 0, -24706, 0,
+                      11953, 0, -6107, 0, 2959, 0, -1271, 0, 445, 0, -107],
                       numpy.float64)/262144.
 
-    print "Software interpolation: %d" % (self._interpolation)
+    print("Software interpolation: %d" % (self._interpolation))
 
     bw = 1.0/self._interpolation
     tb = bw/5
     if self._interpolation > 1:
       self.tx_filter = gr.hier_block2("filter",
-                                   gr.io_signature(1,1,gr.sizeof_gr_complex),
-                                   gr.io_signature(1,1,gr.sizeof_gr_complex))
-      self.tx_filter.connect( self.tx_filter, gr.interp_fir_filter_ccf(2,f1),
-                           gr.interp_fir_filter_ccf(2,f1), self.tx_filter )
+                                   gr.io_signature(1, 1, gr.sizeof_gr_complex),
+                                   gr.io_signature(1, 1, gr.sizeof_gr_complex))
+      self.tx_filter.connect( self.tx_filter, gr.interp_fir_filter_ccf(2, f1),
+                           gr.interp_fir_filter_ccf(2, f1), self.tx_filter )
 
-      print "New"
+      print("New")
 
     else:
       self.tx_filter = None
@@ -115,8 +115,8 @@ class fbmc_benchmark (gr.top_block):
       # passband ripple in dB, stopband attenuation in dB
       # extra taps
       filt_coeff = optfir.low_pass(1.0, 1.0, bw, bw+tb, 0.1, 60.0, 1)
-      print "Software decimation filter length: %d" % (len(filt_coeff))
-      self.rx_filter = gr.fir_filter_ccf(self.decimation,filt_coeff)
+      print("Software decimation filter length: %d" % (len(filt_coeff)))
+      self.rx_filter = gr.fir_filter_ccf(self.decimation, filt_coeff)
     else:
       self.rx_filter = None
 
@@ -137,7 +137,7 @@ class fbmc_benchmark (gr.top_block):
     #self.dst  = gr.file_sink(gr.sizeof_gr_complex,options.to_file)
     self.dst= self.rxpath
     if options.force_rx_filter:
-      print "Forcing rx filter usage"
+      print("Forcing rx filter usage")
       self.connect( self.rx_filter, self.dst )
       self.dst = self.rx_filter
 
@@ -163,13 +163,13 @@ class fbmc_benchmark (gr.top_block):
           snr = 10.0**(snr_db/10.0)
           noise_sigma = sqrt( config.rms_amplitude**2 / snr )
 
-      print " Noise St. Dev. %d" % (noise_sigma)
+      print(" Noise St. Dev. %d" % (noise_sigma))
       awgn_chan = blocks.add_cc()
       #awgn_noise_src = ofdm.complex_white_noise( 0.0, noise_sigma )
       #noise_sigma = 0.000000000001
       awgn_noise_src = analog.fastnoise_source_c(analog.GR_GAUSSIAN, noise_sigma, 0, 8192)
-      self.connect( awgn_noise_src, (awgn_chan,1) )
-      self.connect( awgn_chan,self.dst )
+      self.connect( awgn_noise_src, (awgn_chan, 1) )
+      self.connect( awgn_chan, self.dst )
       #self.connect( awgn_chan, blocks.skiphead( gr.sizeof_gr_complex, 3* config.fft_length ),self.dst )
       self.dst = awgn_chan
       
@@ -180,7 +180,7 @@ class fbmc_benchmark (gr.top_block):
       dst = self.dst
       self.connect(freq_off, dst) 
       self.dst = freq_off
-      self.rpc_mgr_tx.add_interface("set_freq_offset",self.freq_off.set_freqoff)
+      self.rpc_mgr_tx.add_interface("set_freq_offset", self.freq_off.set_freqoff)
       #log_to_file( self, self.freq_off, "data/TRANSMITTER_OUT.compl" )
 
 
@@ -188,45 +188,45 @@ class fbmc_benchmark (gr.top_block):
     if options.multipath:
       if options.itu_channel:
         self.fad_chan = channel.itpp_channel(options.bandwidth)
-        self.rpc_mgr_tx.add_interface("set_channel_profile",self.fad_chan.set_channel_profile)
+        self.rpc_mgr_tx.add_interface("set_channel_profile", self.fad_chan.set_channel_profile)
       else:
         #self.fad_chan = filter.fir_filter_ccc(1,[1.0,0.0,2e-1+0.1j,1e-4-0.04j])
         # filter coefficients for the lab exercise
-        self.fad_chan = filter.fir_filter_ccc(1,[0,0,0.3267,0.8868,0.3267])
+        self.fad_chan = filter.fir_filter_ccc(1, [0, 0, 0.3267, 0.8868, 0.3267])
 
       self.connect(self.fad_chan, self.dst)
       self.dst = self.fad_chan
 
     if options.samplingoffset is not None:
       soff = options.samplingoffset
-      interp = moms(1000000*(1.0+soff),1000000)
+      interp = moms(1000000*(1.0+soff), 1000000)
       self.connect( interp, self.dst )
       self.dst = interp
 
       if options.record:
        log_to_file( self, interp, "data/interp_out.compl" )
 
-    tmm =blocks.throttle(gr.sizeof_gr_complex,1e6)
+    tmm =blocks.throttle(gr.sizeof_gr_complex, 1e6)
     self.connect( tmm, self.dst )
     self.dst = tmm
     if options.force_tx_filter:
-      print "Forcing tx filter usage"
+      print("Forcing tx filter usage")
       self.connect( self.tx_filter, self.dst )
       self.dst = self.tx_filter
     if options.record:
       log_to_file( self, self.txpath, "data/txpath_out.compl" )
 
     if options.scatterplot:
-      print "Scatterplot enabled"
+      print("Scatterplot enabled")
 
-    self.connect( self.txpath,self.dst )
+    self.connect( self.txpath, self.dst )
     #log_to_file( self, self.txpath, "data/fbmc_rx_input.compl" )
 
 
 
-    print "Hit Strg^C to terminate"
+    print("Hit Strg^C to terminate")
 
-    print "Hit Strg^C to terminate"
+    print("Hit Strg^C to terminate")
 
 
     # Display some information about the setup
@@ -234,11 +234,11 @@ class fbmc_benchmark (gr.top_block):
         self._print_verbage()
 
 
-  def _setup_tx_path(self,options):
-    print "OPTIONS", options
+  def _setup_tx_path(self, options):
+    print("OPTIONS", options)
     self.txpath = transmit_path(options)
 
-  def _setup_rx_path(self,options):
+  def _setup_rx_path(self, options):
     self.rxpath = receive_path(options)
     
   def set_rms_amplitude(self, ampl):
@@ -269,22 +269,22 @@ class fbmc_benchmark (gr.top_block):
     self.rpc_mgr_rx.start_watcher()
 
     ## Adding interfaces
-    self.rpc_mgr_tx.add_interface("set_amplitude",self.txpath.set_rms_amplitude)
-    self.rpc_mgr_tx.add_interface("get_tx_parameters",self.txpath.get_tx_parameters)
-    self.rpc_mgr_tx.add_interface("set_modulation",self.txpath.allocation_src.set_allocation)
-    self.rpc_mgr_rx.add_interface("set_scatter_subcarrier",self.rxpath.set_scatterplot_subc)
+    self.rpc_mgr_tx.add_interface("set_amplitude", self.txpath.set_rms_amplitude)
+    self.rpc_mgr_tx.add_interface("get_tx_parameters", self.txpath.get_tx_parameters)
+    self.rpc_mgr_tx.add_interface("set_modulation", self.txpath.allocation_src.set_allocation)
+    self.rpc_mgr_rx.add_interface("set_scatter_subcarrier", self.rxpath.set_scatterplot_subc)
     if self.ideal or self.ideal2:
-        self.rpc_mgr_tx.add_interface("set_amplitude_ideal",self.set_rms_amplitude)
+        self.rpc_mgr_tx.add_interface("set_amplitude_ideal", self.set_rms_amplitude)
     else:
-        self.rpc_mgr_tx.add_interface("set_amplitude_ideal",self.set_fake_amplitude)
+        self.rpc_mgr_tx.add_interface("set_amplitude_ideal", self.set_fake_amplitude)
 
     
   def set_fake_amplitude(self, amplitude):
-        print
+        print()
 
   def supply_rx_baseband(self):
     ## RX Spectrum
-    if self.__dict__.has_key('rx_baseband'):
+    if 'rx_baseband' in self.__dict__:
       return self.rx_baseband
 
     config = self.config
@@ -292,26 +292,26 @@ class fbmc_benchmark (gr.top_block):
     fftlen = config.fft_length
 
     my_window = window.hamming(fftlen) #.blackmanharris(fftlen)
-    rxs_sampler = vector_sampler(gr.sizeof_gr_complex,fftlen)
-    rxs_trigger = blocks.vector_source_b(concatenate([[1],[0]*199]),True)
+    rxs_sampler = vector_sampler(gr.sizeof_gr_complex, fftlen)
+    rxs_trigger = blocks.vector_source_b(concatenate([[1], [0]*199]), True)
     rxs_window = blocks.multiply_const_vcc(my_window)
-    rxs_spectrum = gr.fft_vcc(fftlen,True,[],True)
+    rxs_spectrum = gr.fft_vcc(fftlen, True, [], True)
     rxs_mag = gr.complex_to_mag(fftlen)
-    rxs_avg = gr.single_pole_iir_filter_ff(0.01,fftlen)
-    rxs_logdb = gr.nlog10_ff(20.0,fftlen,-20*log10(fftlen))
-    rxs_decimate_rate = gr.keep_one_in_n(gr.sizeof_float*fftlen,50)
+    rxs_avg = gr.single_pole_iir_filter_ff(0.01, fftlen)
+    rxs_logdb = gr.nlog10_ff(20.0, fftlen, -20*log10(fftlen))
+    rxs_decimate_rate = gr.keep_one_in_n(gr.sizeof_float*fftlen, 50)
 
     t = self.u if self.filter is None else self.filter
-    self.connect(rxs_trigger,(rxs_sampler,1))
-    self.connect(t,rxs_sampler,rxs_window,
-                 rxs_spectrum,rxs_mag,rxs_avg,rxs_logdb, rxs_decimate_rate)
+    self.connect(rxs_trigger, (rxs_sampler, 1))
+    self.connect(t, rxs_sampler, rxs_window,
+                 rxs_spectrum, rxs_mag, rxs_avg, rxs_logdb, rxs_decimate_rate)
     if self._options.log:
           log_to_file(self, rxs_decimate_rate, "data/supply_rx.float")
     self.rx_baseband = rxs_decimate_rate
     return rxs_decimate_rate
 
 
-  def change_freqoff(self,val):
+  def change_freqoff(self, val):
     self.set_freqoff(val[0])
 
 
@@ -319,7 +319,7 @@ class fbmc_benchmark (gr.top_block):
     """
     Prints information about the transmit path
     """
-    print "\nTransmit Path:"
+    print("\nTransmit Path:")
     ##print "Bandwidth:       %s"    % (eng_notation.num_to_str(self._bandwidth))
     ##if "self.u" in vars(self):
       ##print "Using TX d'board %s"    % (self.subdev.side_and_name(),)
@@ -328,13 +328,13 @@ class fbmc_benchmark (gr.top_block):
       ##print "Software interp:%3d"    % (self._interpolation)
       ##print "Tx Frequency:    %s"    % (eng_notation.num_to_str(self._tx_freq))
       ##print "DAC rate:        %s"    % (eng_notation.num_to_str(self.u.dac_rate()))
-    print ""
+    print("")
 
 
     """
     Prints information about the receive path
     """
-    print "\nReceive Path:"
+    print("\nReceive Path:")
     ##print "Bandwidth:       %s"    % (eng_notation.num_to_str(self._bandwidth))
     ##if hasattr(self, "u"):
       ##print "Using RX d'board %s"    % (self.subdev.side_and_name(),)
@@ -342,7 +342,7 @@ class fbmc_benchmark (gr.top_block):
       ##print "decim:           %3d"   % (self._decim)
       ##print "Rx Frequency:    %s"    % (eng_notation.num_to_str(self._rx_freq))
       ##print "ADC rate:        %s"    % (eng_notation.num_to_str(self.u.adc_rate()))
-    print ""
+    print("")
 
 
   def get_tx_parameters(self):
@@ -352,9 +352,9 @@ class fbmc_benchmark (gr.top_block):
     """
     Adds usrp-specific options to the Options Parser
     """
-    common_options.add_options(normal,expert)
-    transmit_path.add_options(normal,expert)
-    receive_path.add_options(normal,expert)
+    common_options.add_options(normal, expert)
+    transmit_path.add_options(normal, expert)
+    receive_path.add_options(normal, expert)
 
 #    normal.add_option("-T", "--tx-subdev-spec", type="subdev", default=None,
 #                      help="select USRP Tx side A or B")
@@ -449,17 +449,17 @@ def main():
   (options, args) = parser.parse_args()
 
   if options.cfg is not None:
-    (options,args) = parser.parse_args(files=[options.cfg])
-    print "Using configuration file %s" % ( options.cfg )
+    (options, args) = parser.parse_args(files=[options.cfg])
+    print("Using configuration file %s" % ( options.cfg ))
 
   benchmark = fbmc_benchmark(options)
   runtime = benchmark
 
   r = gr.enable_realtime_scheduling()
   if r != gr.RT_OK:
-    print "Couldn't enable realtime scheduling"
+    print("Couldn't enable realtime scheduling")
   else:
-    print "Enabled realtime scheduling"
+    print("Enabled realtime scheduling")
 
   try:
 
@@ -467,7 +467,7 @@ def main():
       string_benchmark = runtime.dot_graph()
       filetx = os.path.expanduser('~/omnilog/benchmark_fbmc.dot')
       filetx = os.path.expanduser('benchmark_fbmc.dot')
-      dot_file = open(filetx,'w')
+      dot_file = open(filetx, 'w')
       dot_file.write(string_benchmark)
       dot_file.close()
 
@@ -490,9 +490,9 @@ def main():
 
 
   if options.measure:
-    print "min",tx.m.get_min()
-    print "max",tx.m.get_max()
-    print "avg",tx.m.get_avg()
+    print("min", tx.m.get_min())
+    print("max", tx.m.get_max())
+    print("avg", tx.m.get_avg())
 
 if __name__ == '__main__':
   main()

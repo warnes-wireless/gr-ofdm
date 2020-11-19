@@ -25,15 +25,15 @@ from gnuradio import fft as fft_blocks
 from gnuradio.eng_option import eng_option
 
 from optparse import OptionParser
-from gr_tools import log_to_file,terminate_stream
+from .gr_tools import log_to_file, terminate_stream
 
 import ofdm as ofdm
 import numpy
 import math
 from numpy import concatenate
 
-from autocorrelator import autocorrelator
-from station_configuration import station_configuration
+from .autocorrelator import autocorrelator
+from .station_configuration import station_configuration
 
 
 class ofdm_inner_receiver( gr.hier_block2 ):
@@ -72,8 +72,8 @@ class ofdm_inner_receiver( gr.hier_block2 ):
     
     
     ## Input and output ports
-    self.input  = rx_input = (self,0)
-    self.input2 = rx2_input = (self,1)
+    self.input  = rx_input = (self, 0)
+    self.input2 = rx2_input = (self, 1)
     
     out_ofdm_blocks = ( self, 0 )
     out_frame_start = ( self, 1 )
@@ -120,10 +120,10 @@ class ofdm_inner_receiver( gr.hier_block2 ):
       terminate_stream(self, frame_start)
       terminate_stream(self, frame_start2)
       
-      serial_to_parallel = blocks.stream_to_vector(gr.sizeof_gr_complex,block_length)
-      serial_to_parallel2 = blocks.stream_to_vector(gr.sizeof_gr_complex,block_length)
-      discard_cp = ofdm.vector_mask(block_length,cp_length,fft_length,[])
-      discard_cp2 = ofdm.vector_mask(block_length,cp_length,fft_length,[])
+      serial_to_parallel = blocks.stream_to_vector(gr.sizeof_gr_complex, block_length)
+      serial_to_parallel2 = blocks.stream_to_vector(gr.sizeof_gr_complex, block_length)
+      discard_cp = ofdm.vector_mask(block_length, cp_length, fft_length, [])
+      discard_cp2 = ofdm.vector_mask(block_length, cp_length, fft_length, [])
       ofdm_blocks = discard_cp
       ofdm_blocks2 = discard_cp2
       self.connect( rx_input, serial_to_parallel, discard_cp )
@@ -131,12 +131,12 @@ class ofdm_inner_receiver( gr.hier_block2 ):
       
       frame_start = [0]*frame_length
       frame_start[0] = 1
-      frame_start = blocks.vector_source_b(frame_start,True)
+      frame_start = blocks.vector_source_b(frame_start, True)
       frame_start2 = [0]*frame_length
       frame_start2[0] = 1
-      frame_start2 = blocks.vector_source_b(frame_start2,True)
+      frame_start2 = blocks.vector_source_b(frame_start2, True)
       
-      print "Disabled time synchronization stage"
+      print("Disabled time synchronization stage")
     
     
     
@@ -173,9 +173,9 @@ class ofdm_inner_receiver( gr.hier_block2 ):
     if options.disable_freq_sync or options.ideal:
        terminate_stream(self, freq_offset)
        terminate_stream(self, freq_offset2)
-       freq_offset = blocks.vector_source_f([0.0],True)
-       freq_offset2 = blocks.vector_source_f([0.0],True)
-       print "Disabled frequency synchronization stage"
+       freq_offset = blocks.vector_source_f([0.0], True)
+       freq_offset2 = blocks.vector_source_f([0.0], True)
+       print("Disabled frequency synchronization stage")
     
     ## Correct frequency shift, feed-forward structure
     frequency_shift = ofdm.frequency_shift_vcc( fft_length, -1.0/fft_length,
@@ -274,29 +274,29 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         for i in range (total_subc/2):
             dd.extend([i*2])
             
-        skip_block_1 = ofdm.int_skip(total_subc,2,0)
-        skip_block_2 = ofdm.int_skip(total_subc,2,1)
+        skip_block_1 = ofdm.int_skip(total_subc, 2, 0)
+        skip_block_2 = ofdm.int_skip(total_subc, 2, 1)
     #    inta_estim_1 = ofdm.interpolator(total_subc,2,dd)
     #    inta_estim_2 = ofdm.interpolator(total_subc,2,dd)
         
         LS_channel_estimator_1 = ofdm.multiply_const_vcc( list( inv_preamble_fd_1 ) )
         LS_channel_estimator_2 = ofdm.multiply_const_vcc( list( inv_preamble_fd_2 ) )
-        self.connect( sampled_chest_preamble,skip_block_1, LS_channel_estimator_1)#,inta_estim_1 )
-        self.connect( sampled_chest_preamble,skip_block_2, LS_channel_estimator_2)#,inta_estim_2 )
+        self.connect( sampled_chest_preamble, skip_block_1, LS_channel_estimator_1)#,inta_estim_1 )
+        self.connect( sampled_chest_preamble, skip_block_2, LS_channel_estimator_2)#,inta_estim_2 )
         
         estimated_CTF_1 = LS_channel_estimator_1                  # h0
         estimated_CTF_2 = LS_channel_estimator_2                  # h1
         
-        skip_block_3 = ofdm.int_skip(total_subc,2,0)
-        skip_block_4 = ofdm.int_skip(total_subc,2,1)
+        skip_block_3 = ofdm.int_skip(total_subc, 2, 0)
+        skip_block_4 = ofdm.int_skip(total_subc, 2, 1)
     #    inta_estim_3 = ofdm.interpolator(total_subc,2,dd)
     #    inta_estim_4 = ofdm.interpolator(total_subc,2,dd)
         
         LS_channel_estimator_3 = ofdm.multiply_const_vcc( list( inv_preamble_fd_1 ) )
         LS_channel_estimator_4 = ofdm.multiply_const_vcc( list( inv_preamble_fd_2 ) )
         
-        self.connect( sampled_chest_preamble2,skip_block_3, LS_channel_estimator_3)#,inta_estim_3 )
-        self.connect( sampled_chest_preamble2,skip_block_4, LS_channel_estimator_4)#,inta_estim_4 )
+        self.connect( sampled_chest_preamble2, skip_block_3, LS_channel_estimator_3)#,inta_estim_3 )
+        self.connect( sampled_chest_preamble2, skip_block_4, LS_channel_estimator_4)#,inta_estim_4 )
         
         estimated_CTF_3 = LS_channel_estimator_3                  # h2
         estimated_CTF_4 = LS_channel_estimator_4                  # h3
@@ -333,7 +333,7 @@ class ofdm_inner_receiver( gr.hier_block2 ):
           
           estimated_CTF_3 = ctf_mse_enhancer_3
           estimated_CTF_4 = ctf_mse_enhancer_4
-          print "Disabled CTF MSE enhancer"
+          print("Disabled CTF MSE enhancer")
         
         ctf_postprocess_1 = ofdm.postprocess_CTF_estimate( total_subc/2 )
         self.connect( estimated_CTF_1, ( ctf_postprocess_1, 0 ) )
@@ -361,8 +361,8 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         self.connect ( disp_CTF_3, (disp_CTF_RX1, 0) )
         self.connect ( disp_CTF_4, (disp_CTF_RX1, 1) ) 
     
-        terminate_stream(self,disp_CTF_RX0)
-        terminate_stream(self,disp_CTF_RX1)
+        terminate_stream(self, disp_CTF_RX0)
+        terminate_stream(self, disp_CTF_RX1)
         
         disp_CTF_RX0 = blocks.null_source(gr.sizeof_float*total_subc)
         disp_CTF_RX1 = blocks.null_source(gr.sizeof_float*total_subc)
@@ -378,12 +378,12 @@ class ofdm_inner_receiver( gr.hier_block2 ):
             
         pilot_subc = block_header.pilot_tones
         pilot_subcarriers = block_header.pilot_subc_sym
-        print "PILOT SUBCARRIERS: ", pilot_subcarriers
+        print("PILOT SUBCARRIERS: ", pilot_subcarriers)
         
         phase_tracking = ofdm.lms_phase_tracking_03( total_subc, pilot_subc,
-                                                   nondata_blocks,pilot_subcarriers,0 )
+                                                   nondata_blocks, pilot_subcarriers, 0 )
         phase_tracking2 = ofdm.lms_phase_tracking_03( total_subc, pilot_subc,
-                                                    nondata_blocks,pilot_subcarriers,0 )
+                                                    nondata_blocks, pilot_subcarriers, 0 )
         
         ##phase_tracking = ofdm.LMS_phase_tracking2( total_subc, pilot_subc,
          ##                                          nondata_blocks )
@@ -414,8 +414,8 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         
         #ofdm_blocks = phase_tracking
         #ofdm_blocks2 = phase_tracking2
-        self.connect(phase_tracking,blocks.null_sink(gr.sizeof_gr_complex*total_subc))
-        self.connect(phase_tracking2,blocks.null_sink(gr.sizeof_gr_complex*total_subc))
+        self.connect(phase_tracking, blocks.null_sink(gr.sizeof_gr_complex*total_subc))
+        self.connect(phase_tracking2, blocks.null_sink(gr.sizeof_gr_complex*total_subc))
         
         terminate_stream(self, inv_CTF_2)
         terminate_stream(self, inv_CTF_4)
@@ -502,12 +502,12 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         '''
           
         combine = blocks.add_cc(config.subcarriers)
-        self.connect(ofdm_blocks, (combine,0))
-        self.connect(ofdm_blocks2, (combine,1))
+        self.connect(ofdm_blocks, (combine, 0))
+        self.connect(ofdm_blocks2, (combine, 1))
         
         norm_val = [0.5]*208
         norm = ofdm.multiply_const_vcc( norm_val)
-        self.connect(combine,norm)
+        self.connect(combine, norm)
         
         ofdm_blocks = norm
     ##    div = gr.multiply_cc(config.subcarriers)
@@ -579,9 +579,9 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         #for i in range (total_subc/2):
            # dd.extend([i*2])
             
-        skip_block_11 = ofdm.int_skip(total_subc,2,0)
-        skip_block_111 = ofdm.int_skip(total_subc,2,0)
-        skip_block_12 = ofdm.int_skip(total_subc,2,1)
+        skip_block_11 = ofdm.int_skip(total_subc, 2, 0)
+        skip_block_111 = ofdm.int_skip(total_subc, 2, 0)
+        skip_block_12 = ofdm.int_skip(total_subc, 2, 1)
     #    inta_estim_1 = ofdm.interpolator(total_subc,2,dd)
     #    inta_estim_2 = ofdm.interpolator(total_subc,2,dd)
         
@@ -593,9 +593,9 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         estimated_CTF_11 = LS_channel_estimator_11                  # h0
         estimated_CTF_12 = LS_channel_estimator_12                  # h1
         
-        skip_block_21 = ofdm.int_skip(total_subc,2,0)
-        skip_block_211 = ofdm.int_skip(total_subc,2,0)
-        skip_block_22 = ofdm.int_skip(total_subc,2,1)
+        skip_block_21 = ofdm.int_skip(total_subc, 2, 0)
+        skip_block_211 = ofdm.int_skip(total_subc, 2, 0)
+        skip_block_22 = ofdm.int_skip(total_subc, 2, 1)
     #    inta_estim_3 = ofdm.interpolator(total_subc,2,dd)
     #    inta_estim_4 = ofdm.interpolator(total_subc,2,dd)
         
@@ -640,7 +640,7 @@ class ofdm_inner_receiver( gr.hier_block2 ):
           
           estimated_CTF_21 = ctf_mse_enhancer_21
           estimated_CTF_22 = ctf_mse_enhancer_22
-          print "Disabled CTF MSE enhancer"
+          print("Disabled CTF MSE enhancer")
         
         ctf_postprocess_11 = ofdm.postprocess_CTF_estimate( total_subc )
         self.connect( estimated_CTF_11, ( ctf_postprocess_11, 0 ) )
@@ -669,8 +669,8 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         #self.connect ( disp_CTF_21, (disp_CTF_RX1, 0) )
         #self.connect ( disp_CTF_22, (disp_CTF_RX1, 1) ) 
     
-        terminate_stream(self,disp_CTF_21)
-        terminate_stream(self,disp_CTF_22)
+        terminate_stream(self, disp_CTF_21)
+        terminate_stream(self, disp_CTF_22)
         
         disp_CTF_RX0 = disp_CTF_11
         disp_CTF_RX1 = disp_CTF_12
@@ -686,12 +686,12 @@ class ofdm_inner_receiver( gr.hier_block2 ):
             
         pilot_subc = block_header.pilot_tones
         pilot_subcarriers = block_header.pilot_subc_sym
-        print "PILOT SUBCARRIERS: ", pilot_subcarriers
+        print("PILOT SUBCARRIERS: ", pilot_subcarriers)
         
         phase_tracking = ofdm.lms_phase_tracking_03( total_subc, pilot_subc,
-                                                   nondata_blocks,pilot_subcarriers,0 )
+                                                   nondata_blocks, pilot_subcarriers, 0 )
         phase_tracking2 = ofdm.lms_phase_tracking_03( total_subc, pilot_subc,
-                                                    nondata_blocks,pilot_subcarriers,0 )
+                                                    nondata_blocks, pilot_subcarriers, 0 )
         
         ##phase_tracking = ofdm.LMS_phase_tracking2( total_subc, pilot_subc,
          ##                                          nondata_blocks )
@@ -723,13 +723,13 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         if options.disable_phase_tracking or options.ideal:
           terminate_stream(self, phase_tracking)
           terminate_stream(self, phase_tracking2)
-          print "Disabled phase tracking stage"
+          print("Disabled phase tracking stage")
         else:
           ofdm_blocks = phase_tracking
           ofdm_blocks2 = phase_tracking2
           
-        self.connect(phase_tracking,blocks.null_sink(gr.sizeof_gr_complex*total_subc))
-        self.connect(phase_tracking2,blocks.null_sink(gr.sizeof_gr_complex*total_subc))
+        self.connect(phase_tracking, blocks.null_sink(gr.sizeof_gr_complex*total_subc))
+        self.connect(phase_tracking2, blocks.null_sink(gr.sizeof_gr_complex*total_subc))
         
         terminate_stream(self, inv_CTF_12)
         terminate_stream(self, inv_CTF_22)

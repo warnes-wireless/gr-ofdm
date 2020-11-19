@@ -82,10 +82,10 @@ class scfdma_receiver_cb(gr.hier_block2):
 
         # connect the rest
         for i in range(len(indices)):
-            self.connect((self.fft_vxx_0, 0), (self.demappers[i],0))
-            self.connect((self.demappers[i],0), (self.idft_blocks[i],0))
-            self.connect((self.idft_blocks[i],0), (self.estimation_blocks[i],0))
-            self.connect((self.estimation_blocks[i],0), (self, i))
+            self.connect((self.fft_vxx_0, 0), (self.demappers[i], 0))
+            self.connect((self.demappers[i], 0), (self.idft_blocks[i], 0))
+            self.connect((self.idft_blocks[i], 0), (self.estimation_blocks[i], 0))
+            self.connect((self.estimation_blocks[i], 0), (self, i))
 
         # self.connect((self.fft_vxx_0, 0), (self.ofdm_scfdma_subcarrier_demapper_vcvc_0, 0))    
         # self.connect((self.fft_vxx_0_0, 0), (self.ofdm_fbmc_symbol_estimation_vcb_0, 0))    

@@ -25,17 +25,17 @@ from gnuradio import fft as fft_blocks
 from gnuradio.eng_option import eng_option
 
 from optparse import OptionParser
-from gr_tools import log_to_file,terminate_stream
+from .gr_tools import log_to_file, terminate_stream
 
 import ofdm as ofdm
-from preambles import fbmc_inner_pilot_block_filter
+from .preambles import fbmc_inner_pilot_block_filter
 import numpy
 import math
 
-import schmidl
+from . import schmidl
 
-from autocorrelator import autocorrelator
-from station_configuration import station_configuration
+from .autocorrelator import autocorrelator
+from .station_configuration import station_configuration
 
 
 
@@ -61,9 +61,9 @@ class fbmc_inner_receiver( gr.hier_block2 ):
 
 
     
-    print "data_subc: ", config.data_subcarriers
-    print "total_subc: ", config.subcarriers
-    print "frame_lengthframe_length: ", frame_length
+    print("data_subc: ", config.data_subcarriers)
+    print("total_subc: ", config.subcarriers)
+    print("frame_lengthframe_length: ", frame_length)
     
     
     ## Set Input/Output signature
@@ -147,15 +147,15 @@ class fbmc_inner_receiver( gr.hier_block2 ):
                                     #(frame_length-10)*fft_length/2 - fft_length/4 + int(3.5*fft_length)  + timingmetric_shift-1)
         self.connect( peak_detector, delayed_timesync )
         
-        self.block_sampler = ofdm.vector_sampler(gr.sizeof_gr_complex,fft_length/2*frame_length)
+        self.block_sampler = ofdm.vector_sampler(gr.sizeof_gr_complex, fft_length/2*frame_length)
         
-        self.connect(self.input,self.block_sampler)
-        self.connect(delayed_timesync,(self.block_sampler,1))
+        self.connect(self.input, self.block_sampler)
+        self.connect(delayed_timesync, (self.block_sampler, 1))
         #log_to_file( self, self.block_sampler, "data/fbmc_block_sampler.compl" )
         
         vt2s = blocks.vector_to_stream(gr.sizeof_gr_complex*fft_length,
                                                 frame_length/2)
-        self.connect(self.block_sampler,vt2s)
+        self.connect(self.block_sampler, vt2s)
         #terminate_stream(self,ofdm_blocks)
         
         ofdm_blocks = vt2s
@@ -188,7 +188,7 @@ class fbmc_inner_receiver( gr.hier_block2 ):
     #    log_to_file(self,ofdm_blocks,"data/ofdm_blocks_original.compl")
         frame_start = [0]*int(frame_length/2)
         frame_start[0] = 1
-        frame_start = blocks.vector_source_b(frame_start,True)          
+        frame_start = blocks.vector_source_b(frame_start, True)          
         
         #frame_start2 = [0]*int(frame_length/2)
         #frame_start2[0] = 1
@@ -199,14 +199,14 @@ class fbmc_inner_receiver( gr.hier_block2 ):
         terminate_stream(self, ofdm_blocks)
         terminate_stream(self, frame_start)
       
-      serial_to_parallel = blocks.stream_to_vector(gr.sizeof_gr_complex,fft_length)
+      serial_to_parallel = blocks.stream_to_vector(gr.sizeof_gr_complex, fft_length)
       #discard_cp = ofdm.vector_mask(block_length,cp_length,fft_length,[])
       #serial_to_parallel = blocks.stream_to_vector(gr.sizeof_gr_complex,block_length)
       #discard_cp = ofdm.vector_mask(block_length,cp_length,fft_length,[])
       #self.connect( rx_input,serial_to_parallel)
       
       #self.connect( rx_input, blocks.delay(gr.sizeof_gr_complex,0),serial_to_parallel)
-      initial_skip = blocks.skiphead(gr.sizeof_gr_complex,2*fft_length)
+      initial_skip = blocks.skiphead(gr.sizeof_gr_complex, 2*fft_length)
       self.connect( rx_input, initial_skip)
       if options.ideal is False and options.ideal2 is False:          
           self.connect(  initial_skip, serial_to_parallel)
@@ -217,15 +217,15 @@ class fbmc_inner_receiver( gr.hier_block2 ):
       
       frame_start = [0]*int(frame_length/2)
       frame_start[0] = 1
-      frame_start = blocks.vector_source_b(frame_start,True)
+      frame_start = blocks.vector_source_b(frame_start, True)
       
       #frame_start2 = [0]*int(frame_length/2)
       #frame_start2[0] = 1
       #frame_start2 = blocks.vector_source_b(frame_start2,True)
       
-      print "Disabled time synchronization stage"
+      print("Disabled time synchronization stage")
     
-    print"\t\t\t\t\tframe_length = ",frame_length
+    print("\t\t\t\t\tframe_length = ", frame_length)
     
     if options.ideal is False and options.ideal2 is False:
         ## Extract preamble, feed to Morelli & Mengali frequency offset estimator
@@ -237,7 +237,7 @@ class fbmc_inner_receiver( gr.hier_block2 ):
         self.connect( frame_start, blocks.delay( gr.sizeof_char, 1 ), ( sampler_preamble, 1 ) )
         self.connect( sampler_preamble, morelli_foe )
         freq_offset = morelli_foe
-        print "FRAME_LENGTH: ", frame_length
+        print("FRAME_LENGTH: ", frame_length)
         #log_to_file( self, sampler_preamble, "data/sampler_preamble.compl" )
         #log_to_file( self, rx_input, "data/rx_input.compl" )
         #log_to_file( self, ofdm_blocks, "data/rx_input.compl" )
@@ -264,9 +264,9 @@ class fbmc_inner_receiver( gr.hier_block2 ):
         self.connect( freq_offset, lms_fir )
         freq_offset = lms_fir
         
-        self.connect(freq_offset, blocks.keep_one_in_n(gr.sizeof_float,20) ,out_disp_cfo)
+        self.connect(freq_offset, blocks.keep_one_in_n(gr.sizeof_float, 20), out_disp_cfo)
     else:
-        self.connect(blocks.vector_source_f ([1]) ,out_disp_cfo)
+        self.connect(blocks.vector_source_f ([1]), out_disp_cfo)
 
     
     #log_to_file(self, lms_fir, "data/lms_fir.float")
@@ -274,8 +274,8 @@ class fbmc_inner_receiver( gr.hier_block2 ):
     if options.disable_freq_sync or options.ideal or options.ideal2:
       if options.ideal is False and options.ideal2 is False:  
           terminate_stream(self, freq_offset)
-          freq_offset = blocks.vector_source_f([0.0],True)
-      print "Disabled frequency synchronization stage"
+          freq_offset = blocks.vector_source_f([0.0], True)
+      print("Disabled frequency synchronization stage")
     
     if options.ideal is False and options.ideal2 is False:
         ## Correct frequency shift, feed-forward structure
@@ -288,7 +288,7 @@ class fbmc_inner_receiver( gr.hier_block2 ):
         
         self.connect( ofdm_blocks, ( frequency_shift, 0 ) )
         self.connect( freq_offset, ( frequency_shift, 1 ) )
-        self.connect( frame_start,blocks.delay( gr.sizeof_char, 0), ( frequency_shift, 2 ) )
+        self.connect( frame_start, blocks.delay( gr.sizeof_char, 0), ( frequency_shift, 2 ) )
         
         
 
@@ -315,7 +315,7 @@ class fbmc_inner_receiver( gr.hier_block2 ):
     self.junction_vcvc = ofdm.fbmc_junction_vcvc(fft_length, 2)
     self.fft_fbmc = fft_blocks.fft_vcc(fft_length, True, [], True)
     
-    print "config.training_data.fbmc_no_preambles: ", config.training_data.fbmc_no_preambles
+    print("config.training_data.fbmc_no_preambles: ", config.training_data.fbmc_no_preambles)
     #center_preamble = [1, -1j, -1, 1j]
     
     #self.preamble = preamble = [0]*total_subc + center_preamble*((int)(total_subc/len(center_preamble)))+[0]*total_subc
@@ -332,7 +332,7 @@ class fbmc_inner_receiver( gr.hier_block2 ):
     self.multiply_const= ofdm.multiply_const_vcc(([1.0/(math.sqrt(fft_length*0.6863))]*total_subc))    
     self.beta_multiplier_vcvc = ofdm.fbmc_beta_multiplier_vcvc(total_subc, 4, 4*fft_length-1, 0)
     #self.skiphead = blocks.skiphead(gr.sizeof_gr_complex*total_subc, 2*4-1-1)
-    self.skiphead = blocks.skiphead(gr.sizeof_gr_complex*total_subc,2)
+    self.skiphead = blocks.skiphead(gr.sizeof_gr_complex*total_subc, 2)
     self.skiphead_1 = blocks.skiphead(gr.sizeof_gr_complex*total_subc, 0)
     #self.remove_preamble_vcvc = ofdm.fbmc_remove_preamble_vcvc(total_subc, config.frame_data_part/2, config.training_data.fbmc_no_preambles*total_subc/2)
     #self.subchannel_processing_vcvc = ofdm.fbmc_subchannel_processing_vcvc(total_subc, config.frame_data_part, 1, 2, 1, 0)
@@ -343,17 +343,17 @@ class fbmc_inner_receiver( gr.hier_block2 ):
 
     if options.ideal is False and options.ideal2 is False:
         self.subchannel_processing_vcvc = ofdm.fbmc_subchannel_processing_vcvc(total_subc, config.frame_data_part, 3, 2, 1, 0)
-        help2 = blocks.keep_one_in_n(gr.sizeof_gr_complex*total_subc,frame_length)
-        self.connect ((self.subchannel_processing_vcvc,1),help2)
+        help2 = blocks.keep_one_in_n(gr.sizeof_gr_complex*total_subc, frame_length)
+        self.connect ((self.subchannel_processing_vcvc, 1), help2)
         #log_to_file( self, self.subchannel_processing_vcvc, "data/fbmc_subc.compl" )
 
     
     #terminate_stream(self, help2)
     
     if options.ideal is False and options.ideal2 is False:
-        self.connect(ofdm_blocks, blocks.vector_to_stream(gr.sizeof_gr_complex, fft_length),overlap_ser_to_par)
+        self.connect(ofdm_blocks, blocks.vector_to_stream(gr.sizeof_gr_complex, fft_length), overlap_ser_to_par)
     else:
-        self.connect(ofdm_blocks,overlap_ser_to_par)
+        self.connect(ofdm_blocks, overlap_ser_to_par)
         
     self.connect(overlap_ser_to_par, self.separate_vcvc)
     self.connect((self.separate_vcvc, 1), (self.polyphase_network_vcvc_2, 0))
@@ -363,7 +363,7 @@ class fbmc_inner_receiver( gr.hier_block2 ):
     self.connect(self.junction_vcvc, self.fft_fbmc)
     
     ofdm_blocks = self.fft_fbmc
-    print "config.dc_null: ", config.dc_null
+    print("config.dc_null: ", config.dc_null)
     if fft_length > data_subc:
       subcarrier_mask_fbmc = ofdm.vector_mask_dc_null( fft_length, virtual_subc/2,
                                            total_subc, config.dc_null, [] )
@@ -388,7 +388,7 @@ class fbmc_inner_receiver( gr.hier_block2 ):
     #self.connect(self.multiply_const, self.beta_multiplier_vcvc)
     #self.connect((self.beta_multiplier_vcvc, 0), (self.skiphead, 0))
     if options.ideal or options.ideal2:
-        self.connect((self.skiphead, 0),(self.skiphead_1, 0))
+        self.connect((self.skiphead, 0), (self.skiphead_1, 0))
     else:
         self.connect((self.skiphead, 0), (self.subchannel_processing_vcvc, 0))
         self.connect((self.subchannel_processing_vcvc, 0), (self.skiphead_1, 0))
@@ -403,7 +403,7 @@ class fbmc_inner_receiver( gr.hier_block2 ):
     
     
     
-    self.connect((self.skiphead_1, 0),(self.oqam_postprocessing_vcvc, 0))
+    self.connect((self.skiphead_1, 0), (self.oqam_postprocessing_vcvc, 0))
     #self.connect((self.oqam_postprocessing_vcvc, 0), (self.remove_preamble_vcvc, 0) )
     
     ofdm_blocks = (self.oqam_postprocessing_vcvc, 0)#(self.remove_preamble_vcvc, 0)
@@ -485,12 +485,12 @@ class fbmc_inner_receiver( gr.hier_block2 ):
       
       
             if options.logcir:
-                ifft1 = fft_blocks.fft_vcc(total_subc,False,[],True)
-                self.connect( estimated_CTF, ifft1,gr.null_sink(gr.sizeof_gr_complex*total_subc))
+                ifft1 = fft_blocks.fft_vcc(total_subc, False, [], True)
+                self.connect( estimated_CTF, ifft1, gr.null_sink(gr.sizeof_gr_complex*total_subc))
                 summ1 = ofdm.vector_sum_vcc(total_subc)
                 c2m =gr.complex_to_mag(total_subc)
-                self.connect( estimated_CTF,summ1 ,gr.null_sink(gr.sizeof_gr_complex))
-                self.connect( estimated_CTF, c2m,gr.null_sink(gr.sizeof_float*total_subc))
+                self.connect( estimated_CTF, summ1, gr.null_sink(gr.sizeof_gr_complex))
+                self.connect( estimated_CTF, c2m, gr.null_sink(gr.sizeof_float*total_subc))
                 log_to_file( self, ifft1, "data/CIR1.compl" )
                 log_to_file( self, summ1, "data/CTFsumm1.compl" )
                 log_to_file( self, estimated_CTF, "data/CTF1.compl" )
@@ -508,15 +508,15 @@ class fbmc_inner_receiver( gr.hier_block2 ):
       #self.connect( estimated_CTF, ifft3,null_noise,ctf_mse_enhancer )
         
             estimated_CTF = ctf_mse_enhancer 
-            print "Disabled CTF MSE enhancer"
+            print("Disabled CTF MSE enhancer")
 
         if options.logcir:
-         ifft2 = fft_blocks.fft_vcc(total_subc,False,[],True)
-         self.connect( estimated_CTF, ifft2,gr.null_sink(gr.sizeof_gr_complex*total_subc))
+         ifft2 = fft_blocks.fft_vcc(total_subc, False, [], True)
+         self.connect( estimated_CTF, ifft2, gr.null_sink(gr.sizeof_gr_complex*total_subc))
          summ2 = ofdm.vector_sum_vcc(total_subc)
          c2m2 =gr.complex_to_mag(total_subc)
-         self.connect( estimated_CTF,summ2 ,gr.null_sink(gr.sizeof_gr_complex))
-         self.connect( estimated_CTF, c2m2,gr.null_sink(gr.sizeof_float*total_subc))
+         self.connect( estimated_CTF, summ2, gr.null_sink(gr.sizeof_gr_complex))
+         self.connect( estimated_CTF, c2m2, gr.null_sink(gr.sizeof_float*total_subc))
          log_to_file( self, ifft2, "data/CIR2.compl" )
          log_to_file( self, summ2, "data/CTFsumm2.compl" )
          log_to_file( self, estimated_CTF, "data/CTF2.compl" )
@@ -595,10 +595,10 @@ class fbmc_inner_receiver( gr.hier_block2 ):
       if i in config.training_data.pilotsym_pos:
         nondata_blocks.append(i)
         
-    print"\t\t\t\t\tnondata_blocks=",nondata_blocks
+    print("\t\t\t\t\tnondata_blocks=", nondata_blocks)
     pilot_subc = block_header.pilot_tones
     pilot_subcarriers = block_header.pilot_subc_sym
-    print "PILOT SUBCARRIERS: ", pilot_subcarriers
+    print("PILOT SUBCARRIERS: ", pilot_subcarriers)
     
     if options.scatter_plot_before_phase_tracking:
       self.before_phase_tracking = equalizer
@@ -611,7 +611,7 @@ class fbmc_inner_receiver( gr.hier_block2 ):
     if options.ideal is False and options.ideal2 is False:
         self.connect( disp_CTF, out_disp_ctf )
     else:
-        self.connect( blocks.vector_source_f([1.0]*total_subc),blocks.stream_to_vector(gr.sizeof_float,total_subc), out_disp_ctf )
+        self.connect( blocks.vector_source_f([1.0]*total_subc), blocks.stream_to_vector(gr.sizeof_float, total_subc), out_disp_ctf )
     
     
 
@@ -626,7 +626,7 @@ class fbmc_inner_receiver( gr.hier_block2 ):
       log_to_file( self, fft, "data/fft.compl")
       log_to_file( self, fft, "data/fft.float", mag=True )
       
-      if vars().has_key( 'subcarrier_mask' ):
+      if 'subcarrier_mask' in vars():
         log_to_file( self, subcarrier_mask, "data/subcarrier_mask.compl" )
       
       log_to_file( self, ofdm_blocks, "data/ofdm_blocks_out.compl" )
@@ -645,8 +645,8 @@ class fbmc_inner_receiver( gr.hier_block2 ):
         log_to_file( self, ctf_mse_enhancer, "data/ctf_mse_enhancer.float", 
                      mag=True )
       
-      log_to_file( self, (ctf_postprocess,0), "data/inc_estimated_ctf.compl" )
-      log_to_file( self, (ctf_postprocess,1), "data/disp_ctf.float" )
+      log_to_file( self, (ctf_postprocess, 0), "data/inc_estimated_ctf.compl" )
+      log_to_file( self, (ctf_postprocess, 1), "data/disp_ctf.float" )
       
       log_to_file( self, equalizer, "data/equalizer.compl" )
       log_to_file( self, equalizer, "data/equalizer.float", mag=True )

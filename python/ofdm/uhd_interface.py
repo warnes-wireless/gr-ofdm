@@ -47,16 +47,16 @@ class uhd_interface:
                  gain=None, spec=None, antenna=None, clock_source=None, time_source=None):
 
         # check the USRP model name
-        print "Assuming only one type of USRP. Checking USRP model..."
+        print("Assuming only one type of USRP. Checking USRP model...")
         usrp = uhd.usrp_source(device_addr=uhd.device_addr_t(''), stream_args=uhd.stream_args('fc32'))
         self._usrp_model = usrp.get_usrp_info().get("mboard_id")
-        print "Using USRP model:", self._usrp_model
+        print("Using USRP model:", self._usrp_model)
         del(usrp)
 
         if(istx):
             if self._usrp_model == 'USRP1':
                 # load special FPGA bitstream to get a flat frequency response
-                print "Loading special FPGA bitstream for USRP1 Tx to obtain flat frequency response"
+                print("Loading special FPGA bitstream for USRP1 Tx to obtain flat frequency response")
                 UHD_DIR = os.environ.get("UHD_DIR")
                 if UHD_DIR != None and UHD_DIR != "":
                     args = uhd.device_addr_t('fpga=' + UHD_DIR + 'share/uhd/images/std_1rxhb_1txhb.rbf')
@@ -65,7 +65,7 @@ class uhd_interface:
             self.u = uhd.usrp_sink(device_addr=args, stream_args=uhd.stream_args('fc32'))
         else:
             if(ismimo):
-                self.u = uhd.usrp_source(device_addr=" addr0=192.168.10.2, addr1=192.168.10.3", stream_args=uhd.stream_args('fc32',channels=range(2)))
+                self.u = uhd.usrp_source(device_addr=" addr0=192.168.10.2, addr1=192.168.10.3", stream_args=uhd.stream_args('fc32', channels=list(range(2))))
             else:
                 self.u = uhd.usrp_source(device_addr=args, stream_args=uhd.stream_args('fc32'))
 
@@ -89,11 +89,11 @@ class uhd_interface:
 
         # Set clock source to external.
         if(clock_source):
-            print "clock_source: ", clock_source
+            print("clock_source: ", clock_source)
             self.u.set_clock_source(clock_source, 0)
 
         if(time_source):
-            print "time_source: ", time_source
+            print("time_source: ", time_source)
             self.u.set_time_source(time_source, 0)
 
         # Set the subdevice spec
@@ -119,21 +119,21 @@ class uhd_interface:
         if gain_rel is None:
             if (self._istx and ((self._usrp_model == 'USRP1') or (self._usrp_model == 'B200') or (self._usrp_model == 'B210'))):
                 self.u.set_gain(gain_range.stop())
-                print 'Running a B2x0 or USRP1, needs high gain, set gain to', gain_range.stop()
+                print('Running a B2x0 or USRP1, needs high gain, set gain to', gain_range.stop())
                 gain_abs=gain_range.stop()
             else:
                 # if no gain was specified, use the mid-point in dB
                 gain_abs = float(gain_range.start()+gain_range.stop())/2
-                print "No gain specified."
-                print "Setting gain to %f (from [%f, %f])" % \
-                (gain_abs, gain_range.start(), gain_range.stop())
+                print("No gain specified.")
+                print("Setting gain to %f (from [%f, %f])" % \
+                (gain_abs, gain_range.start(), gain_range.stop()))
             	self.u.set_gain(gain_abs, 0)
         else:
             gain_delta = gain_range.stop() - gain_range.start()
             gain_abs_delta = gain_rel * gain_delta
             gain_abs = gain_range.start() + gain_abs_delta
-            print "Gain range: ", gain_range
-            print "Setting gain to %f dB " % gain_abs
+            print("Gain range: ", gain_range)
+            print("Setting gain to %f dB " % gain_abs)
             self.u.set_gain(gain_abs, 0)
 
         return gain_abs
@@ -143,9 +143,9 @@ class uhd_interface:
             sys.stderr.write("You must specify -f FREQ or --freq FREQ\n")
             sys.exit(1)
 
-        r = self.u.set_center_freq(uhd.tune_request(freq, lo_offset),0)
+        r = self.u.set_center_freq(uhd.tune_request(freq, lo_offset), 0)
         if(self._ismimo):
-            s = self.u.set_center_freq(uhd.tune_request(freq, lo_offset),1)
+            s = self.u.set_center_freq(uhd.tune_request(freq, lo_offset), 1)
         if  r:
             return "FREQ", freq
         else:
@@ -162,8 +162,8 @@ class uhd_transmitter(uhd_interface, gr.hier_block2):
     def __init__(self, args, bandwidth, freq=None, lo_offset=None, gain=None,
                  spec=None, antenna=None, clock_source=None, time_source=None, verbose=False):
         gr.hier_block2.__init__(self, "uhd_transmitter",
-                                gr.io_signature(1,1,gr.sizeof_gr_complex),
-                                gr.io_signature(0,0,0))
+                                gr.io_signature(1, 1, gr.sizeof_gr_complex),
+                                gr.io_signature(0, 0, 0))
 
 
         # Set up the UHD interface as a transmitter
@@ -203,16 +203,16 @@ class uhd_transmitter(uhd_interface, gr.hier_block2):
         """
         Prints information about the UHD transmitter
         """
-        print "\nUHD Transmitter:"
-        print "UHD Args:     %s"    % (self._args)
-        print "Freq:         %sHz"  % (eng_notation.num_to_str(self._freq))
-        print "LO Offset:    %sHz"  % (eng_notation.num_to_str(self._lo_offset))
-        print "Gain:         %f dB" % (self._gain)
-        print "Sample Rate:  %ssps" % (eng_notation.num_to_str(self._rate))
-        print "Antenna:      %s"    % (self._ant)
-        print "Subdev Sec:   %s"    % (self._spec)
-        print "Clock Source: %s"    % (self._clock_source)
-        print "TimeSource: %s"    % (self._time_source)
+        print("\nUHD Transmitter:")
+        print("UHD Args:     %s"    % (self._args))
+        print("Freq:         %sHz"  % (eng_notation.num_to_str(self._freq)))
+        print("LO Offset:    %sHz"  % (eng_notation.num_to_str(self._lo_offset)))
+        print("Gain:         %f dB" % (self._gain))
+        print("Sample Rate:  %ssps" % (eng_notation.num_to_str(self._rate)))
+        print("Antenna:      %s"    % (self._ant))
+        print("Subdev Sec:   %s"    % (self._spec))
+        print("Clock Source: %s"    % (self._clock_source))
+        print("TimeSource: %s"    % (self._time_source))
 
 
 
@@ -225,8 +225,8 @@ class uhd_receiver(uhd_interface, gr.hier_block2):
     def __init__(self, args, bandwidth, freq=None, lo_offset=None, gain=None,
                  spec=None, antenna=None, clock_source=None, time_source=None, verbose=False):
         gr.hier_block2.__init__(self, "uhd_receiver",
-                                gr.io_signature(0,0,0),
-                                gr.io_signature(1,1,gr.sizeof_gr_complex))
+                                gr.io_signature(0, 0, 0),
+                                gr.io_signature(1, 1, gr.sizeof_gr_complex))
 
         # Set up the UHD interface as a receiver
         uhd_interface.__init__(self, False, False, args, bandwidth,
@@ -266,23 +266,23 @@ class uhd_receiver(uhd_interface, gr.hier_block2):
         """
         Prints information about the UHD transmitter
         """
-        print "\nUHD Receiver:"
-        print "UHD Args:     %s"    % (self._args)
-        print "Freq:         %sHz"  % (eng_notation.num_to_str(self._freq))
-        print "LO Offset:    %sHz"  % (eng_notation.num_to_str(self._lo_offset))
-        print "Gain:         %f dB" % (self._gain)
-        print "Sample Rate:  %ssps" % (eng_notation.num_to_str(self._rate))
-        print "Antenna:      %s"    % (self._ant)
-        print "Subdev Sec:   %s"    % (self._spec)
-        print "Clock Source: %s"    % (self._clock_source)
-        print "Time Source: %s"    % (self._time_source)
+        print("\nUHD Receiver:")
+        print("UHD Args:     %s"    % (self._args))
+        print("Freq:         %sHz"  % (eng_notation.num_to_str(self._freq)))
+        print("LO Offset:    %sHz"  % (eng_notation.num_to_str(self._lo_offset)))
+        print("Gain:         %f dB" % (self._gain))
+        print("Sample Rate:  %ssps" % (eng_notation.num_to_str(self._rate)))
+        print("Antenna:      %s"    % (self._ant))
+        print("Subdev Sec:   %s"    % (self._spec))
+        print("Clock Source: %s"    % (self._clock_source))
+        print("Time Source: %s"    % (self._time_source))
 
 class uhd_mimo_receiver(uhd_interface, gr.hier_block2):
     def __init__(self, args, bandwidth, freq=None, lo_offset=None, gain=None,
                  spec=None, antenna=None, clock_source=None, time_source=None, verbose=False):
         gr.hier_block2.__init__(self, "uhd_receiver",
-                                gr.io_signature(0,0,0),
-                                gr.io_signature2(2,2,gr.sizeof_gr_complex,gr.sizeof_gr_complex))
+                                gr.io_signature(0, 0, 0),
+                                gr.io_signature2(2, 2, gr.sizeof_gr_complex, gr.sizeof_gr_complex))
 
         # Set up the UHD interface as a receiver
         uhd_interface.__init__(self, False, True, args, bandwidth,
@@ -299,8 +299,8 @@ class uhd_mimo_receiver(uhd_interface, gr.hier_block2):
         #self.u.set_samp_rate(bandwidth)
         #self.u.set_center_freq(freq, 0)
         #self.u.set_center_freq(freq, 1)
-        self.connect((self.u,0), (self,0))
-        self.connect((self.u,1), (self,1))
+        self.connect((self.u, 0), (self, 0))
+        self.connect((self.u, 1), (self, 1))
 
         if(verbose):
             self._print_verbage()
@@ -334,13 +334,13 @@ class uhd_mimo_receiver(uhd_interface, gr.hier_block2):
         """
         Prints information about the UHD transmitter
         """
-        print "\nUHD Receiver:"
-        print "UHD Args:     %s"    % (self._args)
-        print "Freq:         %sHz"  % (eng_notation.num_to_str(self._freq))
-        print "LO Offset:    %sHz"  % (eng_notation.num_to_str(self._lo_offset))
-        print "Gain:         %f dB" % (self._gain)
-        print "Sample Rate:  %ssps" % (eng_notation.num_to_str(self._rate))
-        print "Antenna:      %s"    % (self._ant)
-        print "Subdev Sec:   %s"    % (self._spec)
-        print "Clock Source: %s"    % (self._clock_source)
-        print "Time Source: %s"    % (self._time_source)
+        print("\nUHD Receiver:")
+        print("UHD Args:     %s"    % (self._args))
+        print("Freq:         %sHz"  % (eng_notation.num_to_str(self._freq)))
+        print("LO Offset:    %sHz"  % (eng_notation.num_to_str(self._lo_offset)))
+        print("Gain:         %f dB" % (self._gain))
+        print("Sample Rate:  %ssps" % (eng_notation.num_to_str(self._rate)))
+        print("Antenna:      %s"    % (self._ant))
+        print("Subdev Sec:   %s"    % (self._spec))
+        print("Clock Source: %s"    % (self._clock_source))
+        print("Time Source: %s"    % (self._time_source))

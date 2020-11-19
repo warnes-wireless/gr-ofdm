@@ -22,24 +22,24 @@
 
 from gnuradio import gr, blocks, analog, zeromq
 from gnuradio import eng_notation
-from configparse import OptionParser
+from .configparse import OptionParser
 from gnuradio import filter, channels
 
-from station_configuration import station_configuration
+from .station_configuration import station_configuration
 
 from math import log10, sqrt
 
 import sys
 import os
 
-from transmit_path import transmit_path
-from receive_path import receive_path
+from .transmit_path import transmit_path
+from .receive_path import receive_path
 from ofdm import throughput_measure, vector_sampler
-import common_options
-from gr_tools import log_to_file, ms_to_file
-from moms import moms
+from . import common_options
+from .gr_tools import log_to_file, ms_to_file
+from .moms import moms
 
-import fusb_options
+from . import fusb_options
 
 
 import ofdm as ofdm
@@ -52,7 +52,7 @@ import numpy
 import copy
 
 
-import channel
+from . import channel
 
 #import os
 #print 'Blocked waiting for GDB attach (pid = %d)' % (os.getpid(),)
@@ -83,23 +83,23 @@ class ofdm_benchmark (gr.top_block):
 
     self._interpolation = 1
 
-    f1 = numpy.array([-107,0,445,0,-1271,0,2959,0,-6107,0,11953,
-                      0,-24706,0,82359,262144/2,82359,0,-24706,0,
-                      11953,0,-6107,0,2959,0,-1271,0,445,0,-107],
+    f1 = numpy.array([-107, 0, 445, 0, -1271, 0, 2959, 0, -6107, 0, 11953,
+                      0, -24706, 0, 82359, 262144/2, 82359, 0, -24706, 0,
+                      11953, 0, -6107, 0, 2959, 0, -1271, 0, 445, 0, -107],
                       numpy.float64)/262144.
 
-    print "Software interpolation: %d" % (self._interpolation)
+    print("Software interpolation: %d" % (self._interpolation))
 
     bw = 1.0/self._interpolation
     tb = bw/5
     if self._interpolation > 1:
       self.tx_filter = gr.hier_block2("filter",
-                                   gr.io_signature(1,1,gr.sizeof_gr_complex),
-                                   gr.io_signature(1,1,gr.sizeof_gr_complex))
-      self.tx_filter.connect( self.tx_filter, gr.interp_fir_filter_ccf(2,f1),
-                           gr.interp_fir_filter_ccf(2,f1), self.tx_filter )
+                                   gr.io_signature(1, 1, gr.sizeof_gr_complex),
+                                   gr.io_signature(1, 1, gr.sizeof_gr_complex))
+      self.tx_filter.connect( self.tx_filter, gr.interp_fir_filter_ccf(2, f1),
+                           gr.interp_fir_filter_ccf(2, f1), self.tx_filter )
 
-      print "New"
+      print("New")
 
     else:
       self.tx_filter = None
@@ -113,8 +113,8 @@ class ofdm_benchmark (gr.top_block):
       # passband ripple in dB, stopband attenuation in dB
       # extra taps
       filt_coeff = optfir.low_pass(1.0, 1.0, bw, bw+tb, 0.1, 60.0, 1)
-      print "Software decimation filter length: %d" % (len(filt_coeff))
-      self.rx_filter = gr.fir_filter_ccf(self.decimation,filt_coeff)
+      print("Software decimation filter length: %d" % (len(filt_coeff)))
+      self.rx_filter = gr.fir_filter_ccf(self.decimation, filt_coeff)
     else:
       self.rx_filter = None
 
@@ -135,7 +135,7 @@ class ofdm_benchmark (gr.top_block):
     #self.dst  = gr.file_sink(gr.sizeof_gr_complex,options.to_file)
     self.dst= self.rxpath
     if options.force_rx_filter:
-      print "Forcing rx filter usage"
+      print("Forcing rx filter usage")
       self.connect( self.rx_filter, self.dst )
       self.dst = self.rx_filter
       
@@ -162,12 +162,12 @@ class ofdm_benchmark (gr.top_block):
           snr = 10.0**(snr_db/10.0)
           noise_sigma = sqrt( config.rms_amplitude**2 / snr )
 
-      print " Noise St. Dev. %f" % (noise_sigma)
+      print(" Noise St. Dev. %f" % (noise_sigma))
 
       awgn_chan = blocks.add_cc()
       #awgn_noise_src = ofdm.complex_white_noise( 0.0, noise_sigma )
       awgn_noise_src = analog.fastnoise_source_c(analog.GR_GAUSSIAN, noise_sigma, 0, 8192)
-      self.connect( awgn_noise_src, (awgn_chan,1) )
+      self.connect( awgn_noise_src, (awgn_chan, 1) )
       self.connect( awgn_chan, self.dst  )
       self.dst = awgn_chan
 
@@ -177,18 +177,18 @@ class ofdm_benchmark (gr.top_block):
       dst = self.dst
       self.connect(freq_off, dst) 
       self.dst = freq_off
-      self.rpc_mgr_tx.add_interface("set_freq_offset",self.freq_off.set_freqoff)
+      self.rpc_mgr_tx.add_interface("set_freq_offset", self.freq_off.set_freqoff)
 
 
     if options.multipath:
       if options.itu_channel:
         self.fad_chan = channel.itpp_channel(options.bandwidth)
-        self.rpc_mgr_tx.add_interface("set_channel_profile",self.fad_chan.set_channel_profile)
-        self.rpc_mgr_tx.add_interface("set_norm_doppler",self.fad_chan.set_norm_doppler)
+        self.rpc_mgr_tx.add_interface("set_channel_profile", self.fad_chan.set_channel_profile)
+        self.rpc_mgr_tx.add_interface("set_norm_doppler", self.fad_chan.set_norm_doppler)
       else:
         #self.fad_chan = filter.fir_filter_ccc(1,[1.0,0.0,2e-1+0.1j,1e-4-0.04j])
         # filter coefficients for the lab exercise
-        self.fad_chan = filter.fir_filter_ccc(1,[0.3267,0.8868,0.3267])
+        self.fad_chan = filter.fir_filter_ccc(1, [0.3267, 0.8868, 0.3267])
         #self.fad_chan = filter.fir_filter_ccc(1,[0,0,0.1,0.2,0.01,0.3])#0.3267,0.8868,0.3267])
         #self.fad_chan = channels.selective_fading_model(5, 0.1, False, 1, -1, [0, 0, 0], [0.3267,0.8868,0.3267], 10 )
         #self.fad_chan = channels.fading_model(6, 0.05, False);
@@ -200,7 +200,7 @@ class ofdm_benchmark (gr.top_block):
 
     if options.samplingoffset is not None:
       soff = options.samplingoffset
-      interp = moms(1000000*(1.0+soff),1000000)
+      interp = moms(1000000*(1.0+soff), 1000000)
       #interp = filter.fractional_resampler_cc(0,1000000*(1.0+soff)/1000000.0)
       self.connect( interp, self.dst )
       self.dst = interp
@@ -208,11 +208,11 @@ class ofdm_benchmark (gr.top_block):
       if options.record:
        log_to_file( self, interp, "data/interp_out.compl" )
 
-    tmm =blocks.throttle(gr.sizeof_gr_complex,options.bandwidth)
+    tmm =blocks.throttle(gr.sizeof_gr_complex, options.bandwidth)
     self.connect( tmm, self.dst )
     self.dst = tmm
     if options.force_tx_filter:
-      print "Forcing tx filter usage"
+      print("Forcing tx filter usage")
       self.connect( self.tx_filter, self.dst )
       self.dst = self.tx_filter
     if options.record:
@@ -220,14 +220,14 @@ class ofdm_benchmark (gr.top_block):
 
 
     if options.scatterplot:
-      print "Scatterplot enabled"
+      print("Scatterplot enabled")
 
-    self.connect( self.txpath,self.dst )
+    self.connect( self.txpath, self.dst )
 
 
-    print "Hit Strg^C to terminate"
+    print("Hit Strg^C to terminate")
 
-    print "Hit Strg^C to terminate"
+    print("Hit Strg^C to terminate")
 
 
     # Display some information about the setup
@@ -235,11 +235,11 @@ class ofdm_benchmark (gr.top_block):
         self._print_verbage()
 
 
-  def _setup_tx_path(self,options):
-    print "OPTIONS", options
+  def _setup_tx_path(self, options):
+    print("OPTIONS", options)
     self.txpath = transmit_path(options)
 
-  def _setup_rx_path(self,options):
+  def _setup_rx_path(self, options):
     self.rxpath = receive_path(options)
     
   def set_rms_amplitude(self, ampl):
@@ -252,8 +252,8 @@ class ofdm_benchmark (gr.top_block):
 
     self.rms = max(0.000000000001, min(ampl, 1.0))
     #scaled_ampl = 1.0/(ampl/sqrt(self.config.subcarriers))
-    print "config.fft_length: ", self.config.fft_length
-    print "config.cp_length: ", self.config.cp_length
+    print("config.fft_length: ", self.config.fft_length)
+    print("config.cp_length: ", self.config.cp_length)
     scaled_ampl = 1.0/(ampl*sqrt(self.config.fft_length**2/self.config.subcarriers))
     self._amplification = scaled_ampl
     self._amplifier.set_k(self._amplification)
@@ -271,23 +271,23 @@ class ofdm_benchmark (gr.top_block):
     self.rpc_mgr_rx.start_watcher()
 
     ## Adding interfaces
-    self.rpc_mgr_tx.add_interface("set_amplitude",self.txpath.set_rms_amplitude)
-    self.rpc_mgr_tx.add_interface("get_tx_parameters",self.txpath.get_tx_parameters)
-    self.rpc_mgr_tx.add_interface("set_modulation",self.txpath.allocation_src.set_allocation)
-    self.rpc_mgr_rx.add_interface("set_observed_subcarrier",self.rxpath.set_observed_subc)
-    self.rpc_mgr_tx.add_interface("set_allocation_scheme",self.txpath.allocation_src.set_allocation_scheme)
-    self.rpc_mgr_tx.add_interface("set_data_rate",self.txpath.allocation_src.set_data_rate)
-    self.rpc_mgr_tx.add_interface("set_power_limit",self.txpath.allocation_src.set_power_limit)
-    self.rpc_mgr_tx.add_interface("set_gap",self.txpath.allocation_src.set_gap)
-    self.rpc_mgr_tx.add_interface("set_resource_block_size",self.txpath.allocation_src.set_resource_block_size)
-    self.rpc_mgr_tx.add_interface("set_resource_block_number",self.txpath.allocation_src.set_resource_block_number)
+    self.rpc_mgr_tx.add_interface("set_amplitude", self.txpath.set_rms_amplitude)
+    self.rpc_mgr_tx.add_interface("get_tx_parameters", self.txpath.get_tx_parameters)
+    self.rpc_mgr_tx.add_interface("set_modulation", self.txpath.allocation_src.set_allocation)
+    self.rpc_mgr_rx.add_interface("set_observed_subcarrier", self.rxpath.set_observed_subc)
+    self.rpc_mgr_tx.add_interface("set_allocation_scheme", self.txpath.allocation_src.set_allocation_scheme)
+    self.rpc_mgr_tx.add_interface("set_data_rate", self.txpath.allocation_src.set_data_rate)
+    self.rpc_mgr_tx.add_interface("set_power_limit", self.txpath.allocation_src.set_power_limit)
+    self.rpc_mgr_tx.add_interface("set_gap", self.txpath.allocation_src.set_gap)
+    self.rpc_mgr_tx.add_interface("set_resource_block_size", self.txpath.allocation_src.set_resource_block_size)
+    self.rpc_mgr_tx.add_interface("set_resource_block_number", self.txpath.allocation_src.set_resource_block_number)
     if self.ideal or self.ideal2:
-        self.rpc_mgr_tx.add_interface("set_amplitude_ideal",self.set_rms_amplitude)
+        self.rpc_mgr_tx.add_interface("set_amplitude_ideal", self.set_rms_amplitude)
     else:
-        self.rpc_mgr_tx.add_interface("set_amplitude_ideal",self.set_fake_amplitude)
+        self.rpc_mgr_tx.add_interface("set_amplitude_ideal", self.set_fake_amplitude)
 
   def set_fake_amplitude(self, amplitude):
-        print
+        print()
 
 #   def supply_rx_baseband(self):
 #     ## RX Spectrum
@@ -318,7 +318,7 @@ class ofdm_benchmark (gr.top_block):
 #     return rxs_decimate_rate
 
 
-  def change_freqoff(self,val):
+  def change_freqoff(self, val):
     self.set_freqoff(val[0])
 
 
@@ -326,7 +326,7 @@ class ofdm_benchmark (gr.top_block):
     """
     Prints information about the transmit path
     """
-    print "\nTransmit Path:"
+    print("\nTransmit Path:")
     ##print "Bandwidth:       %s"    % (eng_notation.num_to_str(self._bandwidth))
     ##if "self.u" in vars(self):
       ##print "Using TX d'board %s"    % (self.subdev.side_and_name(),)
@@ -335,13 +335,13 @@ class ofdm_benchmark (gr.top_block):
       ##print "Software interp:%3d"    % (self._interpolation)
       ##print "Tx Frequency:    %s"    % (eng_notation.num_to_str(self._tx_freq))
       ##print "DAC rate:        %s"    % (eng_notation.num_to_str(self.u.dac_rate()))
-    print ""
+    print("")
 
 
     """
     Prints information about the receive path
     """
-    print "\nReceive Path:"
+    print("\nReceive Path:")
     ##print "Bandwidth:       %s"    % (eng_notation.num_to_str(self._bandwidth))
     ##if hasattr(self, "u"):
       ##print "Using RX d'board %s"    % (self.subdev.side_and_name(),)
@@ -349,7 +349,7 @@ class ofdm_benchmark (gr.top_block):
       ##print "decim:           %3d"   % (self._decim)
       ##print "Rx Frequency:    %s"    % (eng_notation.num_to_str(self._rx_freq))
       ##print "ADC rate:        %s"    % (eng_notation.num_to_str(self.u.adc_rate()))
-    print ""
+    print("")
 
 
   def get_tx_parameters(self):
@@ -359,9 +359,9 @@ class ofdm_benchmark (gr.top_block):
     """
     Adds usrp-specific options to the Options Parser
     """
-    common_options.add_options(normal,expert)
-    transmit_path.add_options(normal,expert)
-    receive_path.add_options(normal,expert)
+    common_options.add_options(normal, expert)
+    transmit_path.add_options(normal, expert)
+    receive_path.add_options(normal, expert)
 
 #    normal.add_option("-T", "--tx-subdev-spec", type="subdev", default=None,
 #                      help="select USRP Tx side A or B")
@@ -456,17 +456,17 @@ def main():
   (options, args) = parser.parse_args()
 
   if options.cfg is not None:
-    (options,args) = parser.parse_args(files=[options.cfg])
-    print "Using configuration file %s" % ( options.cfg )
+    (options, args) = parser.parse_args(files=[options.cfg])
+    print("Using configuration file %s" % ( options.cfg ))
 
   benchmark = ofdm_benchmark(options)
   runtime = benchmark
 
   r = gr.enable_realtime_scheduling()
   if r != gr.RT_OK:
-    print "Couldn't enable realtime scheduling"
+    print("Couldn't enable realtime scheduling")
   else:
-    print "Enabled realtime scheduling"
+    print("Enabled realtime scheduling")
 
   try:
 
@@ -474,7 +474,7 @@ def main():
       string_benchmark = runtime.dot_graph()
       filetx = os.path.expanduser('~/omnilog/benchmark_ofdm.dot')
       filetx = os.path.expanduser('benchmark_ofdm.dot')
-      dot_file = open(filetx,'w')
+      dot_file = open(filetx, 'w')
       dot_file.write(string_benchmark)
       dot_file.close()
 
@@ -497,9 +497,9 @@ def main():
 
 
   if options.measure:
-    print "min",tx.m.get_min()
-    print "max",tx.m.get_max()
-    print "avg",tx.m.get_avg()
+    print("min", tx.m.get_min())
+    print("max", tx.m.get_max())
+    print("avg", tx.m.get_avg())
 
 if __name__ == '__main__':
   main()

@@ -22,17 +22,17 @@
 
 from gnuradio import gr, filter, zeromq
 from gnuradio import eng_notation
-from configparse import OptionParser
+from .configparse import OptionParser
 
 from gnuradio import blocks
-from uhd_interface import uhd_transmitter
+from .uhd_interface import uhd_transmitter
 
-from transmit_path import transmit_path
-from fbmc_transmit_path import transmit_path as fbmc_transmit_path
+from .transmit_path import transmit_path
+from .fbmc_transmit_path import transmit_path as fbmc_transmit_path
 
 import os
 
-import channel
+from . import channel
 
 class tx_top_block(gr.top_block):
     def __init__(self, options):
@@ -40,7 +40,7 @@ class tx_top_block(gr.top_block):
 
         if(options.to_file is not None):
             self.file = blocks.file_sink(gr.sizeof_gr_complex, options.to_file)
-            self.sink = blocks.throttle(gr.sizeof_gr_complex,1e6)
+            self.sink = blocks.throttle(gr.sizeof_gr_complex, 1e6)
             self.connect( self.sink, self.file )
         elif(options.tx_freq is not None):
             self.sink = uhd_transmitter(options.args,
@@ -60,14 +60,14 @@ class tx_top_block(gr.top_block):
             freq_off = self.freq_off = channel.freq_offset(options.freqoff )
             self.connect(self.txpath, freq_off)
             self.txpath = freq_off
-            self.rpc_mgr_tx.add_interface("set_freq_offset",self.freq_off.set_freqoff)
+            self.rpc_mgr_tx.add_interface("set_freq_offset", self.freq_off.set_freqoff)
 
         if options.multipath:
           if options.itu_channel:
             self.fad_chan = channel.itpp_channel(options.bandwidth)
-            self.rpc_mgr_tx.add_interface("set_channel_profile",self.fad_chan.set_channel_profile)
+            self.rpc_mgr_tx.add_interface("set_channel_profile", self.fad_chan.set_channel_profile)
           else:
-            self.fad_chan = filter.fir_filter_ccc(1,[1.0,0.0,2e-1+0.1j,1e-4-0.04j])
+            self.fad_chan = filter.fir_filter_ccc(1, [1.0, 0.0, 2e-1+0.1j, 1e-4-0.04j])
 
           self.connect(self.txpath, self.fad_chan)
           self.txpath = self.fad_chan
@@ -76,10 +76,10 @@ class tx_top_block(gr.top_block):
         self.connect(self.txpath, self.sink)
 
 
-    def _setup_tx_path(self,options):
-        print "OPTIONS", options
+    def _setup_tx_path(self, options):
+        print("OPTIONS", options)
         if options.fbmc:
-            print "fbmc_transmit_path"
+            print("fbmc_transmit_path")
             self.txpath = fbmc_transmit_path(options)
         else:
             self.txpath = transmit_path(options)
@@ -94,25 +94,25 @@ class tx_top_block(gr.top_block):
         self.rpc_mgr_tx.start_watcher()
 
        ## Adding interfaces
-        self.rpc_mgr_tx.add_interface("set_amplitude",self.txpath.set_rms_amplitude)
-        self.rpc_mgr_tx.add_interface("get_tx_parameters",self.txpath.get_tx_parameters)
-        self.rpc_mgr_tx.add_interface("set_modulation",self.txpath.allocation_src.set_allocation) 
-        self.rpc_mgr_tx.add_interface("set_allocation_scheme",self.txpath.allocation_src.set_allocation_scheme)
-        self.rpc_mgr_tx.add_interface("set_data_rate",self.txpath.allocation_src.set_data_rate)
-        self.rpc_mgr_tx.add_interface("set_power_limit",self.txpath.allocation_src.set_power_limit)
-        self.rpc_mgr_tx.add_interface("set_gap",self.txpath.allocation_src.set_gap)
-        self.rpc_mgr_tx.add_interface("set_resource_block_size",self.txpath.allocation_src.set_resource_block_size)
-        self.rpc_mgr_tx.add_interface("set_resource_block_number",self.txpath.allocation_src.set_resource_block_number)
-        self.rpc_mgr_tx.add_interface("set_tx_gain",self.set_tx_gain)
-        self.rpc_mgr_tx.add_interface("set_amplitude_ideal",self.set_fake_amplitude)
+        self.rpc_mgr_tx.add_interface("set_amplitude", self.txpath.set_rms_amplitude)
+        self.rpc_mgr_tx.add_interface("get_tx_parameters", self.txpath.get_tx_parameters)
+        self.rpc_mgr_tx.add_interface("set_modulation", self.txpath.allocation_src.set_allocation) 
+        self.rpc_mgr_tx.add_interface("set_allocation_scheme", self.txpath.allocation_src.set_allocation_scheme)
+        self.rpc_mgr_tx.add_interface("set_data_rate", self.txpath.allocation_src.set_data_rate)
+        self.rpc_mgr_tx.add_interface("set_power_limit", self.txpath.allocation_src.set_power_limit)
+        self.rpc_mgr_tx.add_interface("set_gap", self.txpath.allocation_src.set_gap)
+        self.rpc_mgr_tx.add_interface("set_resource_block_size", self.txpath.allocation_src.set_resource_block_size)
+        self.rpc_mgr_tx.add_interface("set_resource_block_number", self.txpath.allocation_src.set_resource_block_number)
+        self.rpc_mgr_tx.add_interface("set_tx_gain", self.set_tx_gain)
+        self.rpc_mgr_tx.add_interface("set_amplitude_ideal", self.set_fake_amplitude)
     
     def set_fake_amplitude(self, amplitude):
-        print
+        print()
 
     def add_options(parser):
         parser.add_option("-c", "--cfg", action="store", type="string", default=None,
                           help="Specifiy configuration file, default: none")
-        parser.add_option("","--to-file", default=None,
+        parser.add_option("", "--to-file", default=None,
                           help="Output file for modulated samples")
         parser.add_option("", "--multipath", action="store_true", default=False,
                           help="Enable multipath channel")
@@ -135,8 +135,8 @@ def main():
     uhd_transmitter.add_options(parser)
     (options, args) = parser.parse_args()
     if options.cfg is not None:
-        (options,args) = parser.parse_args(files=[options.cfg])
-        print "Using configuration file %s" % ( options.cfg )
+        (options, args) = parser.parse_args(files=[options.cfg])
+        print("Using configuration file %s" % ( options.cfg ))
 
     tb = tx_top_block(options)
 
@@ -144,7 +144,7 @@ def main():
         # write a dot graph of the flowgraph to file
         dot_str = tb.dot_graph()
         file_str = os.path.expanduser('tx_ofdm.dot')
-        dot_file = open(file_str,'w')
+        dot_file = open(file_str, 'w')
         dot_file.write(dot_str)
         dot_file.close()
 

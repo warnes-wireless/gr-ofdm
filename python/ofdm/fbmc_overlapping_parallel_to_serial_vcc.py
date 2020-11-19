@@ -41,7 +41,7 @@ class fbmc_overlapping_parallel_to_serial_vcc(gr.hier_block2):
         self.M = M
 
         # Assertions
-        assert (M>0 and int(math.log(M,2))==math.log(M,2)), "M should be of 2^n!"
+        assert (M>0 and int(math.log(M, 2))==math.log(M, 2)), "M should be of 2^n!"
 
         # Blocks
         self.vector_to_stream0 = blocks.vector_to_stream(gr.sizeof_gr_complex*M/2, 2)
@@ -50,12 +50,12 @@ class fbmc_overlapping_parallel_to_serial_vcc(gr.hier_block2):
         self.adder = blocks.add_vcc(M/2)
 
         # Connections
-        self.connect((self,0),self.vector_to_stream0)
-        self.connect((self,1),self.vector_to_stream1)
-        self.connect(self.vector_to_stream0, (self.adder,0))
+        self.connect((self, 0), self.vector_to_stream0)
+        self.connect((self, 1), self.vector_to_stream1)
+        self.connect(self.vector_to_stream0, (self.adder, 0))
         self.connect(self.vector_to_stream1, self.delay)
-        self.connect(self.delay, (self.adder,1))
-        self.connect((self.adder,0), blocks.vector_to_stream(gr.sizeof_gr_complex, M/2),(self,0))
+        self.connect(self.delay, (self.adder, 1))
+        self.connect((self.adder, 0), blocks.vector_to_stream(gr.sizeof_gr_complex, M/2), (self, 0))
 
     def get_M(self):
         return self.M

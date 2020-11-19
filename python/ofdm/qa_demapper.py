@@ -22,7 +22,7 @@
 
 from gnuradio import gr, gr_unittest, blocks
 import ofdm as ofdm
-from random import seed,randint
+from random import seed, randint
 from numpy import concatenate
 import numpy
 
@@ -37,17 +37,17 @@ class qa_demapper (gr_unittest.TestCase):
     self.fg = None
 
   def std_test (self, vlen, data, bitmap, trig):
-    dut = ofdm.generic_demapper_vcb(vlen,1000000)
+    dut = ofdm.generic_demapper_vcb(vlen, 1000000)
     
-    sym_src = blocks.vector_source_c(data,False, vlen)
-    bmap_src = blocks.vector_source_b(bitmap,False, vlen)
+    sym_src = blocks.vector_source_c(data, False, vlen)
+    bmap_src = blocks.vector_source_b(bitmap, False, vlen)
     #trig_src = gr.vector_source_b(trig,False)
     dst = blocks.vector_sink_b()
     
-    self.fg.connect(sym_src,(dut,0))
-    self.fg.connect(bmap_src,(dut,1))
+    self.fg.connect(sym_src, (dut, 0))
+    self.fg.connect(bmap_src, (dut, 1))
     #self.fg.connect(trig_src,(dut,2))
-    self.fg.connect(dut,dst)
+    self.fg.connect(dut, dst)
     
     self.fg.run()
     
@@ -63,15 +63,15 @@ class qa_demapper (gr_unittest.TestCase):
     trig = [0]*blks
     trig[0] = 1
     
-    bitdata = [randint(0,1) for i in range(blks*vlen)]
+    bitdata = [randint(0, 1) for i in range(blks*vlen)]
     data = numpy.array(bitdata)*(-2)+1
     
     d = self.std_test(vlen, data.tolist(), bitmap, trig)
     
     if d != list(bitdata[vlen:]):
-      self.assert_(False)
+      self.assertTrue(False)
     else:
-      self.assert_(True)
+      self.assertTrue(True)
 
   # new bitmap for each data block
   def test_002(self):
@@ -82,15 +82,15 @@ class qa_demapper (gr_unittest.TestCase):
        
     trig = [1]*blks
        
-    bitdata = [randint(0,1) for i in range(blks*vlen)]
+    bitdata = [randint(0, 1) for i in range(blks*vlen)]
     data = numpy.array(bitdata)*(-2)+1
        
     d = self.std_test(vlen, data.tolist(), bitmap, trig)
        
     if d != list(bitdata[vlen:]):
-      self.assert_(False)
+      self.assertTrue(False)
     else:
-      self.assert_(True) 
+      self.assertTrue(True) 
    
    # two identical bitmaps, first 3 blocks, second 2 blocks
   def test_003(self):
@@ -103,15 +103,15 @@ class qa_demapper (gr_unittest.TestCase):
       trig[0] = 1
       trig[3] = 1
          
-      bitdata = [randint(0,1) for i in range(blks*vlen)]
+      bitdata = [randint(0, 1) for i in range(blks*vlen)]
       data = numpy.array(bitdata)*(-2)+1
          
       d = self.std_test(vlen, data.tolist(), bitmap, trig)
          
       if d != list(bitdata[vlen:]):
-        self.assert_(False)
+        self.assertTrue(False)
       else:
-        self.assert_(True)
+        self.assertTrue(True)
        
     # two different bitmaps, first 3 blocks, second 2 blocks  
 #   def test_005(self):

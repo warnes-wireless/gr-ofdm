@@ -23,13 +23,13 @@
 from gnuradio import gr, gr_unittest, eng_notation
 import ofdm as ofdm
 import numpy
-from preambles import morellimengali_designer, schmidl_ifo_designer
+from .preambles import morellimengali_designer, schmidl_ifo_designer
 from random import randint
 from numpy import sqrt, concatenate
 from numpy.random import randint, seed, random_integers
-from gr_tools import log_to_file
+from .gr_tools import log_to_file
 
-from schmidl import recursive_timing_metric
+from .schmidl import recursive_timing_metric
 
 import os
 
@@ -47,7 +47,7 @@ class autocorrelator ( gr.hier_block2 ):
     s2 = ofdm.autocorrelator_stage2( n_samples )
     
     self.connect( self, s1, s2, self )
-    self.connect( (s1,1), (s2,1) )
+    self.connect( (s1, 1), (s2, 1) )
     
     self.s2 = s2
 
@@ -73,7 +73,7 @@ class qa_autocorrelator(gr_unittest.TestCase):
     
     profiling = False
 
-    pre0,fd = morellimengali_designer.create( subc, vlen, L )
+    pre0, fd = morellimengali_designer.create( subc, vlen, L )
 
     
     ofdm_frames = \
@@ -125,7 +125,7 @@ class qa_autocorrelator(gr_unittest.TestCase):
     
     if not profiling:
       e = numpy.array( err_sink.data() )[0]
-      print "Err: %.7f" % ( e )
+      print("Err: %.7f" % ( e ))
 
   def test_002(self):
     vlen = 256
@@ -141,7 +141,7 @@ class qa_autocorrelator(gr_unittest.TestCase):
     
     # GI metric
 
-    pre0,fd = morellimengali_designer.create( subc, vlen, L )
+    pre0, fd = morellimengali_designer.create( subc, vlen, L )
 
     
     ofdm_frames = \
@@ -160,7 +160,7 @@ class qa_autocorrelator(gr_unittest.TestCase):
     
     r = time_it( self.tb )
     
-    print "Expected throughput:  %s Samples/s" % ( eng_notation.num_to_str( float(N) / r ) )
+    print("Expected throughput:  %s Samples/s" % ( eng_notation.num_to_str( float(N) / r ) ))
 
 
   def test_100(self):
@@ -181,7 +181,7 @@ class qa_autocorrelator(gr_unittest.TestCase):
     
     N = int( 1e9 )
 
-    pre0,fd = morellimengali_designer.create( subc, vlen, L )
+    pre0, fd = morellimengali_designer.create( subc, vlen, L )
 
     
     ofdm_frames = \
@@ -207,8 +207,8 @@ class qa_autocorrelator(gr_unittest.TestCase):
 
     r = time_it( self.tb )
     
-    print "SC rate: %s Samples/second" \
-      % ( eng_notation.num_to_str( float(N) / r ) )
+    print("SC rate: %s Samples/second" \
+      % ( eng_notation.num_to_str( float(N) / r ) ))
       
 
   def test_101(self):
@@ -229,7 +229,7 @@ class qa_autocorrelator(gr_unittest.TestCase):
     
     N = int( 1e9 )
 
-    pre0,fd = morellimengali_designer.create( subc, vlen, L )
+    pre0, fd = morellimengali_designer.create( subc, vlen, L )
 
     
     ofdm_frames = \
@@ -255,8 +255,8 @@ class qa_autocorrelator(gr_unittest.TestCase):
 
     r = time_it( self.tb )
     
-    print "GI rate: %s Samples/second" \
-      % ( eng_notation.num_to_str( float(N) / r ) )
+    print("GI rate: %s Samples/second" \
+      % ( eng_notation.num_to_str( float(N) / r ) ))
        
       
 class ofdm_frame_src ( gr.hier_block2 ):
@@ -264,13 +264,13 @@ class ofdm_frame_src ( gr.hier_block2 ):
                 framelength, bits_per_subc ):
     gr.hier_block2.__init__( self,
         "ofdm_frame_src",
-        gr.io_signature(0,0,0),
+        gr.io_signature(0, 0, 0),
         gr.io_signature( 1, 1, gr.sizeof_gr_complex ) )
     
     
     data_block_src_i = data_block_src( bits_per_subc, vlen, data_blocks ) 
     
-    mux_ctrl = concatenate([[0],[1]*(framelength-1)])
+    mux_ctrl = concatenate([[0], [1]*(framelength-1)])
     
     preamble_src = gr.vector_source_c( preamble_block, True, vlen )
     self.preamble_src = preamble_src
@@ -301,7 +301,7 @@ class data_block_src ( gr.hier_block2 ):
   def __init__( self, bits_per_subc, vlen, nblocks = 1 ):
     gr.hier_block2.__init__( self,
           "data_block_src",
-          gr.io_signature(0,0,0),
+          gr.io_signature(0, 0, 0),
           gr.io_signature( 1, 1, gr.sizeof_gr_complex * vlen ) )
     
     demapper = ofdm.generic_demapper_vcb(1)
@@ -369,13 +369,13 @@ def time_it(tb):
     start = os.times()
     tb.run()
     stop = os.times()
-    delta = map((lambda a, b: a-b), stop, start)
+    delta = list(map((lambda a, b: a-b), stop, start))
     user, sys, childrens_user, childrens_sys, real = delta
     total_user = user + childrens_user
     total_sys  = sys + childrens_sys
-    print "real             %7.3f" % (real,)
-    print "user             %7.3f" % (total_user,)
-    print "sys              %7.3f" % (total_sys,)
+    print("real             %7.3f" % (real,))
+    print("user             %7.3f" % (total_user,))
+    print("sys              %7.3f" % (total_sys,))
 #    print "(user+sys)/real  %7.3f" % ((total_user + total_sys)/real,)
     
     return real

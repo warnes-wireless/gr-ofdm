@@ -43,24 +43,24 @@ class qa_snr_estimator_dc_null (gr_unittest.TestCase):
         # all the power is allocated to the pilots
         src_data = [0.1]*(skip/2) + [skip] + [0.1]*(skip/2-1)
         src_data = src_data * (vlen/skip)
-        src = blocks.vector_source_c(src_data,False,vlen)
-        snr_estim = ofdm.snr_estimator_dc_null(vlen,skip,dc_null)
+        src = blocks.vector_source_c(src_data, False, vlen)
+        snr_estim = ofdm.snr_estimator_dc_null(vlen, skip, dc_null)
         dst = blocks.vector_sink_f()
         dst_noise = blocks.vector_sink_f()
 
         # construct the flowgraph
-        self.tb.connect(src,snr_estim)
-        self.tb.connect((snr_estim,0),dst)
-        self.tb.connect((snr_estim,1),dst_noise)
+        self.tb.connect(src, snr_estim)
+        self.tb.connect((snr_estim, 0), dst)
+        self.tb.connect((snr_estim, 1), dst_noise)
 
         # set up fg
         self.tb.run ()
-        print "snr", dst.data()
-        print "noise", dst_noise.data()
+        print("snr", dst.data())
+        print("noise", dst_noise.data())
 
         # Compare with reference data from above
-        self.assertFloatTuplesAlmostEqual(dst.data(),expected_snr)
-        self.assertFloatTuplesAlmostEqual(dst_noise.data(),expected_noise)
+        self.assertFloatTuplesAlmostEqual(dst.data(), expected_snr)
+        self.assertFloatTuplesAlmostEqual(dst_noise.data(), expected_noise)
 
     def test_002_t (self):
         vlen=16
@@ -74,24 +74,24 @@ class qa_snr_estimator_dc_null (gr_unittest.TestCase):
         src_data = src_data * (vlen/skip)
         src_data = [0]*(dc_null/2) + src_data[:(vlen/2-dc_null/2)]  + src_data[(vlen/2+dc_null/2):] + [0]*(dc_null/2)
         src_data = src_data * (ofdm_sym)
-        src = blocks.vector_source_c(src_data,False,vlen)
-        snr_estim = ofdm.snr_estimator_dc_null(vlen,skip,dc_null)
+        src = blocks.vector_source_c(src_data, False, vlen)
+        snr_estim = ofdm.snr_estimator_dc_null(vlen, skip, dc_null)
         dst = blocks.vector_sink_f()
         dst_noise = blocks.vector_sink_f()
 
         # construct the flowgraph
-        self.tb.connect(src,snr_estim)
-        self.tb.connect((snr_estim,0),dst)
-        self.tb.connect((snr_estim,1),dst_noise)
+        self.tb.connect(src, snr_estim)
+        self.tb.connect((snr_estim, 0), dst)
+        self.tb.connect((snr_estim, 1), dst_noise)
 
         # set up fg
         self.tb.run ()
-        print "snr", dst.data()
-        print "noise", dst_noise.data()
+        print("snr", dst.data())
+        print("noise", dst_noise.data())
 
         # Compare with reference data from above
-        self.assertFloatTuplesAlmostEqual(dst.data(),expected_snr)
-        self.assertFloatTuplesAlmostEqual(dst_noise.data(),expected_noise)
+        self.assertFloatTuplesAlmostEqual(dst.data(), expected_snr)
+        self.assertFloatTuplesAlmostEqual(dst_noise.data(), expected_noise)
 
 
 if __name__ == '__main__':

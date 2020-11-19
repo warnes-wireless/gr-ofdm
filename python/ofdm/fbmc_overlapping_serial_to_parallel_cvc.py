@@ -23,7 +23,7 @@ from gnuradio import gr
 from gnuradio import blocks
 from gnuradio.filter import firdes
 
-from fbmc_vector_reshape_vcvc import fbmc_vector_reshape_vcvc
+from .fbmc_vector_reshape_vcvc import fbmc_vector_reshape_vcvc
 import ofdm_swig as ofdm
 
 class fbmc_overlapping_serial_to_parallel_cvc(gr.hier_block2):
@@ -80,7 +80,7 @@ class fbmc_overlapping_serial_to_parallel_cvc(gr.hier_block2):
 #         # self.connect((self, 0), (self.blocks_stream_to_vector_0, 0))
 #         self.connect((self.blocks_stream_to_vector_0_0, 0), (self, 0))
         
-        self.connect((self.fbmc_vector_copy_vcvc_0, 0),(self.blocks_skiphead_0, 0))
+        self.connect((self.fbmc_vector_copy_vcvc_0, 0), (self.blocks_skiphead_0, 0))
         self.connect((self.blocks_skiphead_0, 0), (self.blocks_stream_to_vector_0_0, 0))
         # self.connect((self, 0), (self.blocks_stream_to_vector_0, 0))
         self.connect((self.blocks_stream_to_vector_0_0, 0), (self, 0))

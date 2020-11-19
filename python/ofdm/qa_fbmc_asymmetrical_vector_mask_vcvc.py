@@ -45,23 +45,23 @@ class qa_fbmc_asymmetrical_vector_mask_vcvc (gr_unittest.TestCase):
         for i in range(M*num):
         	data = int(random.random()*10)+1
         	src_data.append(data)
-        	if i%M in range(start,end+1):
+        	if i%M in range(start, end+1):
         		expected_result.append(data)
 
-        src = blocks.vector_source_c(src_data,vlen=M)
-        avm = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M,start,end)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        avm = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M, start, end)
         dst = blocks.vector_sink_c(vlen=(end-start+1))
 
-        self.tb.connect(src,avm,dst)
+        self.tb.connect(src, avm, dst)
 
 
         self.tb.run ()
         # check data
 
         result_data = dst.data()
-        print(len(expected_result))
-        print(len(result_data))
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data),5)
+        print((len(expected_result)))
+        print((len(result_data)))
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data), 5)
 
 
 if __name__ == '__main__':

@@ -20,11 +20,11 @@
 # Boston, MA 02110-1301, USA.
 #
 
-from numpy import concatenate,mean,var,arange,sqrt, log10, ceil, logspace
+from numpy import concatenate, mean, var, arange, sqrt, log10, ceil, logspace
 import numpy
 import array
 
-from resource_manager_base import resource_manager_base,start_resource_manager
+from .resource_manager_base import resource_manager_base, start_resource_manager
 
 from time import time, strftime, gmtime
 
@@ -35,8 +35,8 @@ import sys
 import os
 
 class resource_manager (resource_manager_base):
-  def __init__(self,orb,options):
-    resource_manager_base.__init__(self,orb,options=options,loggerbase="mber.")
+  def __init__(self, orb, options):
+    resource_manager_base.__init__(self, orb, options=options, loggerbase="mber.")
 
     self.localenv = options.le
     self.snr = options.snr
@@ -67,7 +67,7 @@ class resource_manager (resource_manager_base):
     self.nbits = [options.init_mod]
   
         
-    available_modulations = ["BPSK", "QPSK", "8-PSK","16-QAM","32-QAM", "64-QAM","128-QAM", "256-QAM"]
+    available_modulations = ["BPSK", "QPSK", "8-PSK", "16-QAM", "32-QAM", "64-QAM", "128-QAM", "256-QAM"]
     self.modulations = available_modulations[ self.init_mod-1]
     self.state = 0
     self.curmod = 0
@@ -127,8 +127,8 @@ class resource_manager (resource_manager_base):
       #self.mod_map = [ self.init_mod]*self.subcarriers
       #self.assignment_map = [1]*self.subcarriers
 
-      nl = range(self.subcarriers/4)
-      nr = range(3*self.subcarriers/4,self.subcarriers)
+      nl = list(range(self.subcarriers/4))
+      nr = list(range(3*self.subcarriers/4, self.subcarriers))
       self.null_indeces = nl + nr
       self.pa_vector = [2]*self.subcarriers
       self.mod_map = [self.nbits[self.curmod]]*self.subcarriers
@@ -164,7 +164,7 @@ class resource_manager (resource_manager_base):
 
         rxid_stable = 0
         last_rxid = int(self.buffer[len(self.buffer)-1].rx_id)
-        for i in arange(len(self.buffer)-1,-1,-1):
+        for i in arange(len(self.buffer)-1, -1, -1):
           if int(self.buffer[i].rx_id) == last_rxid:
             rxid_stable += 1
           else:
@@ -179,8 +179,8 @@ class resource_manager (resource_manager_base):
         else:
           self.state = 0
           for x in self.buffer:
-            print x.rx_id," ",
-          print ""
+            print(x.rx_id, " ", end=' ')
+          print("")
 
     elif self.state == 2:
 
@@ -190,8 +190,8 @@ class resource_manager (resource_manager_base):
       self.logger.info( "Next mod %d" %(self.nbits[self.curmod]))
       self.logger.info( "Next modulation " + self.modulations)
 
-      nl = range(self.subcarriers/4)
-      nr = range(3*self.subcarriers/4,self.subcarriers)
+      nl = list(range(self.subcarriers/4))
+      nr = list(range(3*self.subcarriers/4, self.subcarriers))
       self.null_indeces = nl + nr
       self.pa_vector = [2]*self.subcarriers
       self.mod_map = [self.nbits[self.curmod]]*self.subcarriers
@@ -250,11 +250,11 @@ class resource_manager (resource_manager_base):
 
         ber_mean = mean(bervec)
         snr_mean = mean(snrvec)
-        ctf_mean = mean(ctfmat,axis=0)
+        ctf_mean = mean(ctfmat, axis=0)
 
         ber_var = var(bervec)
         snr_var = var(snrvec)
-        ctf_var = var(ctfmat,axis=0)
+        ctf_var = var(ctfmat, axis=0)
 
         berout = array.array('f')
         snrout = array.array('f')
@@ -287,8 +287,8 @@ class resource_manager (resource_manager_base):
         self.f_nfo.write( "Mod: " + str(self.modulations) + "\n")
         #f_nfo.write( "Power: %f\n" %(self.txpow_range[self.curtxpowind]))
         #f_nfo.write( "expected rx id: %d\n" %(self.expected_rx_id))
-        self.f_nfo.write( "Mean SNR %.8g   Var SNR %.8g\n" %(snr_mean,snr_var))
-        self.f_nfo.write( "Mean BER %.8g   Var BER %.8g\n\n" %(ber_mean,ber_var))
+        self.f_nfo.write( "Mean SNR %.8g   Var SNR %.8g\n" %(snr_mean, snr_var))
+        self.f_nfo.write( "Mean BER %.8g   Var BER %.8g\n\n" %(ber_mean, ber_var))
 
 	#self.f_nfo.write( "Mean CTF: ")
         #print>> self.f_nfo,ctf_mean.tolist()
@@ -301,8 +301,8 @@ class resource_manager (resource_manager_base):
         #self.f_nfo.write( "\n")
 
 
-        self.logger.info("Mean SNR %.8g   Var SNR %.8g" %(snr_mean,snr_var))
-        self.logger.info("Mean BER %.8g   Var BER %.8g" %(ber_mean,ber_var))
+        self.logger.info("Mean SNR %.8g   Var SNR %.8g" %(snr_mean, snr_var))
+        self.logger.info("Mean BER %.8g   Var BER %.8g" %(ber_mean, ber_var))
 
         #self.logger.info("Mean CTF "+ctf_mean.tostring())
         #self.logger.info( "Strong CTF "+max_vec.tostring())
@@ -327,15 +327,15 @@ class resource_manager (resource_manager_base):
       if self.curmod >= len(self.nbits):
         #self.curmod = 0
         #sys.exit("Simulation finished")
-        print "Simulation for SNR = %f dB finished" %(self.snr)
-        print "Press <STRG> C to stop the resource manager"
+        print("Simulation for SNR = %f dB finished" %(self.snr))
+        print("Press <STRG> C to stop the resource manager")
         quit()
         #self.curtxpowind += 1
         #if self.curtxpowind >= len(self.txpow_range):
           #self.curtxpowind = 0
 
       ##self.logger.info( "Next mod %d" %(self.nbits[self.curmod]))
-      print "Next modulation ", self.modulations
+      print("Next modulation ", self.modulations)
 
       self.expected_rx_id += 1
       self.state = 3
@@ -376,10 +376,10 @@ class resource_manager (resource_manager_base):
                       action="store_true",
                       default=False,
                       help="USRP2")
-    expert.add_option("","--init-mod",type="intx",
-                      default=2,help="Set init modulation")
+    expert.add_option("", "--init-mod", type="intx",
+                      default=2, help="Set init modulation")
 
-    resource_manager_base.add_options(normal,expert)
+    resource_manager_base.add_options(normal, expert)
   add_options = staticmethod(add_options)
 
 
@@ -390,7 +390,7 @@ def main():
   parser = OptionParser(option_class=eng_option, conflict_handler="resolve")
   normal_grp = parser.add_option_group("Normal")
   expert_grp = parser.add_option_group("Expert")
-  resource_manager.add_options(normal_grp,expert_grp)
+  resource_manager.add_options(normal_grp, expert_grp)
   (options, args) = parser.parse_args()
 
   logger = logging.getLogger("mber")
@@ -415,7 +415,7 @@ def main():
   #logger.info("Log filename is %s" %(logfilename))
 
 
-  start_resource_manager(resource_manager, "PA",options)
+  start_resource_manager(resource_manager, "PA", options)
 
 if __name__ == '__main__':
   try:

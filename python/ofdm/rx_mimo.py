@@ -23,15 +23,15 @@
 from gnuradio import gr
 from gnuradio import eng_notation
 from gnuradio import zeromq
-from configparse import OptionParser
+from .configparse import OptionParser
 
 from gnuradio import blocks
-from uhd_interface import uhd_receiver
-from uhd_interface import uhd_mimo_receiver
+from .uhd_interface import uhd_receiver
+from .uhd_interface import uhd_mimo_receiver
 
-from receive_path import receive_path as receive_path
-from receive_path12 import receive_path as receive_path_12
-from gr_tools import log_to_file
+from .receive_path import receive_path as receive_path
+from .receive_path12 import receive_path as receive_path_12
+from .gr_tools import log_to_file
 
 import os
 
@@ -46,7 +46,7 @@ class rx_top_block(gr.top_block):
                                        options.bandwidth, options.rx_freq,
                                        options.lo_offset, options.rx_gain,
                                        options.spec, options.antenna,
-                                       options.clock_source, options.time_source,options.verbose)
+                                       options.clock_source, options.time_source, options.verbose)
             else:
                 self.source = uhd_mimo_receiver(options.args,
                                        options.bandwidth, options.rx_freq,
@@ -60,15 +60,15 @@ class rx_top_block(gr.top_block):
         if (options.rx_ant == 1):
             self._setup_rx_path(options)
             self._setup_rpc_manager()
-            self.dst    = (self.rxpath,0)
-            self.connect((self.source,0), self.dst)
+            self.dst    = (self.rxpath, 0)
+            self.connect((self.source, 0), self.dst)
         else:
             self._setup_rx_path(options)
             self._setup_rpc_manager()
-            self.dst    = (self.rxpath,0)
-            self.dst2     = (self.rxpath,1)
-            self.connect((self.source,0), self.dst)
-            self.connect((self.source,1), self.dst2)
+            self.dst    = (self.rxpath, 0)
+            self.dst2     = (self.rxpath, 1)
+            self.connect((self.source, 0), self.dst)
+            self.connect((self.source, 1), self.dst2)
 
     def set_rx_gain(self, gain):
         return self.source.set_gain(gain)
@@ -80,24 +80,24 @@ class rx_top_block(gr.top_block):
       self.rpc_mgr_rx.start_watcher()
 
       ## Adding interfaces
-      self.rpc_mgr_rx.add_interface("set_scatter_subcarrier",self.rxpath.set_scatterplot_subc)
-      self.rpc_mgr_rx.add_interface("set_rx_gain",self.set_rx_gain)
+      self.rpc_mgr_rx.add_interface("set_scatter_subcarrier", self.rxpath.set_scatterplot_subc)
+      self.rpc_mgr_rx.add_interface("set_rx_gain", self.set_rx_gain)
 
 
-    def _setup_rx_path(self,options):
+    def _setup_rx_path(self, options):
         if options.tx_ant == 1:
             if options.rx_ant == 1:
                 self.rxpath = receive_path(options)
                 #self._setup_rpc_manager()
                 #self.connect(self.source, self.rxpath)
             else:
-                print "Two Rx antennas"
+                print("Two Rx antennas")
                 self.rxpath = receive_path_12(options)
 
     def add_options(parser):
         parser.add_option("-c", "--cfg", action="store", type="string", default=None,
                           help="Specifiy configuration file, default: none")
-        parser.add_option("","--from-file", default=None,
+        parser.add_option("", "--from-file", default=None,
                           help="input file of samples to demod")
         parser.add_option("", "--tx-ant", type="int", default=1,
                       help="the number of transmit antennas")
@@ -115,8 +115,8 @@ def main():
     uhd_receiver.add_options(parser)
     (options, args) = parser.parse_args()
     if options.cfg is not None:
-        (options,args) = parser.parse_args(files=[options.cfg])
-        print "Using configuration file %s" % ( options.cfg )
+        (options, args) = parser.parse_args(files=[options.cfg])
+        print("Using configuration file %s" % ( options.cfg ))
 
     tb = rx_top_block(options)
 
@@ -124,7 +124,7 @@ def main():
         # write a dot graph of the flowgraph to file
         dot_str = tb.dot_graph()
         file_str = os.path.expanduser('rx_ofdm.dot')
-        dot_file = open(file_str,'w')
+        dot_file = open(file_str, 'w')
         dot_file.write(dot_str)
         dot_file.close()
 

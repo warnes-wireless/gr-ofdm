@@ -24,8 +24,8 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 
 import ofdm_swig as ofdm
-from fbmc_insert_preamble_mu_vcvc import fbmc_insert_preamble_mu_vcvc
-from fbmc_remove_preamble_vcvc import fbmc_remove_preamble_vcvc
+from .fbmc_insert_preamble_mu_vcvc import fbmc_insert_preamble_mu_vcvc
+from .fbmc_remove_preamble_vcvc import fbmc_remove_preamble_vcvc
 
 import random
 import math
@@ -43,8 +43,8 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
         # set up fg
         M = 16
         syms_per_frame = 20
-        num_frame = int(math.pow(2,10))
-        indices = [3,6,10,14] # num_users = 2
+        num_frame = int(math.pow(2, 10))
+        indices = [3, 6, 10, 14] # num_users = 2
         sel_preamble = 1 # triple repetition preamble
         zero_pads = 4
         extra_pad = 1
@@ -59,14 +59,14 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
 
         # prepare preamble
         if sel_preamble == 0: # standard one vector center preamble [1,-j,-1,j]
-            center_preamble = [0, 0, 0, 1j,1, -1j, -1, 0,0, 0, -1, 1j,1, -1j, -1, 0]
+            center_preamble = [0, 0, 0, 1j, 1, -1j, -1, 0, 0, 0, -1, 1j, 1, -1j, -1, 0]
         elif sel_preamble == 1: # standard preamble with triple repetition
-            tmp = [0, 0, 0, 1j,1, -1j, -1, 0,0, 0, -1, 1j,1, -1j, -1, 0]
+            tmp = [0, 0, 0, 1j, 1, -1j, -1, 0, 0, 0, -1, 1j, 1, -1j, -1, 0]
             center_preamble = tmp*3 #[1/math.sqrt(3), -1j/math.sqrt(3), -1/math.sqrt(3), 1j/math.sqrt(3)]*((int)(M/4))*3
         elif sel_preamble ==2: # IAM-R preamble [1, -1,-1, 1]
-            center_preamble = [0, 0, 0, 1, 1, -1, -1, 0, 0, 0, -1, 1,1, -1, -1, 0]
+            center_preamble = [0, 0, 0, 1, 1, -1, -1, 0, 0, 0, -1, 1, 1, -1, -1, 0]
         else: # standard one vector center preamble [1,-j,-1,j]
-            center_preamble = [0, 0, 0, 1j,1, -1j, -1, 0,0, 0, -1, 1j,1, -1j, -1, 0]
+            center_preamble = [0, 0, 0, 1j, 1, -1j, -1, 0, 0, 0, -1, 1j, 1, -1j, -1, 0]
 
         preamble.extend([0]*zero_pads*M)
         preamble.extend(center_preamble)
@@ -102,23 +102,23 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
         # print str(len(src_data)-len(preamble)*num_frame)
 
 
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_mu_vcvc(M=M,syms_per_frame=syms_per_frame,indices=indices,sel_preamble=sel_preamble,zero_pads=zero_pads,extra_pad=extra_pad,sel_eq=sel_eq)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_mu_vcvc(M=M, syms_per_frame=syms_per_frame, indices=indices, sel_preamble=sel_preamble, zero_pads=zero_pads, extra_pad=extra_pad, sel_eq=sel_eq)
         rem = fbmc_remove_preamble_vcvc(M, syms_per_frame, sel_preamble, zero_pads, extra_pad)
-        avm1 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M,3,6)
-        avm2 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M,10,14)
+        avm1 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M, 3, 6)
+        avm2 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M, 10, 14)
         dst1 = blocks.vector_sink_c(vlen=4)
         dst2 = blocks.vector_sink_c(vlen=5)
         dst99 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),(rem,0))
-        self.tb.connect((rem,0),avm1)
-        self.tb.connect((rem,0),avm2)
-        self.tb.connect((avm1,0),dst1)
-        self.tb.connect((avm2,0),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), (rem, 0))
+        self.tb.connect((rem, 0), avm1)
+        self.tb.connect((rem, 0), avm2)
+        self.tb.connect((avm1, 0), dst1)
+        self.tb.connect((avm2, 0), dst2)
 
         # estimation probe is connected to dst99
-        self.tb.connect((scp,1),dst99)
+        self.tb.connect((scp, 1), dst99)
         self.tb.run ()
         # check data
         result_data1 = dst1.data()
@@ -136,15 +136,15 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
         # for i in range(len(result_data2)):
         #     print str(i)+"\t"+str(result_data2[i])
         # print result_data
-        self.assertComplexTuplesAlmostEqual(expected_result1,result_data1,6)
-        self.assertComplexTuplesAlmostEqual(expected_result2,result_data2,6)
+        self.assertComplexTuplesAlmostEqual(expected_result1, result_data1, 6)
+        self.assertComplexTuplesAlmostEqual(expected_result2, result_data2, 6)
 
     def test_002_t(self):
         # set up fg
         M = 16
         syms_per_frame = 20
-        num_frame = int(math.pow(2,10))
-        indices = [3,6,10,14] # num_users = 2
+        num_frame = int(math.pow(2, 10))
+        indices = [3, 6, 10, 14] # num_users = 2
         sel_preamble = 0 # standard one-vector preamble
         zero_pads = 1
         extra_pad = 0
@@ -159,14 +159,14 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
 
         # prepare preamble
         if sel_preamble == 0: # standard one vector center preamble [1,-j,-1,j]
-            center_preamble = [0, 0, 0, 1j,1, -1j, -1, 0,0, 0, -1, 1j,1, -1j, -1, 0]
+            center_preamble = [0, 0, 0, 1j, 1, -1j, -1, 0, 0, 0, -1, 1j, 1, -1j, -1, 0]
         elif sel_preamble == 1: # standard preamble with triple repetition
-            tmp = [0, 0, 0, 1j,1, -1j, -1, 0,0, 0, -1, 1j,1, -1j, -1, 0]
+            tmp = [0, 0, 0, 1j, 1, -1j, -1, 0, 0, 0, -1, 1j, 1, -1j, -1, 0]
             center_preamble = tmp*3 #[1/math.sqrt(3), -1j/math.sqrt(3), -1/math.sqrt(3), 1j/math.sqrt(3)]*((int)(M/4))*3
         elif sel_preamble ==2: # IAM-R preamble [1, -1,-1, 1]
-            center_preamble = [0, 0, 0, 1, 1, -1, -1, 0, 0, 0, -1, 1,1, -1, -1, 0]
+            center_preamble = [0, 0, 0, 1, 1, -1, -1, 0, 0, 0, -1, 1, 1, -1, -1, 0]
         else: # standard one vector center preamble [1,-j,-1,j]
-            center_preamble = [0, 0, 0, 1j,1, -1j, -1, 0,0, 0, -1, 1j,1, -1j, -1, 0]
+            center_preamble = [0, 0, 0, 1j, 1, -1j, -1, 0, 0, 0, -1, 1j, 1, -1j, -1, 0]
 
         preamble.extend([0]*zero_pads*M)
         preamble.extend(center_preamble)
@@ -202,23 +202,23 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
         # # print str(len(src_data)-len(preamble)*num_frame)
 
 
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_mu_vcvc(M=M,syms_per_frame=syms_per_frame,indices=indices,sel_preamble=sel_preamble,zero_pads=zero_pads,extra_pad=extra_pad,sel_eq=sel_eq)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_mu_vcvc(M=M, syms_per_frame=syms_per_frame, indices=indices, sel_preamble=sel_preamble, zero_pads=zero_pads, extra_pad=extra_pad, sel_eq=sel_eq)
         rem = fbmc_remove_preamble_vcvc(M, syms_per_frame, sel_preamble, zero_pads, extra_pad)
-        avm1 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M,3,6)
-        avm2 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M,10,14)
+        avm1 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M, 3, 6)
+        avm2 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M, 10, 14)
         dst1 = blocks.vector_sink_c(vlen=4)
         dst2 = blocks.vector_sink_c(vlen=5)
         dst99 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),(rem,0))
-        self.tb.connect((rem,0),avm1)
-        self.tb.connect((rem,0),avm2)
-        self.tb.connect((avm1,0),dst1)
-        self.tb.connect((avm2,0),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), (rem, 0))
+        self.tb.connect((rem, 0), avm1)
+        self.tb.connect((rem, 0), avm2)
+        self.tb.connect((avm1, 0), dst1)
+        self.tb.connect((avm2, 0), dst2)
 
         # estimation probe is connected to dst99
-        self.tb.connect((scp,1),dst99)
+        self.tb.connect((scp, 1), dst99)
         self.tb.run ()
         # check data
         result_data1 = dst1.data()
@@ -236,15 +236,15 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
         # for i in range(len(result_data2)):
         #     print str(i)+"\t"+str(result_data2[i])
         # print result_data
-        self.assertComplexTuplesAlmostEqual(expected_result1,result_data1,6)
-        self.assertComplexTuplesAlmostEqual(expected_result2,result_data2,6)
+        self.assertComplexTuplesAlmostEqual(expected_result1, result_data1, 6)
+        self.assertComplexTuplesAlmostEqual(expected_result2, result_data2, 6)
 
     def test_003_t(self):
         # set up fg
         M = 16
         syms_per_frame = 20
-        num_frame = int(math.pow(2,10))
-        indices = [3,6,10,14] # num_users = 2
+        num_frame = int(math.pow(2, 10))
+        indices = [3, 6, 10, 14] # num_users = 2
         sel_preamble = 1
         zero_pads = 2
         extra_pad = 0
@@ -258,14 +258,14 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
 
         # prepare preamble
         if sel_preamble == 0: # standard one vector center preamble [1,-j,-1,j]
-            center_preamble = [0, 0, 0, 1j,1, -1j, -1, 0,0, 0, -1, 1j,1, -1j, -1, 0]
+            center_preamble = [0, 0, 0, 1j, 1, -1j, -1, 0, 0, 0, -1, 1j, 1, -1j, -1, 0]
         elif sel_preamble == 1: # standard preamble with triple repetition
-            tmp = [0, 0, 0, 1j,1, -1j, -1, 0,0, 0, -1, 1j,1, -1j, -1, 0]
+            tmp = [0, 0, 0, 1j, 1, -1j, -1, 0, 0, 0, -1, 1j, 1, -1j, -1, 0]
             center_preamble = tmp*3 #[1/math.sqrt(3), -1j/math.sqrt(3), -1/math.sqrt(3), 1j/math.sqrt(3)]*((int)(M/4))*3
         elif sel_preamble ==2: # IAM-R preamble [1, -1,-1, 1]
-            center_preamble = [0, 0, 0, 1, 1, -1, -1, 0, 0, 0, -1, 1,1, -1, -1, 0]
+            center_preamble = [0, 0, 0, 1, 1, -1, -1, 0, 0, 0, -1, 1, 1, -1, -1, 0]
         else: # standard one vector center preamble [1,-j,-1,j]
-            center_preamble = [0, 0, 0, 1j,1, -1j, -1, 0,0, 0, -1, 1j,1, -1j, -1, 0]
+            center_preamble = [0, 0, 0, 1j, 1, -1j, -1, 0, 0, 0, -1, 1j, 1, -1j, -1, 0]
 
         preamble.extend([0]*zero_pads*M)
         preamble.extend(center_preamble)
@@ -299,15 +299,15 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
         # # print str(len(src_data)-len(preamble)*num_frame)
 
 
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_mu_vcvc(M=M,syms_per_frame=syms_per_frame,indices=indices,sel_preamble=sel_preamble,zero_pads=zero_pads,extra_pad=extra_pad,sel_eq=sel_eq)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_mu_vcvc(M=M, syms_per_frame=syms_per_frame, indices=indices, sel_preamble=sel_preamble, zero_pads=zero_pads, extra_pad=extra_pad, sel_eq=sel_eq)
         rem = fbmc_remove_preamble_vcvc(M, syms_per_frame, sel_preamble, zero_pads, extra_pad)
         dst = blocks.vector_sink_c(vlen=M)
         dst2 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),(rem,0))
-        self.tb.connect((rem,0),dst)
-        self.tb.connect((scp,1),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), (rem, 0))
+        self.tb.connect((rem, 0), dst)
+        self.tb.connect((scp, 1), dst2)
         self.tb.run ()
         # check data
         result_data = dst.data()
@@ -319,14 +319,14 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
         # for i in range(len(result_data2)):
         #     print str(i)+"\t"+str(result_data2[i])
         # print result_data
-        self.assertComplexTuplesAlmostEqual(expected_result,result_data,6)
+        self.assertComplexTuplesAlmostEqual(expected_result, result_data, 6)
 
     def test_004_t(self):
         # set up fg
         M = 16
         syms_per_frame = 20
-        num_frame = int(math.pow(2,10))
-        indices = [3,6,10,14] # num_users = 2
+        num_frame = int(math.pow(2, 10))
+        indices = [3, 6, 10, 14] # num_users = 2
         sel_preamble = 1 # standard one-vector preamble
         zero_pads = 4
         extra_pad = 1
@@ -341,14 +341,14 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
 
         # prepare preamble
         if sel_preamble == 0: # standard one vector center preamble [1,-j,-1,j]
-            center_preamble = [0, 0, -1, 1j,1, -1j, -1, 1j,0, -1j, -1, 1j,1, -1j, -1, 1j]
+            center_preamble = [0, 0, -1, 1j, 1, -1j, -1, 1j, 0, -1j, -1, 1j, 1, -1j, -1, 1j]
         elif sel_preamble == 1: # standard preamble with triple repetition
-            tmp = [0, 0, -1, 1j,1, -1j, -1, 1j,0, -1j, -1, 1j,1, -1j, -1, 1j]
+            tmp = [0, 0, -1, 1j, 1, -1j, -1, 1j, 0, -1j, -1, 1j, 1, -1j, -1, 1j]
             center_preamble = tmp*3 #[1/math.sqrt(3), -1j/math.sqrt(3), -1/math.sqrt(3), 1j/math.sqrt(3)]*((int)(M/4))*3
         elif sel_preamble ==2: # IAM-R preamble [1, -1,-1, 1]
-            center_preamble = [0, 0, -1, 1, 1, -1, -1, 1, 0, 0, -1, 1,1, -1, -1, 1]
+            center_preamble = [0, 0, -1, 1, 1, -1, -1, 1, 0, 0, -1, 1, 1, -1, -1, 1]
         else: # standard one vector center preamble [1,-j,-1,j]
-            center_preamble = [0, 0, -1, 1j,1, -1j, -1, 1j,0, -1j, -1, 1j,1, -1j, -1, 1j]
+            center_preamble = [0, 0, -1, 1j, 1, -1j, -1, 1j, 0, -1j, -1, 1j, 1, -1j, -1, 1j]
 
         preamble.extend([0]*zero_pads*M)
         preamble.extend(center_preamble)
@@ -386,26 +386,26 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
         # # print str(len(src_data)-len(preamble)*num_frame)
 
 
-        src = blocks.vector_source_c(src_data,vlen=M)
-        scp = ofdm.fbmc_subchannel_processing_mu_vcvc(M=M,syms_per_frame=syms_per_frame,indices=indices,sel_preamble=sel_preamble,zero_pads=zero_pads,extra_pad=extra_pad,sel_eq=sel_eq)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        scp = ofdm.fbmc_subchannel_processing_mu_vcvc(M=M, syms_per_frame=syms_per_frame, indices=indices, sel_preamble=sel_preamble, zero_pads=zero_pads, extra_pad=extra_pad, sel_eq=sel_eq)
         skh = blocks.skiphead(gr.sizeof_gr_complex*M, 1)
         rem = fbmc_remove_preamble_vcvc(M, syms_per_frame, sel_preamble, zero_pads, extra_pad)
-        avm1 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M,3,6)
-        avm2 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M,10,14)
+        avm1 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M, 3, 6)
+        avm2 = ofdm.fbmc_asymmetrical_vector_mask_vcvc(M, 10, 14)
         dst1 = blocks.vector_sink_c(vlen=4)
         dst2 = blocks.vector_sink_c(vlen=5)
         dst99 = blocks.vector_sink_c(vlen=M)
 
-        self.tb.connect((src,0),(scp,0))
-        self.tb.connect((scp,0),(skh,0))
-        self.tb.connect((skh,0),(rem,0))
-        self.tb.connect((rem,0),avm1)
-        self.tb.connect((rem,0),avm2)
-        self.tb.connect((avm1,0),dst1)
-        self.tb.connect((avm2,0),dst2)
+        self.tb.connect((src, 0), (scp, 0))
+        self.tb.connect((scp, 0), (skh, 0))
+        self.tb.connect((skh, 0), (rem, 0))
+        self.tb.connect((rem, 0), avm1)
+        self.tb.connect((rem, 0), avm2)
+        self.tb.connect((avm1, 0), dst1)
+        self.tb.connect((avm2, 0), dst2)
 
         # estimation probe is connected to dst99
-        self.tb.connect((scp,1),dst99)
+        self.tb.connect((scp, 1), dst99)
         self.tb.run ()
         # check data
         result_data1 = dst1.data()
@@ -423,7 +423,7 @@ class qa_fbmc_subchannel_processing_mu_vcvc (gr_unittest.TestCase):
         # for i in range(len(result_data2)):
         #     print str(i)+"\t"+str(result_data2[i])
         # print result_data
-        self.assertComplexTuplesAlmostEqual(expected_result1,result_data1,6)
-        self.assertComplexTuplesAlmostEqual(expected_result2,result_data2,6)
+        self.assertComplexTuplesAlmostEqual(expected_result1, result_data1, 6)
+        self.assertComplexTuplesAlmostEqual(expected_result2, result_data2, 6)
 if __name__ == '__main__':
     gr_unittest.run(qa_fbmc_subchannel_processing_mu_vcvc, "qa_fbmc_subchannel_processing_mu_vcvc.xml")

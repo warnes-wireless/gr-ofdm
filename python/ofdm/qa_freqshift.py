@@ -58,9 +58,9 @@ class qa_ofdm (gr_unittest.TestCase):
     eps = gr.vector_source_f([0.0]*syms)
     trig = gr.vector_source_b([1]*syms)
     
-    self.fg.connect(src, s2v, ifft, (freq_shift,0))
-    self.fg.connect(eps, (freq_shift,1))
-    self.fg.connect(trig, (freq_shift,2))
+    self.fg.connect(src, s2v, ifft, (freq_shift, 0))
+    self.fg.connect(eps, (freq_shift, 1))
+    self.fg.connect(trig, (freq_shift, 2))
     self.fg.connect(freq_shift, fft, fft_scale, v2s, dst)
     self.fg.run()
     
@@ -76,7 +76,7 @@ class qa_ofdm (gr_unittest.TestCase):
     vec = concatenate([vec]*syms)
     
     epsilon = [-1]
-    frame_trigger = numpy.concatenate([[1],[0]*(syms-1)])    
+    frame_trigger = numpy.concatenate([[1], [0]*(syms-1)])    
     
     expec = numpy.array(numpy.zeros(vlen*syms), numpy.complex)
     for i in range(syms):
@@ -96,9 +96,9 @@ class qa_ofdm (gr_unittest.TestCase):
     eps = gr.vector_source_f(epsilon)
     trig = gr.vector_source_b(frame_trigger.tolist())
     
-    self.fg.connect(src, s2v, ifft, (freq_shift,0))
-    self.fg.connect(eps, (freq_shift,1))
-    self.fg.connect(trig, (freq_shift,2))
+    self.fg.connect(src, s2v, ifft, (freq_shift, 0))
+    self.fg.connect(eps, (freq_shift, 1))
+    self.fg.connect(trig, (freq_shift, 2))
     self.fg.connect(freq_shift, fft, fft_scale, v2s, dst)
     self.fg.run()
 
@@ -138,9 +138,9 @@ class qa_ofdm (gr_unittest.TestCase):
     eps = gr.vector_source_f(epsilon)
     trig = gr.vector_source_b(frame_trigger)
     
-    self.fg.connect(src, s2v, ifft, (freq_shift,0))
-    self.fg.connect(eps, (freq_shift,1))
-    self.fg.connect(trig, (freq_shift,2))
+    self.fg.connect(src, s2v, ifft, (freq_shift, 0))
+    self.fg.connect(eps, (freq_shift, 1))
+    self.fg.connect(trig, (freq_shift, 2))
     self.fg.connect(freq_shift, fft, fft_scale, v2s, dst)
     self.fg.run()
 
@@ -180,9 +180,9 @@ class qa_ofdm (gr_unittest.TestCase):
     eps = gr.vector_source_f(epsilon)
     trig = gr.vector_source_b(frame_trigger)
     
-    self.fg.connect(src, s2v, ifft, (freq_shift,0))
-    self.fg.connect(eps, (freq_shift,1))
-    self.fg.connect(trig, (freq_shift,2))
+    self.fg.connect(src, s2v, ifft, (freq_shift, 0))
+    self.fg.connect(eps, (freq_shift, 1))
+    self.fg.connect(trig, (freq_shift, 2))
     self.fg.connect(freq_shift, fft, fft_scale, v2s, dst)
     self.fg.run()
 
@@ -224,9 +224,9 @@ class qa_ofdm (gr_unittest.TestCase):
     eps = gr.vector_source_f(epsilon)
     trig = gr.vector_source_b(frame_trigger)
     
-    self.fg.connect(src, s2v, ifft, (freq_shift,0))
-    self.fg.connect(eps, (freq_shift,1))
-    self.fg.connect(trig, (freq_shift,2))
+    self.fg.connect(src, s2v, ifft, (freq_shift, 0))
+    self.fg.connect(eps, (freq_shift, 1))
+    self.fg.connect(trig, (freq_shift, 2))
     self.fg.connect(freq_shift, fft, fft_scale, v2s, dst)
     self.fg.run()
 
@@ -246,7 +246,7 @@ class qa_ofdm (gr_unittest.TestCase):
     vec[bin2] = bin2_val
     vec = concatenate([vec]*syms)
     
-    epsilon = [1,-4,5,2]
+    epsilon = [1, -4, 5, 2]
     frame_trigger = [1]*syms
     
     expec = numpy.array(numpy.zeros(vlen*syms), numpy.complex)
@@ -268,9 +268,9 @@ class qa_ofdm (gr_unittest.TestCase):
     eps = gr.vector_source_f(epsilon)
     trig = gr.vector_source_b(frame_trigger)
     
-    self.fg.connect(src, s2v, ifft, (freq_shift,0))
-    self.fg.connect(eps, (freq_shift,1))
-    self.fg.connect(trig, (freq_shift,2))
+    self.fg.connect(src, s2v, ifft, (freq_shift, 0))
+    self.fg.connect(eps, (freq_shift, 1))
+    self.fg.connect(trig, (freq_shift, 2))
     self.fg.connect(freq_shift, fft, fft_scale, v2s, dst)
     self.fg.run()
 
@@ -289,7 +289,7 @@ class qa_ofdm (gr_unittest.TestCase):
     expec = concatenate([expec]*syms)
     
     epsilon = [0.5]
-    frame_trigger = numpy.concatenate([[1],[0]*(syms-1)])
+    frame_trigger = numpy.concatenate([[1], [0]*(syms-1)])
     
     freq_shift = ofdm.frequency_shift_vcc(vlen, 1.0/vlen)
     
@@ -305,9 +305,9 @@ class qa_ofdm (gr_unittest.TestCase):
     eps = gr.vector_source_f(epsilon)
     trig = gr.vector_source_b(frame_trigger.tolist())
     
-    self.fg.connect(src, s2v, (freq_shift,0))
-    self.fg.connect(eps, (freq_shift,1))
-    self.fg.connect(trig, (freq_shift,2))
+    self.fg.connect(src, s2v, (freq_shift, 0))
+    self.fg.connect(eps, (freq_shift, 1))
+    self.fg.connect(trig, (freq_shift, 2))
     self.fg.connect(freq_shift, fft, fft_scale, v2s, dst)
     self.fg.run()
 
@@ -327,16 +327,16 @@ class qa_ofdm (gr_unittest.TestCase):
     expec = concatenate([expec]*syms)
     
     epsilon = [-0.5]
-    frame_trigger = numpy.concatenate([[1],[0]*(syms-1)])
+    frame_trigger = numpy.concatenate([[1], [0]*(syms-1)])
     
     freq_shift = ofdm.frequency_shift_vcc(vlen, 1.0/vlen, cp_length)
     
     fft = gr.fft_vcc(vlen, True, [], True) # natural order, dc = vlen / 2
     fft_scale = gr.multiply_const_vcc([1.0/vlen]*vlen)
     
-    sampler = ofdm.vector_sampler(gr.sizeof_gr_complex,vlen)
+    sampler = ofdm.vector_sampler(gr.sizeof_gr_complex, vlen)
     
-    trigger_vec = concatenate([[0]*(vlen+cp_length-1),[1]])
+    trigger_vec = concatenate([[0]*(vlen+cp_length-1), [1]])
     trigger_vec = concatenate([trigger_vec]*syms)
     trigger = gr.vector_source_b(trigger_vec.tolist())
     
@@ -347,11 +347,11 @@ class qa_ofdm (gr_unittest.TestCase):
     eps = gr.vector_source_f(epsilon)
     trig = gr.vector_source_b(frame_trigger.tolist())
     
-    self.fg.connect(src, (sampler,0))
-    self.fg.connect(trigger, (sampler,1))    
-    self.fg.connect(sampler, (freq_shift,0))
-    self.fg.connect(eps, (freq_shift,1))
-    self.fg.connect(trig, (freq_shift,2))
+    self.fg.connect(src, (sampler, 0))
+    self.fg.connect(trigger, (sampler, 1))    
+    self.fg.connect(sampler, (freq_shift, 0))
+    self.fg.connect(eps, (freq_shift, 1))
+    self.fg.connect(trig, (freq_shift, 2))
     self.fg.connect(freq_shift, fft, fft_scale, v2s, dst)
     self.fg.run()
 
@@ -387,21 +387,21 @@ class qa_ofdm (gr_unittest.TestCase):
     
     r = time_it( self.fg )
     
-    print "Rate %s" % \
-      ( eng_notation.num_to_str( float( ( vlen + cp_len ) * N ) / r ) )
+    print("Rate %s" % \
+      ( eng_notation.num_to_str( float( ( vlen + cp_len ) * N ) / r ) ))
     
     
 def time_it(tb):
     start = os.times()
     tb.run()
     stop = os.times()
-    delta = map((lambda a, b: a-b), stop, start)
+    delta = list(map((lambda a, b: a-b), stop, start))
     user, sys, childrens_user, childrens_sys, real = delta
     total_user = user + childrens_user
     total_sys  = sys + childrens_sys
-    print "real             %7.3f" % (real,)
-    print "user             %7.3f" % (total_user,)
-    print "sys              %7.3f" % (total_sys,)
+    print("real             %7.3f" % (real,))
+    print("user             %7.3f" % (total_user,))
+    print("sys              %7.3f" % (total_sys,))
     
     return real
 

@@ -20,11 +20,11 @@
 # Boston, MA 02110-1301, USA.
 #
 
-from numpy import concatenate,mean,var,arange,sqrt, log10, ceil, logspace
+from numpy import concatenate, mean, var, arange, sqrt, log10, ceil, logspace
 import numpy
 import array
 
-from resource_manager_base import resource_manager_base,start_resource_manager
+from .resource_manager_base import resource_manager_base, start_resource_manager
 
 from time import time, strftime, gmtime
 
@@ -34,8 +34,8 @@ from gnuradio.eng_option import eng_option
 
 
 class resource_manager (resource_manager_base):
-  def __init__(self,orb,options):
-    resource_manager_base.__init__(self,orb,options=options,loggerbase="mber.")
+  def __init__(self, orb, options):
+    resource_manager_base.__init__(self, orb, options=options, loggerbase="mber.")
 
     self.localenv = options.le
     self.logger = logging.getLogger("mber.sm")
@@ -56,7 +56,7 @@ class resource_manager (resource_manager_base):
       self.tx_max_log = log10(options.ub**2)
       self.tx_min_log = log10(options.lb**2)
 
-    self.txpow_range = logspace(self.tx_max_log,self.tx_min_log,self.num_points)
+    self.txpow_range = logspace(self.tx_max_log, self.tx_min_log, self.num_points)
     #self.txpow_range = range(10000**2,500**2,-(500**2))
 
     self.nbits = [1, 2, 3, 4, 5, 6, 7, 8]
@@ -129,7 +129,7 @@ class resource_manager (resource_manager_base):
 
         rxid_stable = 0
         last_rxid = int(self.buffer[len(self.buffer)-1].rx_id)
-        for i in arange(len(self.buffer)-1,-1,-1):
+        for i in arange(len(self.buffer)-1, -1, -1):
           if int(self.buffer[i].rx_id) == last_rxid:
             rxid_stable += 1
           else:
@@ -144,15 +144,15 @@ class resource_manager (resource_manager_base):
         else:
           self.state = 0
           for x in self.buffer:
-            print x.rx_id," ",
-          print ""
+            print(x.rx_id, " ", end=' ')
+          print("")
 
     elif self.state == 2:
 
       self.curmod = 0
       self.curtxpowind = 0
 
-      self.logger.info( "Next power %f and mod %d" %(self.txpow_range[self.curtxpowind],self.nbits[self.curmod]))
+      self.logger.info( "Next power %f and mod %d" %(self.txpow_range[self.curtxpowind], self.nbits[self.curmod]))
 
       self.pa_vector = [float(1.0)]*self.subcarriers
       self.mod_map = [self.nbits[self.curmod]]*self.subcarriers
@@ -182,12 +182,12 @@ class resource_manager (resource_manager_base):
         else:
           skipped_items += 1
 
-      self.logger.debug( "filtered buffer length: %d, skipped %d" % (len(self.buffer),skipped_items))
+      self.logger.debug( "filtered buffer length: %d, skipped %d" % (len(self.buffer), skipped_items))
 
       if len(self.buffer) > 10000:
         self.state = 4
 
-        filename_prefix = strftime("%Y%m%d%H%M%S",gmtime())
+        filename_prefix = strftime("%Y%m%d%H%M%S", gmtime())
 
         bervec = []
         snrvec = []
@@ -222,17 +222,17 @@ class resource_manager (resource_manager_base):
         f_nfo.write( "Mod: %d\n" %(self.nbits[self.curmod]))
         f_nfo.write( "Power: %f\n" %(self.txpow_range[self.curtxpowind]))
         f_nfo.write( "expected rx id: %d\n" %(self.expected_rx_id))
-        f_nfo.write( "Mean SNR %.8g   Var SNR %.8g\n" %(snr_mean,snr_var))
-        f_nfo.write( "Mean BER %.8g   Var BER %.8g\n" %(ber_mean,ber_var))
+        f_nfo.write( "Mean SNR %.8g   Var SNR %.8g\n" %(snr_mean, snr_var))
+        f_nfo.write( "Mean BER %.8g   Var BER %.8g\n" %(ber_mean, ber_var))
 
-        self.logger.info("Mean SNR %.8g   Var SNR %.8g" %(snr_mean,snr_var))
-        self.logger.info("Mean BER %.8g   Var BER %.8g" %(ber_mean,ber_var))
+        self.logger.info("Mean SNR %.8g   Var SNR %.8g" %(snr_mean, snr_var))
+        self.logger.info("Mean BER %.8g   Var BER %.8g" %(ber_mean, ber_var))
 
         f_ber.close()
         f_snr.close()
         f_nfo.close()
 
-        self.logger.info( "Wrote to files %s and %s" % (filename_prefix+"_ber.float",filename_prefix+"_snr.float"))
+        self.logger.info( "Wrote to files %s and %s" % (filename_prefix+"_ber.float", filename_prefix+"_snr.float"))
 
         self.buffer = []
 
@@ -245,7 +245,7 @@ class resource_manager (resource_manager_base):
         if self.curtxpowind >= len(self.txpow_range):
           self.curtxpowind = 0
 
-      self.logger.info( "Next power %f and mod %d" %(self.txpow_range[self.curtxpowind],self.nbits[self.curmod]))
+      self.logger.info( "Next power %f and mod %d" %(self.txpow_range[self.curtxpowind], self.nbits[self.curmod]))
 
       self.expected_rx_id += 1
       self.state = 3
@@ -281,7 +281,7 @@ class resource_manager (resource_manager_base):
                       default=False,
                       help="USRP2")
 
-    resource_manager_base.add_options(normal,expert)
+    resource_manager_base.add_options(normal, expert)
   add_options = staticmethod(add_options)
 
 
@@ -292,13 +292,13 @@ def main():
   parser = OptionParser(option_class=eng_option, conflict_handler="resolve")
   normal_grp = parser.add_option_group("Normal")
   expert_grp = parser.add_option_group("Expert")
-  resource_manager.add_options(normal_grp,expert_grp)
+  resource_manager.add_options(normal_grp, expert_grp)
   (options, args) = parser.parse_args()
 
   logger = logging.getLogger("mber")
   logger.setLevel(logging.DEBUG)
 
-  logfilename = "berlog_" + strftime("%Y%m%d%H%M%S",gmtime()) + ".log"
+  logfilename = "berlog_" + strftime("%Y%m%d%H%M%S", gmtime()) + ".log"
 
 
   fh = logging.FileHandler(logfilename)
@@ -317,7 +317,7 @@ def main():
   logger.info("Log filename is %s" %(logfilename))
 
 
-  start_resource_manager(resource_manager, "PA",options)
+  start_resource_manager(resource_manager, "PA", options)
 
 if __name__ == '__main__':
   try:

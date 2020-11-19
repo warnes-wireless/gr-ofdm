@@ -1,6 +1,6 @@
 from gnuradio import gr
 from ofdm import reference_data_source_02_ib
-from random import seed,randint, getrandbits
+from random import seed, randint, getrandbits
 
 class ber_reference_source_grc (gr.hier_block2):
   """
@@ -8,16 +8,16 @@ class ber_reference_source_grc (gr.hier_block2):
   Input is the bitcount per frame. Outputs the exact number of bits for
   the each frame.
   """
-  def __init__(self,subcarriers, data_blocks):
+  def __init__(self, subcarriers, data_blocks):
     gr.hier_block2.__init__(self, "ber_reference_source_grc",
-      gr.io_signature2(2,2,gr.sizeof_short,
+      gr.io_signature2(2, 2, gr.sizeof_short,
                        gr.sizeof_int),
-      gr.io_signature(1,1,gr.sizeof_char))
+      gr.io_signature(1, 1, gr.sizeof_char))
 
     ## ID Source
-    id_src = (self,0)
+    id_src = (self, 0)
     ## Bitcount Source
-    bc_src = (self,1)
+    bc_src = (self, 1)
 
     ## Reference Data Source
 #    rand_file = file('random.dat','rb')
@@ -27,12 +27,12 @@ class ber_reference_source_grc (gr.hier_block2):
     # We have to use a fix seed so that Tx and Rx have the same random sequence in order to calculate BER
     seed(30214345)
     # Maximum bitloading is 8 and maximum ID is 256
-    print "Generating random bits..."
+    print("Generating random bits...")
     rand_data = [chr(getrandbits(1)) for x in range(subcarriers*8*data_blocks*256)]
 
     ref_src = self._reference_data_source = reference_data_source_02_ib(rand_data)
-    self.connect(id_src,(ref_src,0))
-    self.connect(bc_src,(ref_src,1))
+    self.connect(id_src, (ref_src, 0))
+    self.connect(bc_src, (ref_src, 1))
 
     ## Setup Output
-    self.connect(ref_src,self)
+    self.connect(ref_src, self)

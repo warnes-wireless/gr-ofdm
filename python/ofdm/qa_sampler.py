@@ -33,33 +33,33 @@ class qa_ofdm (gr_unittest.TestCase):
     self.fg = None
 
   def test_007_vector_sampler(self):
-    data = range(1,577,1) # 1..576
-    trigger = numpy.concatenate([[0]*575,[1]])
+    data = list(range(1, 577, 1)) # 1..576
+    trigger = numpy.concatenate([[0]*575, [1]])
     blocks = 10000
     expected = data[64:577]
     assert(len(expected)==512)
     expected = numpy.concatenate([expected*blocks])
     assert(len(expected) == 512*blocks)
 
-    src = gr.vector_source_c(data,True)
-    src2 = gr.vector_source_b(trigger.tolist(),True)
+    src = gr.vector_source_c(data, True)
+    src2 = gr.vector_source_b(trigger.tolist(), True)
     dst = gr.vector_sink_c()
-    sampler = ofdm.vector_sampler(gr.sizeof_gr_complex,512)
-    v2s = gr.vector_to_stream(gr.sizeof_gr_complex,512)
+    sampler = ofdm.vector_sampler(gr.sizeof_gr_complex, 512)
+    v2s = gr.vector_to_stream(gr.sizeof_gr_complex, 512)
 
-    self.fg.connect(src, (sampler,0))
-    self.fg.connect(src2,gr.head(gr.sizeof_char,blocks*576), (sampler,1))
+    self.fg.connect(src, (sampler, 0))
+    self.fg.connect(src2, gr.head(gr.sizeof_char, blocks*576), (sampler, 1))
     self.fg.connect(sampler, v2s, dst)
 
     self.fg.run()
     #self.assertEqual(numpy.array(expected,numpy.Complex), numpy.array(dst.data(), numpy.Complex))
     if numpy.array(expected).all() != numpy.array(dst.data()).all():
-      print "up"
-      print len(expected),len(dst.data())
+      print("up")
+      print(len(expected), len(dst.data()))
       vec = dst.data()
-      for i in range(min(len(expected),len(dst.data()))):
+      for i in range(min(len(expected), len(dst.data()))):
         if vec[i] != expected[i]:
-          print "e at ",i
+          print("e at ", i)
 
 """
   # general test case

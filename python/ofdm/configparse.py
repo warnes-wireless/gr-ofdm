@@ -89,7 +89,7 @@ class Option(_Option):
             raise OptionError("must supply dest for option", self)
 
     # Replace the base _check_dest method by our own.
-    CHECK_METHODS[CHECK_METHODS.index(_Option._check_dest.im_func)] = _check_dest
+    CHECK_METHODS[CHECK_METHODS.index(_Option._check_dest.__func__)] = _check_dest
 
     # Implement a __str__ method that does die when there are no
     # option strings.
@@ -155,7 +155,7 @@ class OptionParser(_OptionParser):
     def add_option(self, *args, **kwargs):
         if not args:
             if kwargs.get("config") != "only":
-                raise TypeError, "invalid arguments"
+                raise TypeError("invalid arguments")
             kwargs["help"] = SUPPRESS_HELP
             option = self.option_class(**kwargs)
             _OptionParser.add_option(self, option)
@@ -184,7 +184,7 @@ class OptionParser(_OptionParser):
            to file object 'file'.
         """
 
-        for opt, val in self.values.__dict__.iteritems():
+        for opt, val in self.values.__dict__.items():
             try:
                 options = self._get_config_opts(opt)
             except BadOptionError:
@@ -193,12 +193,12 @@ class OptionParser(_OptionParser):
             option = self._get_most_tolerant_opt(options)
 
             if val is not None and val != self.defaults[opt]:
-                print >> fobj, opt, "=", self._pack_value(val)
+                print(opt, "=", self._pack_value(val), file=fobj)
 
     # -- Config-parsing methods -------------------------------------
 
     def _process_file(self, file_or_name, values):
-        if type(file_or_name) is str:
+        if isinstance(file_or_name, str):
             name = file_or_name
             fobj = file(file_or_name)
 
@@ -215,12 +215,12 @@ class OptionParser(_OptionParser):
             if line and line[0] not in '#;':
                 try:
                     self._process_line(line, values)
-                except (BadOptionError, OptionValueError), err:
+                except (BadOptionError, OptionValueError) as err:
                     msg = "file %s, line %d: %s" % (name, lineno, err)
                     if self.error_handler == "error":
                         self.error(msg)
                     elif self.error_handler == "warn":
-                        print >> sys.stderr, msg
+                        print(msg, file=sys.stderr)
             lineno += 1
 
     def _process_line(self, line, values):
@@ -277,7 +277,7 @@ class OptionParser(_OptionParser):
             # it.
             option.default = NO_DEFAULT
 
-            for a in xrange(0, len(value), option.nargs + 1):
+            for a in range(0, len(value), option.nargs + 1):
                 # Parse a list of items separated by commas and
                 # let the Option object process them the usual
                 # way.
@@ -303,16 +303,16 @@ class OptionParser(_OptionParser):
             option.process(opt, value, values, self)
 
     def _pack_value(self, value):
-        if type(value) in (str, int, long, float, complex, bool):
+        if type(value) in (str, int, int, float, complex, bool):
             value = str(value)
             if " " in value:
                 return '"%s"' % value.replace('"', '\\"')
             return value
 
-        elif type(value) is tuple:
+        elif isinstance(value, tuple):
             return " ".join([self._pack_value(v) for v in value])
 
-        elif type(value) is list:
+        elif isinstance(value, list):
             return ", ".join([self._pack_value(v) for v in value])
 
         else:

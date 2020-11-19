@@ -33,8 +33,8 @@ class qa_allocation_src (gr_unittest.TestCase):
         self.tb = None
 
     def test_001_t (self):
-        src = ofdm.allocation_src(6,3,"tcp://*:3333")
-        src.set_allocation([2]*6,[3]*6)
+        src = ofdm.allocation_src(6, 3, "tcp://*:3333")
+        src.set_allocation([2]*6, [3]*6)
         #skiphead = blocks.skiphead( gr.sizeof_float, 8 )
         limit_id = blocks.head( gr.sizeof_short, 4 )
         limit_bitcount = blocks.head( gr.sizeof_int, 4 )
@@ -44,10 +44,10 @@ class qa_allocation_src (gr_unittest.TestCase):
         dst_bitcount = blocks.vector_sink_i()
         dst_bitloading = blocks.vector_sink_b(6)
         dst_power = blocks.vector_sink_c(6)
-        self.tb.connect((src,0),limit_id,dst_id)
-        self.tb.connect((src,1),limit_bitcount,dst_bitcount)
-        self.tb.connect((src,2),limit_bitloading,dst_bitloading)
-        self.tb.connect((src,3),limit_power,dst_power)
+        self.tb.connect((src, 0), limit_id, dst_id)
+        self.tb.connect((src, 1), limit_bitcount, dst_bitcount)
+        self.tb.connect((src, 2), limit_bitloading, dst_bitloading)
+        self.tb.connect((src, 3), limit_power, dst_power)
         # set up fg
         self.tb.run ()
         # check data
@@ -55,10 +55,10 @@ class qa_allocation_src (gr_unittest.TestCase):
         result_bitcount = dst_bitcount.data()
         result_bitloading = dst_bitloading.data()
         result_power = dst_power.data()
-        print "id", result_id
-        print "bitcount", result_bitcount
-        print "bitloading", result_bitloading
-        print "power", result_power
+        print("id", result_id)
+        print("bitcount", result_bitcount)
+        print("bitloading", result_bitloading)
+        print("power", result_power)
        
 
 #        expected_id = [0,1]

@@ -21,7 +21,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from fbmc_receiver_hier_cb import fbmc_receiver_hier_cb
+from .fbmc_receiver_hier_cb import fbmc_receiver_hier_cb
 
 class qa_fbmc_receiver_hier_cb (gr_unittest.TestCase):
 

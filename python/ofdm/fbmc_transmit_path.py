@@ -24,7 +24,7 @@ from gnuradio import eng_notation
 from gnuradio import gr, blocks, analog, filter, zeromq
 from gnuradio import fft as fft_blocks
 from gnuradio import trellis
-from gr_tools import log_to_file,unpack_array, terminate_stream
+from .gr_tools import log_to_file, unpack_array, terminate_stream
 import ofdm as ofdm
 from ofdm import generic_mapper_bcv, midamble_insert
 from ofdm import puncture_bb, cyclic_prefixer, vector_padding, vector_padding_dc_null, skip
@@ -32,18 +32,18 @@ from ofdm import stream_controlled_mux, reference_data_source_02_ib #reference_d
 from ofdm import multiply_frame_fc
 from ofdm import fbmc_oqam_preprocessing_vcvc, fbmc_beta_multiplier_vcvc, fbmc_separate_vcvc, fbmc_polyphase_network_vcvc
 from ofdm import fbmc_overlapping_parallel_to_serial_vcc, fbmc_insert_preamble_vcvc
-from preambles import default_block_header
-from preambles import pilot_subcarrier_inserter,pilot_block_inserter, pilot_block_inserter2, fbmc_pilot_block_inserter, fbmc_timing_pilot_block_inserter
-import common_options
+from .preambles import default_block_header
+from .preambles import pilot_subcarrier_inserter, pilot_block_inserter, pilot_block_inserter2, fbmc_pilot_block_inserter, fbmc_timing_pilot_block_inserter
+from . import common_options
 import math, copy
 import numpy
 
 from ofdm import repetition_encoder_sb
 from ofdm import stream_controlled_mux_b
 from ofdm import allocation_src
-from station_configuration import *
+from .station_configuration import *
 
-from random import seed,randint, getrandbits
+from random import seed, randint, getrandbits
 
 
 class transmit_path(gr.hier_block2):
@@ -53,8 +53,8 @@ class transmit_path(gr.hier_block2):
   """
   def __init__(self, options):
     gr.hier_block2.__init__(self, "fbmc_transmit_path",
-        gr.io_signature(0,0,0),
-        gr.io_signature(1,1,gr.sizeof_gr_complex))
+        gr.io_signature(0, 0, 0),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex))
 
     common_options.defaults(options)
 
@@ -67,7 +67,7 @@ class transmit_path(gr.hier_block2):
     config.fft_length          = options.fft_length
     config.dc_null             = options.dc_null
     config.training_data       = default_block_header(config.data_subcarriers,
-                                          config.fft_length,config.dc_null,options)
+                                          config.fft_length, config.dc_null, options)
     config.coding              = options.coding
     config.fbmc                = options.fbmc
     config.adaptive_fbmc       = options.adaptive_fbmc
@@ -94,9 +94,9 @@ class transmit_path(gr.hier_block2):
 
     # check some bounds
     if config.fft_length < config.subcarriers:
-      raise SystemError, "Subcarrier number must be less than FFT length"
+      raise SystemError("Subcarrier number must be less than FFT length")
     if config.fft_length < config.cp_length:
-      raise SystemError, "Cyclic prefix length must be less than FFT length"
+      raise SystemError("Cyclic prefix length must be less than FFT length")
 
     ## shortcuts
     blen = config.block_length
@@ -108,8 +108,8 @@ class transmit_path(gr.hier_block2):
 
     used_id_bits = config.used_id_bits = 8 #TODO: no constant in source code
     rep_id_bits = config.rep_id_bits = config.data_subcarriers/used_id_bits #BPSK
-    if config.data_subcarriers % used_id_bits <> 0:
-      raise SystemError,"Data subcarriers need to be multiple of %d" % (used_id_bits)
+    if config.data_subcarriers % used_id_bits != 0:
+      raise SystemError("Data subcarriers need to be multiple of %d" % (used_id_bits))
 
     ## Allocation Control
     self.allocation_src = allocation_src(config.data_subcarriers, config.frame_data_blocks, config.coding, "tcp://*:3333", "tcp://"+options.rx_hostname+":3322")
@@ -118,57 +118,57 @@ class transmit_path(gr.hier_block2):
          
         if options.coding:
             mode = 1 # Coding mode 1-9
-            bitspermode= [0.5,1,1.5,2,3,4,4.5,5,6] # Information bits per mode
-            modulbitspermode = [1,2,2,4,4,6,6,6,8] # Coding bits per mode
+            bitspermode= [0.5, 1, 1.5, 2, 3, 4, 4.5, 5, 6] # Information bits per mode
+            modulbitspermode = [1, 2, 2, 4, 4, 6, 6, 6, 8] # Coding bits per mode
             bitcount_vec = [(int)(config.data_subcarriers*config.frame_data_blocks*bitspermode[mode-1])]
             modul_bitcount_vec = [config.data_subcarriers*config.frame_data_blocks*modulbitspermode[mode-1]]
-            bitcount_src = blocks.vector_source_i(bitcount_vec,True,1)
-            modul_bitcount_src = blocks.vector_source_i(modul_bitcount_vec,True,1)
+            bitcount_src = blocks.vector_source_i(bitcount_vec, True, 1)
+            modul_bitcount_src = blocks.vector_source_i(modul_bitcount_vec, True, 1)
             bitloading = mode
         else:
             bitloading = 1
             bitcount_vec = [config.data_subcarriers*config.frame_data_blocks*bitloading]
-            bitcount_src = blocks.vector_source_i(bitcount_vec,True,1)
+            bitcount_src = blocks.vector_source_i(bitcount_vec, True, 1)
             modul_bitcount_src = bitcount_src
         # id's for frames
-        id_vec = range(0,256)
-        id_src = blocks.vector_source_s(id_vec,True,1)
+        id_vec = list(range(0, 256))
+        id_src = blocks.vector_source_s(id_vec, True, 1)
         # bitloading for ID symbol and then once for data symbols
         #bitloading_vec = [1]*dsubc+[0]*(dsubc/2)+[2]*(dsubc/2)
         
         test_allocation = [bitloading]*(int)(config.data_subcarriers/8)+ [0]*(int)(config.data_subcarriers/4*3) + [bitloading]*(int)(config.data_subcarriers/8)
         #bitloading_vec = [1]*dsubc+[bitloading]*dsubc
         bitloading_vec = [1]*dsubc+test_allocation
-        bitloading_src = blocks.vector_source_b(bitloading_vec,True,dsubc)
+        bitloading_src = blocks.vector_source_b(bitloading_vec, True, dsubc)
         # bitcount for frames
         #bitcount_vec = [config.data_subcarriers*config.frame_data_blocks*bitloading]
         bitcount_vec = [config.frame_data_blocks*sum(test_allocation)]
-        bitcount_src = blocks.vector_source_i(bitcount_vec,True,1)
+        bitcount_src = blocks.vector_source_i(bitcount_vec, True, 1)
         # power loading, here same for all symbols
         power_vec = [1]*(int)(config.data_subcarriers/8)+ [0]*(int)(config.data_subcarriers/4*3) + [1]*(int)(config.data_subcarriers/8)
-        power_src = blocks.vector_source_f(power_vec,True,dsubc)
+        power_src = blocks.vector_source_f(power_vec, True, dsubc)
         # mux control stream to mux id and data bits
         mux_vec = [0]*dsubc+[1]*bitcount_vec[0]
-        mux_ctrl = blocks.vector_source_b(mux_vec,True,1)
+        mux_ctrl = blocks.vector_source_b(mux_vec, True, 1)
     else:
-        id_src = (self.allocation_src,0)
-        bitcount_src = (self.allocation_src,4)
-        bitloading_src = (self.allocation_src,2)
-        power_src = (self.allocation_src,1)
+        id_src = (self.allocation_src, 0)
+        bitcount_src = (self.allocation_src, 4)
+        bitloading_src = (self.allocation_src, 2)
+        power_src = (self.allocation_src, 1)
         if options.coding: 
-            modul_bitcount_src = (self.allocation_src,5)
+            modul_bitcount_src = (self.allocation_src, 5)
         else:
             modul_bitcount_src = bitcount_src
         mux_ctrl = ofdm.tx_mux_ctrl(dsubc)
-        self.connect(modul_bitcount_src,mux_ctrl)
+        self.connect(modul_bitcount_src, mux_ctrl)
         #Initial allocation
-        self.allocation_src.set_allocation([4]*config.data_subcarriers,[1]*config.data_subcarriers)   
+        self.allocation_src.set_allocation([4]*config.data_subcarriers, [1]*config.data_subcarriers)   
         if options.benchmarking:
-            self.allocation_src.set_allocation([4]*config.data_subcarriers,[1]*config.data_subcarriers)        
+            self.allocation_src.set_allocation([4]*config.data_subcarriers, [1]*config.data_subcarriers)        
 
 
     if options.lab_special_case:
-        self.allocation_src.set_allocation([0]*(config.data_subcarriers/4)+[2]*(config.data_subcarriers/2)+[0]*(config.data_subcarriers/4),[1]*config.data_subcarriers)
+        self.allocation_src.set_allocation([0]*(config.data_subcarriers/4)+[2]*(config.data_subcarriers/2)+[0]*(config.data_subcarriers/4), [1]*config.data_subcarriers)
 
     if options.log:
         log_to_file(self, id_src, "data/id_src.short")
@@ -178,32 +178,32 @@ class transmit_path(gr.hier_block2):
          
 
     ## GUI probe output
-    zmq_probe_bitloading = zeromq.pub_sink(gr.sizeof_char,dsubc, "tcp://*:4445")
+    zmq_probe_bitloading = zeromq.pub_sink(gr.sizeof_char, dsubc, "tcp://*:4445")
     # also skip ID symbol bitloading with keep_one_in_n (side effect)
     # factor 2 for bitloading because we have two vectors per frame, one for id symbol and one for all payload/data symbols
     # factor config.frame_data_part for power because there is one vector per ofdm symbol per frame
-    self.connect(bitloading_src, blocks.keep_one_in_n(gr.sizeof_char*dsubc,2*40), zmq_probe_bitloading)
-    zmq_probe_power = zeromq.pub_sink(gr.sizeof_float,dsubc, "tcp://*:4444")
+    self.connect(bitloading_src, blocks.keep_one_in_n(gr.sizeof_char*dsubc, 2*40), zmq_probe_bitloading)
+    zmq_probe_power = zeromq.pub_sink(gr.sizeof_float, dsubc, "tcp://*:4444")
     #self.connect(power_src, blocks.keep_one_in_n(gr.sizeof_gr_complex*dsubc,40), blocks.complex_to_real(dsubc), zmq_probe_power)
-    self.connect(power_src, blocks.keep_one_in_n(gr.sizeof_float*dsubc,40), zmq_probe_power)
+    self.connect(power_src, blocks.keep_one_in_n(gr.sizeof_float*dsubc, 40), zmq_probe_power)
 
     ## Workaround to avoid periodic structure
     seed(1)
-    whitener_pn = [randint(0,1) for i in range(used_id_bits*rep_id_bits)]
+    whitener_pn = [randint(0, 1) for i in range(used_id_bits*rep_id_bits)]
 
     ## ID Encoder
-    id_enc = self._id_encoder = repetition_encoder_sb(used_id_bits,rep_id_bits,whitener_pn)
-    self.connect(id_src,id_enc)
+    id_enc = self._id_encoder = repetition_encoder_sb(used_id_bits, rep_id_bits, whitener_pn)
+    self.connect(id_src, id_enc)
 
     if options.log:
       id_enc_f = gr.char_to_float()
-      self.connect(id_enc,id_enc_f)
+      self.connect(id_enc, id_enc_f)
       log_to_file(self, id_enc_f, "data/id_enc_out.float")
 
     ## Reference Data Source
     ber_ref_src = ber_reference_source(self._options)
-    self.connect(id_src,(ber_ref_src,0))
-    self.connect(bitcount_src,(ber_ref_src,1))
+    self.connect(id_src, (ber_ref_src, 0))
+    self.connect(bitcount_src, (ber_ref_src, 1))
 
     if options.log:
       log_to_file(self, ber_ref_src, "data/ber_rec_src_tx.char")
@@ -213,80 +213,80 @@ class transmit_path(gr.hier_block2):
 
     ## Frame Trigger
     ftrig_stream = [1]+[0]*(config.frame_data_part-1)
-    ftrig = self._frame_trigger = blocks.vector_source_b(ftrig_stream,True)
+    ftrig = self._frame_trigger = blocks.vector_source_b(ftrig_stream, True)
 
     ## Data Multiplexer
     # Input 0: control stream
     # Input 1: encoded ID stream
     # Inputs 2..n: data streams
     dmux = self._data_multiplexer = stream_controlled_mux_b()
-    self.connect(mux_ctrl,(dmux,0))
-    self.connect(id_enc,(dmux,1))
+    self.connect(mux_ctrl, (dmux, 0))
+    self.connect(id_enc, (dmux, 1))
 
     if options.coding:
-        fo=trellis.fsm(1,2,[91,121])       
-        encoder = self._encoder = trellis.encoder_bb(fo,0)
+        fo=trellis.fsm(1, 2, [91, 121])       
+        encoder = self._encoder = trellis.encoder_bb(fo, 0)
         unpack = self._unpack = blocks.unpack_k_bits_bb(2)
-        self.connect(ber_ref_src,encoder,unpack)
+        self.connect(ber_ref_src, encoder, unpack)
         
         if options.interleave:
-            int_object=trellis.interleaver(2000,666)
-            interlv = trellis.permutation(int_object.K(),int_object.INTER(),1,gr.sizeof_char)
+            int_object=trellis.interleaver(2000, 666)
+            interlv = trellis.permutation(int_object.K(), int_object.INTER(), 1, gr.sizeof_char)
         
         if not options.nopunct:
             bmaptrig_stream_puncturing = [1]+[0]*(config.frame_data_blocks/2-1)
             btrig_puncturing = self._bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
             puncturing = self._puncturing = puncture_bb(config.data_subcarriers)
-            self.connect(bitloading_src,(puncturing,1))
-            self.connect(self._bitmap_trigger_puncturing,(puncturing,2))
-            self.connect(unpack,puncturing)
+            self.connect(bitloading_src, (puncturing, 1))
+            self.connect(self._bitmap_trigger_puncturing, (puncturing, 2))
+            self.connect(unpack, puncturing)
             last_block=puncturing
             
             if options.interleave:
-                self.connect(last_block,interlv)
+                self.connect(last_block, interlv)
                 last_block = interlv
             
             if options.benchmarking:
-                self.connect(last_block,blocks.head(gr.sizeof_char, options.N),(dmux,2))
+                self.connect(last_block, blocks.head(gr.sizeof_char, options.N), (dmux, 2))
             else:
-                self.connect(last_block,(dmux,2))
+                self.connect(last_block, (dmux, 2))
         else:
             if options.benchmarking:
-                self.connect(unpack,blocks.head(gr.sizeof_char, options.N),(dmux,2))
+                self.connect(unpack, blocks.head(gr.sizeof_char, options.N), (dmux, 2))
             else:
-                self.connect(unpack,(dmux,2))
+                self.connect(unpack, (dmux, 2))
         
     else:
         if options.benchmarking:
-            self.connect(ber_ref_src,blocks.head(gr.sizeof_char, options.N),(dmux,2))
+            self.connect(ber_ref_src, blocks.head(gr.sizeof_char, options.N), (dmux, 2))
         else:
-            self.connect(ber_ref_src,(dmux,2))
+            self.connect(ber_ref_src, (dmux, 2))
         
     
 
     if options.log:
       dmux_f = gr.char_to_float()
-      self.connect(dmux,dmux_f)
+      self.connect(dmux, dmux_f)
       log_to_file(self, dmux_f, "data/dmux_out.float")
 
     ## Modulator
-    mod = self._modulator = generic_mapper_bcv(config.data_subcarriers,config.coding, config.frame_data_part)
-    self.connect(dmux,(mod,0))
-    self.connect(bitloading_src,(mod,1))
+    mod = self._modulator = generic_mapper_bcv(config.data_subcarriers, config.coding, config.frame_data_part)
+    self.connect(dmux, (mod, 0))
+    self.connect(bitloading_src, (mod, 1))
 
     if options.log:
       log_to_file(self, mod, "data/mod_out.compl")
       modi = blocks.complex_to_imag(config.data_subcarriers)
       modr = blocks.complex_to_real(config.data_subcarriers)
-      self.connect(mod,modi)
-      self.connect(mod,modr)
+      self.connect(mod, modi)
+      self.connect(mod, modr)
       log_to_file(self, modi, "data/mod_imag_out.float")
       log_to_file(self, modr, "data/mod_real_out.float")
 
     ## Power allocator
     pa = self._power_allocator = multiply_frame_fc(config.frame_data_part, config.data_subcarriers)
-    self.connect(mod,(pa,0))
-    self.connect(power_src,(pa,1))
+    self.connect(mod, (pa, 0))
+    self.connect(power_src, (pa, 1))
 
     if options.log:
       log_to_file(self, pa, "data/pa_out.compl")
@@ -296,7 +296,7 @@ class transmit_path(gr.hier_block2):
         psubc = pa
     else:
         psubc = self._pilot_subcarrier_inserter = pilot_subcarrier_inserter()
-        self.connect(pa,psubc)
+        self.connect(pa, psubc)
         
         if options.log:
             log_to_file(self, psubc, "data/psubc_out.compl")
@@ -306,10 +306,10 @@ class transmit_path(gr.hier_block2):
     #fbmc_pblocks_timing = self._fbmc_timing_pilot_block_inserter = fbmc_timing_pilot_block_inserter(5,False)
     
     oqam_prep = self._oqam_prep = fbmc_oqam_preprocessing_vcvc(config.subcarriers, 0, 0)
-    self.connect(psubc,oqam_prep)
+    self.connect(psubc, oqam_prep)
     
     
-    fbmc_pblocks = self._fbmc_pilot_block_inserter = fbmc_pilot_block_inserter(5,False)
+    fbmc_pblocks = self._fbmc_pilot_block_inserter = fbmc_pilot_block_inserter(5, False)
     self.connect(oqam_prep, fbmc_pblocks)
     #log_to_file(self, fbmc_pblocks, "data/fbmc_pblocks_out.compl")
     #fbmc_insert_pream = self._fbmc_insert_pream = fbmc_insert_preamble_vcvc(M, syms_per_frame, preamble)
@@ -329,8 +329,8 @@ class transmit_path(gr.hier_block2):
         ## Add virtual subcarriers
     if config.fft_length > subcarriers:
       vsubc = self._virtual_subcarrier_extender = \
-              vector_padding_dc_null(config.subcarriers, config.fft_length,config.dc_null)
-      self.connect(beta_mult,vsubc)
+              vector_padding_dc_null(config.subcarriers, config.fft_length, config.dc_null)
+      self.connect(beta_mult, vsubc)
     else:
       vsubc = self._virtual_subcarrier_extender = beta_mult
 
@@ -338,8 +338,8 @@ class transmit_path(gr.hier_block2):
       log_to_file(self, vsubc, "data/vsubc_out.compl")
 
     ## IFFT, no window, block shift
-    ifft = self._ifft = fft_blocks.fft_vcc(config.fft_length,False,[],True)
-    self.connect(vsubc,ifft)
+    ifft = self._ifft = fft_blocks.fft_vcc(config.fft_length, False, [], True)
+    self.connect(vsubc, ifft)
 
     if options.log:
       log_to_file(self, ifft, "data/ifft_out.compl")
@@ -351,10 +351,10 @@ class transmit_path(gr.hier_block2):
     poly_netw_2 = self._poly_netw_2 = fbmc_polyphase_network_vcvc(config.fft_length, 4, 4*config.fft_length-1, False)
     overlap_p2s = self._overlap_p2s = fbmc_overlapping_parallel_to_serial_vcc(config.fft_length)
       
-    self.connect(ifft,(separate_oqam,0),poly_netw_1)
-    self.connect((separate_oqam,1),poly_netw_2)
-    self.connect(poly_netw_1,(overlap_p2s,0))
-    self.connect(poly_netw_2,(overlap_p2s,1))
+    self.connect(ifft, (separate_oqam, 0), poly_netw_1)
+    self.connect((separate_oqam, 1), poly_netw_2)
+    self.connect(poly_netw_1, (overlap_p2s, 0))
+    self.connect(poly_netw_2, (overlap_p2s, 1))
     
 
     ## Pilot blocks (preambles)
@@ -385,11 +385,11 @@ class transmit_path(gr.hier_block2):
     if config.adaptive_fbmc:
         rep = blocks.repeat(gr.sizeof_gr_complex, config.frame_length * config.block_length)
         amp = blocks.multiply_cc()
-        self.connect( lastblock, (amp,0) )
-        self.connect((self.allocation_src,3), rep , (amp,1) )
+        self.connect( lastblock, (amp, 0) )
+        self.connect((self.allocation_src, 3), rep, (amp, 1) )
         lastblock = amp
     else:
-        self.connect((self.allocation_src,3), blocks.null_sink(gr.sizeof_gr_complex) )
+        self.connect((self.allocation_src, 3), blocks.null_sink(gr.sizeof_gr_complex) )
 
     ## Digital Amplifier
     #amp = self._amplifier = gr.multiply_const_cc(1)
@@ -418,7 +418,7 @@ class transmit_path(gr.hier_block2):
                           , 'symbol_time':(config.cp_length + config.fft_length)/options.bandwidth*1e6, 'max_data_rate':(bits/tb)/1e6}
 
     ## Setup Output
-    self.connect(amp,self)
+    self.connect(amp, self)
 
     # Display some information about the setup
     if config._verbose:
@@ -443,7 +443,7 @@ class transmit_path(gr.hier_block2):
     self._amplification = scaled_ampl
     self._amplifier.set_k(self._amplification)
 
-  def change_txpower(self,val):
+  def change_txpower(self, val):
     self.set_rms_amplitude(val[0])
 
   def get_rms_amplitude(self):
@@ -453,7 +453,7 @@ class transmit_path(gr.hier_block2):
     """
     Adds transmitter-specific options to the Options Parser
     """
-    common_options.add_options(normal,expert)
+    common_options.add_options(normal, expert)
 
     normal.add_option("-a", "--rms-amplitude",
                       type="eng_float", default=0.2, metavar="AMPL",
@@ -491,13 +491,13 @@ class transmit_path(gr.hier_block2):
     """
     Prints information about the transmit path
     """
-    print "\nTransmit path:"
-    print "RMS level:        %s"    % (self.rms)
-    print "FFT length:       %3d"   % (self.config.fft_length)
-    print "Subcarriers:      %3d"   % (self.config.subcarriers)
-    print "CP length:        %3d"   % (self.config.cp_length)
-    print "bits per symbol:  %3d"   % (self.src.bits_per_sym)
-    print "OFDM frame_data_blocks: %3d"   % (self.config.frame_data_blocks)
+    print("\nTransmit path:")
+    print("RMS level:        %s"    % (self.rms))
+    print("FFT length:       %3d"   % (self.config.fft_length))
+    print("Subcarriers:      %3d"   % (self.config.subcarriers))
+    print("CP length:        %3d"   % (self.config.cp_length))
+    print("bits per symbol:  %3d"   % (self.src.bits_per_sym))
+    print("OFDM frame_data_blocks: %3d"   % (self.config.frame_data_blocks))
 
 
 ################################################################################
@@ -508,16 +508,16 @@ class ber_reference_source (gr.hier_block2):
   Input is the bitcount per frame. Outputs the exact number of bits for
   the each frame.
   """
-  def __init__(self,options):
+  def __init__(self, options):
     gr.hier_block2.__init__(self, "ber_reference_source",
-      gr.io_signature2(2,2,gr.sizeof_short,
+      gr.io_signature2(2, 2, gr.sizeof_short,
                        gr.sizeof_int),
-      gr.io_signature(1,1,gr.sizeof_char))
+      gr.io_signature(1, 1, gr.sizeof_char))
 
     ## ID Source
-    id_src = (self,0)
+    id_src = (self, 0)
     ## Bitcount Source
-    bc_src = (self,1)
+    bc_src = (self, 1)
 
     ## Reference Data Source
 #    rand_file = file('random.dat','rb')
@@ -527,22 +527,22 @@ class ber_reference_source (gr.hier_block2):
     # We have to use a fix seed so that Tx and Rx have the same random sequence in order to calculate BER
     seed(30214345)
     # Maximum bitloading is 8 and maximum ID is 256
-    print "Generating random bits..."
+    print("Generating random bits...")
     rand_data = [chr(getrandbits(1)) for x in range(options.subcarriers*8*options.data_blocks*256)]
 
     ref_src = self._reference_data_source = reference_data_source_02_ib(rand_data)
-    self.connect(id_src,(ref_src,0))
-    self.connect(bc_src,(ref_src,1))
+    self.connect(id_src, (ref_src, 0))
+    self.connect(bc_src, (ref_src, 1))
 
     ## Setup Output
-    self.connect(ref_src,self)
+    self.connect(ref_src, self)
 
 
 ################################################################################
 
 class static_control ():
   def __init__(self, dsubc, frame_id_blocks, frame_data_blocks, options):
-    self.static_id = range(0,256)
+    self.static_id = list(range(0, 256))
     self.static_idmod_map = [1] * dsubc
     self.static_idpow_map = [1.0] * dsubc
     self.static_ass_map = [1]*(dsubc)
@@ -562,7 +562,7 @@ class static_control ():
     # reduced, demapper can handle reuse count
     self.rmod_stream = self.static_idmod_map + self.static_mod_map
 
-    self.rc_stream = [frame_id_blocks,frame_data_blocks]
+    self.rc_stream = [frame_id_blocks, frame_data_blocks]
 
     self.pow_stream = self.static_idmod_map*frame_id_blocks + self.static_pow_map*frame_data_blocks
 

@@ -41,9 +41,9 @@ class qa_ofdm (gr_unittest.TestCase):
         self.tb.connect (sqr, dst)
         self.tb.run ()
         result_data = dst.data ()
-	print "Test 1: cube_ff";
-	print "expected result", expected_result;
-	print "actual result", result_data; 
+	print("Test 1: cube_ff");
+	print("expected result", expected_result);
+	print("actual result", result_data); 
         self.assertFloatTuplesAlmostEqual (expected_result, result_data, 6)
 
     def test_002_power4_ff (self):
@@ -56,9 +56,9 @@ class qa_ofdm (gr_unittest.TestCase):
         self.tb.connect (sqr, dst)
         self.tb.run ()
         result_data = dst.data ()
-	print "Test 2: power4_ff";
-        print "expected result", expected_result;
-        print "actual result", result_data;
+	print("Test 2: power4_ff");
+        print("expected result", expected_result);
+        print("actual result", result_data);
 
         self.assertFloatTuplesAlmostEqual (expected_result, result_data, 6)
 

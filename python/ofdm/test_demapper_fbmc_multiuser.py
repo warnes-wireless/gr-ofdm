@@ -4,9 +4,9 @@ from gnuradio import gr
 from gnuradio import gr, blocks, analog, filter
 # import ofdm
 import numpy
-from fbmc_transmitter_multiuser_bc import fbmc_transmitter_multiuser_bc
-from fbmc_receiver_hier_cb import fbmc_receiver_hier_cb
-from fbmc_channel_hier_cc import fbmc_channel_hier_cc
+from .fbmc_transmitter_multiuser_bc import fbmc_transmitter_multiuser_bc
+from .fbmc_receiver_hier_cb import fbmc_receiver_hier_cb
+from .fbmc_channel_hier_cc import fbmc_channel_hier_cc
 
 from numpy import sqrt
 import math
@@ -109,7 +109,7 @@ class test_demapper_fbmc_multiuser:
 		head1 = blocks.head(gr.sizeof_char*1, N)
 		head0 = blocks.head(gr.sizeof_char*1, N)
 		add_block = blocks.add_vcc(1)
-		src = blocks.vector_source_b(map(int, numpy.random.randint(0, qam_size, 100000)), True)
+		src = blocks.vector_source_b(list(map(int, numpy.random.randint(0, qam_size, 100000))), True)
 		noise = analog.fastnoise_source_c(analog.GR_GAUSSIAN, amp, 0, 8192)
 		dst = blocks.vector_sink_b(vlen=1)
 
@@ -121,7 +121,7 @@ class test_demapper_fbmc_multiuser:
 		tb.connect((noise, 0), (add_block, 1)) #esas
 		# tb.connect((head0, 0), (add_block, 1)) #esas
 		tb.connect((add_block, 0), (rx, 0)) #esas
-		tb.connect((rx, 0),(head0, 0)) #esas
+		tb.connect((rx, 0), (head0, 0)) #esas
 		tb.connect((head0, 0), (xor_block, 1)) #esas
 		tb.connect((xor_block, 0), (dst, 0)) #esas  
 
@@ -158,13 +158,13 @@ class test_demapper_fbmc_multiuser:
 			# min_ber = 0
 			min_ber = 100. / (N*arity)
 			ber_arr = []
-			snr_range = range(0, 30, 1)
+			snr_range = list(range(0, 30, 1))
 			for snr_db in snr_range:
 				ber = self.sim( arity, snr_db, N )
 				ber_arr.append( ber )
 				
-				print "For n-arity %d and SNR = %.1f dB, BER is ~%g" \
-							 % ( arity, snr_db , ber )
+				print("For n-arity %d and SNR = %.1f dB, BER is ~%g" \
+							 % ( arity, snr_db, ber ))
 	
 				if ber <= min_ber:
 					break
@@ -174,23 +174,23 @@ class test_demapper_fbmc_multiuser:
 
 
 			
-		print "snr = [",
+		print("snr = [", end=' ')
 		for snr_db in snr_range:
-			print "%.1f," % ( snr_db ),
-		print "]"
+			print("%.1f," % ( snr_db ), end=' ')
+		print("]")
 
 
-		print "ber = [",
+		print("ber = [", end=' ')
 		for arity in narity_range:
 			curve = ber_curves[arity]
 			for x in curve:
-				print "%7g," % (x),
+				print("%7g," % (x), end=' ')
 			for i in range( len( snr_range ) - len( curve ) ):
-				print " 0.0,",
-			print ";"
-		print "]"
+				print(" 0.0,", end=' ')
+			print(";")
+		print("]")
 		
-		print "ber_ref = [",
+		print("ber_ref = [", end=' ')
 		for arity in narity_range:
 			curve = ber_curves[arity]
 			if arity == 1:
@@ -199,24 +199,24 @@ class test_demapper_fbmc_multiuser:
 				mode = 'psk'
 			else:
 				mode = 'qam'
-			print "berawgn(snr(1:%d)-10*log10(%d), '%s', %d " \
-							 % (len(curve),arity, mode, 2**arity ) ,
+			print("berawgn(snr(1:%d)-10*log10(%d), '%s', %d " \
+							 % (len(curve), arity, mode, 2**arity ), end=' ')
 			if arity == 2 or arity == 3:
-				print ", 'nondiff'",
-			print "), ",
+				print(", 'nondiff'", end=' ')
+			print("), ", end=' ')
 			for i in range( len( snr_range ) - len( curve ) ):
-				print " 0.0,",
-			print ";"
-		print "]"
+				print(" 0.0,", end=' ')
+			print(";")
+		print("]")
 		
-		print "semilogy(snr,ber,'--x')"
-		print "hold on"
-		print "semilogy(snr,ber_ref,'--o')"
-		print "legend('QPSK','16QAM','64QAM','256QAM')"
-		print "grid on"
-		print "xlabel 'SNR (dB)'"
-		print "ylabel 'approximate BER'"
-		print "title 'BER over SNR for FBMC system, N=%d window size'" % ( N )
+		print("semilogy(snr,ber,'--x')")
+		print("hold on")
+		print("semilogy(snr,ber_ref,'--o')")
+		print("legend('QPSK','16QAM','64QAM','256QAM')")
+		print("grid on")
+		print("xlabel 'SNR (dB)'")
+		print("ylabel 'approximate BER'")
+		print("title 'BER over SNR for FBMC system, N=%d window size'" % ( N ))
 
 
 if __name__ == '__main__':

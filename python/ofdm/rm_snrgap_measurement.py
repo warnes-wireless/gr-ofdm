@@ -22,16 +22,16 @@
 
 from numpy import concatenate
 import numpy
-from numpy import numarray,mean,var,std,sqrt,logspace
+from numpy import numarray, mean, var, std, sqrt, logspace
 import time
 
 import array
 
-from resource_manager_base import resource_manager_base,start_resource_manager
+from .resource_manager_base import resource_manager_base, start_resource_manager
 
 class resource_manager (resource_manager_base):
-  def __init__(self,orb):
-    resource_manager_base.__init__(self,orb)
+  def __init__(self, orb):
+    resource_manager_base.__init__(self, orb)
 
     # set initial parameters
     self.required_ber = 1e-4
@@ -46,7 +46,7 @@ class resource_manager (resource_manager_base):
     self.txpow_range = logspace(6, 8, 20, True, 10)# range(1000**2,3000**2,1000**2)
     self.cur_txpow_ind = 0
 
-    self.mod_range = range(1,9)
+    self.mod_range = list(range(1, 9))
     self.cur_mod_ind = 0
 
     self.ber_vec = []
@@ -90,25 +90,25 @@ class resource_manager (resource_manager_base):
           self.cur_mod_ind = 0
           self.results = []
 
-      print "Current bit loading per subchannel: %d" % (m)
-      print "Current transmit amplitude %d and power %d" % (self.tx_amplitude,txpow)
+      print("Current bit loading per subchannel: %d" % (m))
+      print("Current transmit amplitude %d and power %d" % (self.tx_amplitude, txpow))
     elif self.state == 1:
       self.rx_snr.flush()
       self.rx_ber.flush()
-      self.snr_vec = numarray.array([],typecode=numarray.Float)
-      self.ber_vec = numarray.array([],typecode=numarray.Float)
+      self.snr_vec = numarray.array([], typecode=numarray.Float)
+      self.ber_vec = numarray.array([], typecode=numarray.Float)
 
       snr_vec_max = 1e4
       ber_vec_max = 1e4
 
-      while 1:
-        snr_vec = numarray.array(self.get_snr(),typecode=numarray.Float)
-        current_ber = numarray.array(self.rx_ber.get_data(),typecode=numarray.Float)
+      while True:
+        snr_vec = numarray.array(self.get_snr(), typecode=numarray.Float)
+        current_ber = numarray.array(self.rx_ber.get_data(), typecode=numarray.Float)
 
         snr_vec = 10**(snr_vec/10)
 
-        self.ber_vec = concatenate([self.ber_vec,current_ber])
-        self.snr_vec = concatenate([self.snr_vec,snr_vec])
+        self.ber_vec = concatenate([self.ber_vec, current_ber])
+        self.snr_vec = concatenate([self.snr_vec, snr_vec])
 
         mean_ber = mean(self.ber_vec)
         std_ber = std(self.ber_vec)
@@ -118,8 +118,8 @@ class resource_manager (resource_manager_base):
         dev1 = std_snr/mean_snr
         dev2 = std_ber/mean_ber
 
-        print "SNR: mean %.2f, std %.2f, dev %.2f   BER: mean %.5f, std %.5f, dev %.2f  State %3d %3d" \
-          % (mean_snr,std_snr,dev1,mean_ber,std_ber,dev2,len(self.snr_vec)/snr_vec_max*100,len(self.ber_vec)/ber_vec_max*100)
+        print("SNR: mean %.2f, std %.2f, dev %.2f   BER: mean %.5f, std %.5f, dev %.2f  State %3d %3d" \
+          % (mean_snr, std_snr, dev1, mean_ber, std_ber, dev2, len(self.snr_vec)/snr_vec_max*100, len(self.ber_vec)/ber_vec_max*100))
 
         try:
           time.sleep(1.0)
@@ -134,7 +134,7 @@ class resource_manager (resource_manager_base):
           tmpfile = "snr.dat"
           fileobj = open(tmpfile, mode='ab')
           outvalues = array.array('f')
-          self.snr_vec = concatenate([[len(self.snr_vec),self.tx_amplitude,self.mod_map[0]],self.snr_vec])
+          self.snr_vec = concatenate([[len(self.snr_vec), self.tx_amplitude, self.mod_map[0]], self.snr_vec])
           outvalues.fromlist( self.snr_vec.astype(float).tolist() )#
           outvalues.tofile(fileobj)
           fileobj.close()
@@ -142,12 +142,12 @@ class resource_manager (resource_manager_base):
           tmpfile = "ber.dat"
           fileobj = open(tmpfile, mode='ab')
           outvalues = array.array('f')
-          self.ber_vec = concatenate([[len(self.ber_vec),self.tx_amplitude,self.mod_map[0]],self.ber_vec])
+          self.ber_vec = concatenate([[len(self.ber_vec), self.tx_amplitude, self.mod_map[0]], self.ber_vec])
           outvalues.fromlist(self.ber_vec.astype(float).tolist() )
           outvalues.tofile(fileobj)
           fileobj.close()
 
-          self.results.append([self.tx_amplitude,self.mod_map[0],mean_snr,std_snr,mean_ber,std_ber])
+          self.results.append([self.tx_amplitude, self.mod_map[0], mean_snr, std_snr, mean_ber, std_ber])
           self.state = 0
           break
 

@@ -38,7 +38,7 @@ class qa_fbmc_asymmetrical_vector_padding_vcvc (gr_unittest.TestCase):
 		# set up fg
 		M = 2**7
 		num = 2**10
-		indices = tuple(range(24,101)) #30:100
+		indices = tuple(range(24, 101)) #30:100
 		# print(indices)
 		src_data = list()
 		expected_result = list()
@@ -55,16 +55,16 @@ class qa_fbmc_asymmetrical_vector_padding_vcvc (gr_unittest.TestCase):
 		#print(src_data)
 		# print(expected_result)
 
-		src = blocks.vector_source_c(src_data,vlen=len(indices))
-		avp = ofdm.fbmc_asymmetrical_vector_padding_vcvc(indices[0],indices[len(indices)-1],M,-1)
+		src = blocks.vector_source_c(src_data, vlen=len(indices))
+		avp = ofdm.fbmc_asymmetrical_vector_padding_vcvc(indices[0], indices[len(indices)-1], M, -1)
 		dst = blocks.vector_sink_c(vlen=M)
 
-		self.tb.connect(src,avp,dst)
+		self.tb.connect(src, avp, dst)
 
 		self.tb.run ()
 		# check data
 		result_data = dst.data()
-		self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data),5)
+		self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data), 5)
 
 
 if __name__ == '__main__':

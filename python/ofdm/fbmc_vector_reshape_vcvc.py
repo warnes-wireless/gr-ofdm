@@ -33,8 +33,8 @@ class fbmc_vector_reshape_vcvc(gr.hier_block2):
             gr.io_signature(1, 1, gr.sizeof_gr_complex*len_out)) # Output signature
 
         assert((int(len_in/len_out)==len_in/len_out) or (int(len_out/len_in)==len_out/len_in))
-        vts = blocks.vector_to_stream(gr.sizeof_gr_complex*1,len_in)
-        stv = blocks.stream_to_vector(gr.sizeof_gr_complex*1,len_out)
-        self.connect((self,0),(vts,0))
-        self.connect((vts,0),(stv,0))
-        self.connect((stv,0),(self,0))
+        vts = blocks.vector_to_stream(gr.sizeof_gr_complex*1, len_in)
+        stv = blocks.stream_to_vector(gr.sizeof_gr_complex*1, len_out)
+        self.connect((self, 0), (vts, 0))
+        self.connect((vts, 0), (stv, 0))
+        self.connect((stv, 0), (self, 0))

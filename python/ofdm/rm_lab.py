@@ -28,13 +28,13 @@ import time
 import array
 
 from gnuradio import eng_notation
-from configparse import OptionParser
+from .configparse import OptionParser
 
 from time import strftime, gmtime
 
 import logging
 
-from resource_manager_base_lab import resource_manager_base_lab, \
+from .resource_manager_base_lab import resource_manager_base_lab, \
         start_resource_manager
 
 from corba_stubs import ofdm_ti
@@ -66,7 +66,7 @@ class resource_manager(resource_manager_base_lab):
 
     def work(self):
         self.query_sounder()
-        print self.ac_vector
+        print(self.ac_vector)
 
         self.ac_vector = [0.0 + 0.0j] * self.ac_vlen
         if self.ac_vlen >= 8:
@@ -85,15 +85,15 @@ class resource_manager(resource_manager_base_lab):
             snr_mean = rxperf.snr
             ctf = rxperf.ctf
         else:
-            print 'Receiver not running or power constraint is too low for receiver...'
+            print('Receiver not running or power constraint is too low for receiver...')
             current_ber = 1
             snr_mean = 0
             ctf = 0
 
         # this is for the lab exercise special case with only half the subcarriers
         if self.options.lab_special_case:
-            nl = range(self.subcarriers/4)
-            nr = range(3*self.subcarriers/4,self.subcarriers)
+            nl = list(range(self.subcarriers/4))
+            nr = list(range(3*self.subcarriers/4, self.subcarriers))
             self.null_indeces = nl + nr
             self.pa_vector = [2]*self.subcarriers
             self.mod_map = [self.modulation]*self.subcarriers
@@ -117,13 +117,13 @@ class resource_manager(resource_manager_base_lab):
         c_ber = max(current_ber, 1e-7)
 
         snr_mean_lin = 10 ** (snr_mean / 10.0)
-        print 'Current SNR:', snr_mean
-        print 'Current BER:', c_ber
+        print('Current SNR:', snr_mean)
+        print('Current BER:', c_ber)
         snr_func_lin = 2.0 * erfcinv(c_ber) ** 2.0
         snr_func = 10 * log10(snr_func_lin)
-        print 'Func. SNR:', snr_func
+        print('Func. SNR:', snr_func)
         delta = self._delta = snr_mean_lin / snr_func_lin
-        print 'Current delta', delta
+        print('Current delta', delta)
         self._agg_rate = 2
 
     def start_measurement(self):
@@ -177,13 +177,13 @@ class resource_manager(resource_manager_base_lab):
 
         for x in rxperf:
 
-            if x.rx_id in self.ctrl_events.keys():
+            if x.rx_id in list(self.ctrl_events.keys()):
 
                 previd = x.rx_id - 1
                 if previd < 0:
                     previd += self.max_tx_id
 
-                if previd in self.ctrl_events.keys():
+                if previd in list(self.ctrl_events.keys()):
                     del self.ctrl_events[previd]
 
                 ev = self.ctrl_events[x.rx_id]
@@ -239,7 +239,7 @@ def main():
 
     if options.cfg is not None:
         (options, args) = parser.parse_args(files=[options.cfg])
-        print 'Using configuration file %s' % options.cfg
+        print('Using configuration file %s' % options.cfg)
 
     start_resource_manager(resource_manager, 'PA', options)
 

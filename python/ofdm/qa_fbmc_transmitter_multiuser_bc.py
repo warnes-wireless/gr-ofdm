@@ -21,7 +21,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from fbmc_transmitter_multiuser_bc import fbmc_transmitter_multiuser_bc
+from .fbmc_transmitter_multiuser_bc import fbmc_transmitter_multiuser_bc
 
 class qa_fbmc_transmitter_multiuser_bc (gr_unittest.TestCase):
 

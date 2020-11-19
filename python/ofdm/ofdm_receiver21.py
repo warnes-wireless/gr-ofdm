@@ -25,15 +25,15 @@ from gnuradio import fft as fft_blocks
 from gnuradio.eng_option import eng_option
 
 from optparse import OptionParser
-from gr_tools import log_to_file,terminate_stream
+from .gr_tools import log_to_file, terminate_stream
 
 import ofdm as ofdm
 import numpy
 import math
 from numpy import concatenate
 
-from autocorrelator import autocorrelator
-from station_configuration import station_configuration
+from .autocorrelator import autocorrelator
+from .station_configuration import station_configuration
 
 
 class ofdm_inner_receiver( gr.hier_block2 ):
@@ -71,7 +71,7 @@ class ofdm_inner_receiver( gr.hier_block2 ):
     
     
     ## Input and output ports
-    self.input  = rx_input = (self,0)
+    self.input  = rx_input = (self, 0)
 
     
     out_ofdm_blocks = ( self, 0 )
@@ -102,16 +102,16 @@ class ofdm_inner_receiver( gr.hier_block2 ):
       terminate_stream(self, ofdm_blocks)
       terminate_stream(self, frame_start)
       
-      serial_to_parallel = blocks.stream_to_vector(gr.sizeof_gr_complex,block_length)
-      discard_cp = ofdm.vector_mask(block_length,cp_length,fft_length,[])
+      serial_to_parallel = blocks.stream_to_vector(gr.sizeof_gr_complex, block_length)
+      discard_cp = ofdm.vector_mask(block_length, cp_length, fft_length, [])
       ofdm_blocks = discard_cp
       self.connect( rx_input, serial_to_parallel, discard_cp )
       
       frame_start = [0]*frame_length
       frame_start[0] = 1
-      frame_start = blocks.vector_source_b(frame_start,True)
+      frame_start = blocks.vector_source_b(frame_start, True)
       
-      print "Disabled time synchronization stage"
+      print("Disabled time synchronization stage")
     
     
     
@@ -138,8 +138,8 @@ class ofdm_inner_receiver( gr.hier_block2 ):
     
     if options.disable_freq_sync or options.ideal:
        terminate_stream(self, freq_offset)
-       freq_offset = blocks.vector_source_f([0.0],True)
-       print "Disabled frequency synchronization stage"
+       freq_offset = blocks.vector_source_f([0.0], True)
+       print("Disabled frequency synchronization stage")
     
     ## Correct frequency shift, feed-forward structure
     frequency_shift = ofdm.frequency_shift_vcc( fft_length, -1.0/fft_length,
@@ -197,19 +197,19 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         # Taking inverse for estimating h11 (h12)
         inv_preamble_fd_1 = numpy.array( block_header.pilotsym_fd_1[ 
             block_header.channel_estimation_pilot[0] ] )
-        print "inv_preamble_fd_1: ",inv_preamble_fd_1
+        print("inv_preamble_fd_1: ", inv_preamble_fd_1)
         inv_preamble_fd_1 = inv_preamble_fd_1[0::2]
         #print "inv_preamble_fd_1 ", inv_preamble_fd_1
         
         # Taking inverse for estimating h21 (h22)
         inv_preamble_fd_2 = numpy.array( block_header.pilotsym_fd_2[ 
             block_header.channel_estimation_pilot[0] ] )
-        print "inv_preamble_fd_2: ",inv_preamble_fd_2
+        print("inv_preamble_fd_2: ", inv_preamble_fd_2)
         inv_preamble_fd_2 = inv_preamble_fd_2[1::2]
         #print "inv_preamble_fd_2 ", inv_preamble_fd_2
         
-        print "inv_preamble_fd_1: ",inv_preamble_fd_1
-        print "inv_preamble_fd_2: ",inv_preamble_fd_2
+        print("inv_preamble_fd_1: ", inv_preamble_fd_1)
+        print("inv_preamble_fd_2: ", inv_preamble_fd_2)
         
         
         inv_preamble_fd_1 = 1. / inv_preamble_fd_1
@@ -219,15 +219,15 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         for i in range (total_subc/2):
             dd.extend([i*2])
             
-        skip_block_1 = ofdm.int_skip(total_subc,2,0)
-        skip_block_2 = ofdm.int_skip(total_subc,2,1)
+        skip_block_1 = ofdm.int_skip(total_subc, 2, 0)
+        skip_block_2 = ofdm.int_skip(total_subc, 2, 1)
     #    inta_estim_1 = ofdm.interpolator(total_subc,2,dd)
     #    inta_estim_2 = ofdm.interpolator(total_subc,2,dd)
         
         LS_channel_estimator_1 = ofdm.multiply_const_vcc( list( inv_preamble_fd_1 ) )
         LS_channel_estimator_2 = ofdm.multiply_const_vcc( list( inv_preamble_fd_2 ) )
-        self.connect( sampled_chest_preamble,skip_block_1, LS_channel_estimator_1)#,inta_estim_1 )
-        self.connect( sampled_chest_preamble,skip_block_2, LS_channel_estimator_2)#,inta_estim_2 )
+        self.connect( sampled_chest_preamble, skip_block_1, LS_channel_estimator_1)#,inta_estim_1 )
+        self.connect( sampled_chest_preamble, skip_block_2, LS_channel_estimator_2)#,inta_estim_2 )
         
         estimated_CTF_1 = LS_channel_estimator_1                  # h0
         estimated_CTF_2 = LS_channel_estimator_2                  # h1              # h3
@@ -257,7 +257,7 @@ class ofdm_inner_receiver( gr.hier_block2 ):
           estimated_CTF_1 = ctf_mse_enhancer_1
           estimated_CTF_2 = ctf_mse_enhancer_2
           
-          print "Disabled CTF MSE enhancer"
+          print("Disabled CTF MSE enhancer")
         
         ctf_postprocess_1 = ofdm.postprocess_CTF_estimate( total_subc/2 )
         self.connect( estimated_CTF_1, ( ctf_postprocess_1, 0 ) )
@@ -275,8 +275,8 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         self.connect ( disp_CTF_2, (disp_CTF_RX0, 1) )
     
     
-        terminate_stream(self,disp_CTF_RX0)
-        terminate_stream(self,inv_CTF_2)
+        terminate_stream(self, disp_CTF_RX0)
+        terminate_stream(self, inv_CTF_2)
         
         disp_CTF_RX0 = blocks.null_source(gr.sizeof_float*total_subc)
         disp_CTF_RX1 = blocks.null_source(gr.sizeof_float*total_subc)
@@ -292,10 +292,10 @@ class ofdm_inner_receiver( gr.hier_block2 ):
             
         pilot_subc = block_header.pilot_tones
         pilot_subcarriers = block_header.pilot_subc_sym
-        print "PILOT SUBCARRIERS: ", pilot_subcarriers
+        print("PILOT SUBCARRIERS: ", pilot_subcarriers)
         
         phase_tracking = ofdm.lms_phase_tracking_03( total_subc, pilot_subc,
-                                                   nondata_blocks,pilot_subcarriers,0 )
+                                                   nondata_blocks, pilot_subcarriers, 0 )
        
         
         ##phase_tracking = ofdm.lms_phase_tracking_02( total_subc, pilot_subc,
@@ -351,9 +351,9 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         ofdm_blocks = equalizer
         
         #log_to_file(self, equalizer,"data/equalizer.compl")
-        log_to_file(self, ofdm_blocks,"data/equalizer.compl")
-        log_to_file(self, estimated_CTF_1,"data/estimated_CTF_1.compl")
-        log_to_file(self, estimated_CTF_2,"data/estimated_CTF_2.compl")
+        log_to_file(self, ofdm_blocks, "data/equalizer.compl")
+        log_to_file(self, estimated_CTF_1, "data/estimated_CTF_1.compl")
+        log_to_file(self, estimated_CTF_2, "data/estimated_CTF_2.compl")
         
         
         
@@ -438,19 +438,19 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         # Taking inverse for estimating h11 (h12)
         inv_preamble_fd_1 = numpy.array( block_header.pilotsym_fd_1[ 
             block_header.channel_estimation_pilot[0] ] )
-        print "inv_preamble_fd_1: ",inv_preamble_fd_1
+        print("inv_preamble_fd_1: ", inv_preamble_fd_1)
         #inv_preamble_fd_1 = inv_preamble_fd_1[0::2]
         #print "inv_preamble_fd_1 ", inv_preamble_fd_1
         
         # Taking inverse for estimating h21 (h22)
         inv_preamble_fd_2 = numpy.array( block_header.pilotsym_fd_2[ 
             block_header.channel_estimation_pilot[0]+1 ] )
-        print "inv_preamble_fd_2: ",inv_preamble_fd_2
+        print("inv_preamble_fd_2: ", inv_preamble_fd_2)
         #inv_preamble_fd_2 = inv_preamble_fd_2[1::2]
         #print "inv_preamble_fd_2 ", inv_preamble_fd_2
         
-        print "inv_preamble_fd_1: ",inv_preamble_fd_1
-        print "inv_preamble_fd_2: ",inv_preamble_fd_2
+        print("inv_preamble_fd_1: ", inv_preamble_fd_1)
+        print("inv_preamble_fd_2: ", inv_preamble_fd_2)
         
         
         inv_preamble_fd_1 = 1. / inv_preamble_fd_1
@@ -460,9 +460,9 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         #for i in range (total_subc/2):
           #  dd.extend([i*2])
             
-        skip_block_1 = ofdm.int_skip(total_subc,2,0)
-        skip_block_11 = ofdm.int_skip(total_subc,2,0)
-        skip_block_2 = ofdm.int_skip(total_subc,2,1)
+        skip_block_1 = ofdm.int_skip(total_subc, 2, 0)
+        skip_block_11 = ofdm.int_skip(total_subc, 2, 0)
+        skip_block_2 = ofdm.int_skip(total_subc, 2, 1)
     #    inta_estim_1 = ofdm.interpolator(total_subc,2,dd)
     #    inta_estim_2 = ofdm.interpolator(total_subc,2,dd)
         
@@ -499,7 +499,7 @@ class ofdm_inner_receiver( gr.hier_block2 ):
           estimated_CTF_1 = ctf_mse_enhancer_1
           estimated_CTF_2 = ctf_mse_enhancer_2
           
-          print "Disabled CTF MSE enhancer"
+          print("Disabled CTF MSE enhancer")
         
         ctf_postprocess_1 = ofdm.postprocess_CTF_estimate( total_subc )
         self.connect( estimated_CTF_1, ( ctf_postprocess_1, 0 ) )
@@ -518,7 +518,7 @@ class ofdm_inner_receiver( gr.hier_block2 ):
     
     
         #terminate_stream(self,disp_CTF_RX0)
-        terminate_stream(self,inv_CTF_2)
+        terminate_stream(self, inv_CTF_2)
         
         disp_CTF_RX0 = disp_CTF_1
         disp_CTF_RX1 = disp_CTF_2
@@ -534,10 +534,10 @@ class ofdm_inner_receiver( gr.hier_block2 ):
             
         pilot_subc = block_header.pilot_tones
         pilot_subcarriers = block_header.pilot_subc_sym
-        print "PILOT SUBCARRIERS: ", pilot_subcarriers
+        print("PILOT SUBCARRIERS: ", pilot_subcarriers)
         
         phase_tracking = ofdm.lms_phase_tracking_03( total_subc, pilot_subc,
-                                                   nondata_blocks,pilot_subcarriers,0 )
+                                                   nondata_blocks, pilot_subcarriers, 0 )
        
         
         ##phase_tracking = ofdm.lms_phase_tracking_02( total_subc, pilot_subc,
@@ -567,7 +567,7 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         
         if options.disable_phase_tracking or options.ideal:
           terminate_stream(self, phase_tracking)
-          print "Disabled phase tracking stage"
+          print("Disabled phase tracking stage")
         else:
           ofdm_blocks = phase_tracking
           
@@ -598,9 +598,9 @@ class ofdm_inner_receiver( gr.hier_block2 ):
         ofdm_blocks = equalizer
         
         #log_to_file(self, equalizer,"data/equalizer.compl")
-        log_to_file(self, ofdm_blocks,"data/equalizer.compl")
-        log_to_file(self, estimated_CTF_1,"data/estimated_CTF_1.compl")
-        log_to_file(self, estimated_CTF_2,"data/estimated_CTF_2.compl")
+        log_to_file(self, ofdm_blocks, "data/equalizer.compl")
+        log_to_file(self, estimated_CTF_1, "data/estimated_CTF_1.compl")
+        log_to_file(self, estimated_CTF_2, "data/estimated_CTF_2.compl")
         
         
         

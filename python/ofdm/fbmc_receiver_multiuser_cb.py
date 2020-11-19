@@ -42,7 +42,7 @@ class fbmc_receiver_multiuser_cb(gr.hier_block2):
         assert(lb%2 == 0), "Unbalanced boundary definition."
 
         allocated = list()
-        for i in range(1,(lb/2)+1):
+        for i in range(1, (lb/2)+1):
             allocated.append(boundaries[2*i-1]-boundaries[2*i-2]+1)
             if i>=2:
                 assert(allocated[i-2] == allocated[i-1]), "Each user should be allocated with same number of subchannels."
@@ -94,7 +94,7 @@ class fbmc_receiver_multiuser_cb(gr.hier_block2):
         ##################################################
         # Blocks
         ##################################################
-        self.ofdm_fbmc_subchannel_processing_mu_vcvc_0 = ofdm.fbmc_subchannel_processing_mu_vcvc(M=M,syms_per_frame=syms_per_frame,indices=boundaries,sel_preamble=sel_preamble,zero_pads=zero_pads,extra_pad=extra_pad,sel_eq=sel_eq)
+        self.ofdm_fbmc_subchannel_processing_mu_vcvc_0 = ofdm.fbmc_subchannel_processing_mu_vcvc(M=M, syms_per_frame=syms_per_frame, indices=boundaries, sel_preamble=sel_preamble, zero_pads=zero_pads, extra_pad=extra_pad, sel_eq=sel_eq)
         self.ofdm_fbmc_separate_vcvc_0 = ofdm.fbmc_separate_vcvc(M, 2)
         self.ofdm_fbmc_remove_preamble_vcvc_0 = ofdm.fbmc_remove_preamble_vcvc(M, syms_per_frame, sel_preamble, zero_pads, extra_pad)
         self.ofdm_fbmc_polyphase_network_vcvc_3 = ofdm.fbmc_polyphase_network_vcvc(M, K, K*M-1, True)
@@ -144,7 +144,7 @@ class fbmc_receiver_multiuser_cb(gr.hier_block2):
 
         asymms = list()
         for i in range(lb/2):
-            asymms.append(ofdm.fbmc_asymmetrical_vector_mask_vcvc(M,boundaries[2*i],boundaries[2*i+1]))
+            asymms.append(ofdm.fbmc_asymmetrical_vector_mask_vcvc(M, boundaries[2*i], boundaries[2*i+1]))
             # print(str(i))
 
         sym_est = list()
@@ -154,5 +154,5 @@ class fbmc_receiver_multiuser_cb(gr.hier_block2):
         # connections
         for i in range(lb/2):
             self.connect((self.ofdm_fbmc_oqam_postprocessing_vcvc_0, 0), (asymms[i], 0))
-            self.connect((asymms[i], 0),(sym_est[i], 0))
-            self.connect((sym_est[i], 0),(self,i))
+            self.connect((asymms[i], 0), (sym_est[i], 0))
+            self.connect((sym_est[i], 0), (self, i))

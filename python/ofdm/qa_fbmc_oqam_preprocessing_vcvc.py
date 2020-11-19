@@ -36,42 +36,42 @@ class qa_fbmc_oqam_preprocessing_vcvc (gr_unittest.TestCase):
 
     def test_001_t (self):
         # set up fg
-        src_data = (1+1j,1-1j,-1-1j,-1+1j,1-1j,-1-1j,1+1j,-1+1j)
-        expected_result = (1,-1j,1,-1j,1j,-1,1j,-1,-1,1j,1,1j,1j,-1,1j,1)
-        src = blocks.vector_source_c(src_data,vlen=4)
-        oqam = ofdm.fbmc_oqam_preprocessing_vcvc(4,0,0)
+        src_data = (1+1j, 1-1j, -1-1j, -1+1j, 1-1j, -1-1j, 1+1j, -1+1j)
+        expected_result = (1, -1j, 1, -1j, 1j, -1, 1j, -1, -1, 1j, 1, 1j, 1j, -1, 1j, 1)
+        src = blocks.vector_source_c(src_data, vlen=4)
+        oqam = ofdm.fbmc_oqam_preprocessing_vcvc(4, 0, 0)
         dst = blocks.vector_sink_c(vlen=4)
-        self.tb.connect(src,oqam,dst)
+        self.tb.connect(src, oqam, dst)
         self.tb.run ()
         # check data
         result_data=dst.data()
-        self.assertEqual(expected_result,result_data)
+        self.assertEqual(expected_result, result_data)
 
     def test_002_t (self):
         # set up fg
-        src_data =  (1+1j,1+1j,-1+1j,1-1j,-1+1j,-1-1j,1+1j,1-1j,-1-1j,-1+1j,1-1j,1-1j,-1-1j,1+1j,-1+1j,1+1j)
-        expected_result = (1,1j,1,1j,-1,-1j,-1,1j,1j,-1,-1j,1,1j,1,-1j,1,1,-1j,1,-1j,1,-1j,-1,1j,1j,-1,-1j,-1,1j,1,1j,-1)
-        src = blocks.vector_source_c(src_data,vlen=8)
-        oqam = ofdm.fbmc_oqam_preprocessing_vcvc(8,0,0)
+        src_data =  (1+1j, 1+1j, -1+1j, 1-1j, -1+1j, -1-1j, 1+1j, 1-1j, -1-1j, -1+1j, 1-1j, 1-1j, -1-1j, 1+1j, -1+1j, 1+1j)
+        expected_result = (1, 1j, 1, 1j, -1, -1j, -1, 1j, 1j, -1, -1j, 1, 1j, 1, -1j, 1, 1, -1j, 1, -1j, 1, -1j, -1, 1j, 1j, -1, -1j, -1, 1j, 1, 1j, -1)
+        src = blocks.vector_source_c(src_data, vlen=8)
+        oqam = ofdm.fbmc_oqam_preprocessing_vcvc(8, 0, 0)
         dst = blocks.vector_sink_c(vlen=8)
-        self.tb.connect(src,oqam,dst)
+        self.tb.connect(src, oqam, dst)
         self.tb.run ()
         # check data
         result_data=dst.data()
-        self.assertEqual(expected_result,result_data)
+        self.assertEqual(expected_result, result_data)
 
     def test_003_t (self):
         # set up fg
-        src_data = (1+1j,1-1j,-1-1j,-1+1j,1-1j,-1-1j,1+1j,-1+1j)
-        expected_result = (1,-1j,-1,1j,1j,1,-1j,-1,1,-1j,1,1j,-1j,-1,1j,-1)
-        src = blocks.vector_source_c(src_data,vlen=4)
-        oqam = ofdm.fbmc_oqam_preprocessing_vcvc(M=4,offset=0,theta_sel=1)
+        src_data = (1+1j, 1-1j, -1-1j, -1+1j, 1-1j, -1-1j, 1+1j, -1+1j)
+        expected_result = (1, -1j, -1, 1j, 1j, 1, -1j, -1, 1, -1j, 1, 1j, -1j, -1, 1j, -1)
+        src = blocks.vector_source_c(src_data, vlen=4)
+        oqam = ofdm.fbmc_oqam_preprocessing_vcvc(M=4, offset=0, theta_sel=1)
         dst = blocks.vector_sink_c(vlen=4)
-        self.tb.connect(src,oqam,dst)
+        self.tb.connect(src, oqam, dst)
         self.tb.run ()
         # check data
         result_data=dst.data()
-        self.assertEqual(expected_result,result_data)
+        self.assertEqual(expected_result, result_data)
 
     def test_004_t(self):
         M= 2**7
@@ -94,10 +94,10 @@ class qa_fbmc_oqam_preprocessing_vcvc (gr_unittest.TestCase):
             e = e+1
             if k==M-1:
                 e = e+M
-        src = blocks.vector_source_c(src_data,vlen=M)
-        oqam = ofdm.fbmc_oqam_preprocessing_vcvc(M=M,offset=0,theta_sel=0)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        oqam = ofdm.fbmc_oqam_preprocessing_vcvc(M=M, offset=0, theta_sel=0)
         dst = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,oqam,dst)
+        self.tb.connect(src, oqam, dst)
         self.tb.run ()
         # check data
         result_data=dst.data()
@@ -107,7 +107,7 @@ class qa_fbmc_oqam_preprocessing_vcvc (gr_unittest.TestCase):
         # print expected_result
         # print "res:"
         # print result_data
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data),5)
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data), 5)
 
 
 if __name__ == '__main__':

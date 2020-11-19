@@ -21,7 +21,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from fbmc_vector_reshape_vcvc import fbmc_vector_reshape_vcvc
+from .fbmc_vector_reshape_vcvc import fbmc_vector_reshape_vcvc
 
 import random
 
@@ -38,30 +38,30 @@ class qa_fbmc_vector_reshape_vcvc (gr_unittest.TestCase):
         src_data=list()
         for i in range(55000):
         	src_data.append(int(random.random()*10))
-        src = blocks.vector_source_c(src_data,vlen=200)
+        src = blocks.vector_source_c(src_data, vlen=200)
         dst = blocks.vector_sink_c(vlen=40)
-        vr = fbmc_vector_reshape_vcvc(200,40)
+        vr = fbmc_vector_reshape_vcvc(200, 40)
 
-        self.tb.connect(src,vr,dst)
+        self.tb.connect(src, vr, dst)
         self.tb.run()
 
         result_data = dst.data()
-        self.assertComplexTuplesAlmostEqual(tuple(src_data),tuple(result_data),100)
+        self.assertComplexTuplesAlmostEqual(tuple(src_data), tuple(result_data), 100)
 
     def test_002_t (self):
         # set up fg
         src_data=list()
         for i in range(25000):
         	src_data.append(int(random.random()*10))
-        src = blocks.vector_source_c(src_data,vlen=25)
+        src = blocks.vector_source_c(src_data, vlen=25)
         dst = blocks.vector_sink_c(vlen=100)
-        vr = fbmc_vector_reshape_vcvc(25,100)
+        vr = fbmc_vector_reshape_vcvc(25, 100)
 
-        self.tb.connect(src,vr,dst)
+        self.tb.connect(src, vr, dst)
         self.tb.run()
 
         result_data = dst.data()
-        self.assertComplexTuplesAlmostEqual(tuple(src_data),tuple(result_data),100)
+        self.assertComplexTuplesAlmostEqual(tuple(src_data), tuple(result_data), 100)
 
 
 if __name__ == '__main__':

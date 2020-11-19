@@ -20,27 +20,27 @@
 # Boston, MA 02110-1301, USA.
 #
 
-from numpy import concatenate,abs,numarray,argmin,argmax,zeros,inf,sqrt,log10, ceil
+from numpy import concatenate, abs, numarray, argmin, argmax, zeros, inf, sqrt, log10, ceil
 from scipy.special import erfcinv
 import numpy
 import time, array
 
 from gnuradio import eng_notation
-from configparse import OptionParser
+from .configparse import OptionParser
 
 from time import strftime, gmtime
 
 import logging
 
-from resource_manager_base import resource_manager_base,start_resource_manager
+from .resource_manager_base import resource_manager_base, start_resource_manager
 
 from corba_stubs import ofdm_ti
 
-from preambles import default_block_header #?????
+from .preambles import default_block_header #?????
 
 class resource_manager (resource_manager_base):
-  def __init__(self,orb,options):
-    resource_manager_base.__init__(self,orb,options=options,loggerbase="suw.")
+  def __init__(self, orb, options):
+    resource_manager_base.__init__(self, orb, options=options, loggerbase="suw.")
     
     self.logger = logging.getLogger("suw.rm")
     self.logger.setLevel(logging.DEBUG)
@@ -66,19 +66,19 @@ class resource_manager (resource_manager_base):
     self.options = options
     
     #Static shifted pilot tones -> CORRECT later
-    self.shifted_pilots = [24,44,64,84,124,144,164,180]
+    self.shifted_pilots = [24, 44, 64, 84, 124, 144, 164, 180]
     #self.subcarriers = 200
 
   def work(self):
     self.query_sounder()
-    print self.ac_vector
+    print(self.ac_vector)
     
     self.ac_vector = [0.0+0.0j]*self.ac_vlen
     if self.ac_vlen >= 8:
       self.ac_vector[0] = (2*10**(-0.452))
       self.ac_vector[3] = (10**(-0.651))
       self.ac_vector[7] = (10**(-1.151))
-      print self.ac_vector
+      print(self.ac_vector)
 
     rxperf = self.get_rx_perf_meas()
     if len(rxperf) == 0:
@@ -134,9 +134,9 @@ class resource_manager (resource_manager_base):
     #sinr_sc_lin = 10**(numarray.array(sinr_sc)/10.0)
     #print "Current LINEAR_SINR_PER_SC:", sinr_sc_lin
 
-    print "Received performance measure estimate:"
-    print repr(rxperf)
-    print "======================================"
+    print("Received performance measure estimate:")
+    print(repr(rxperf))
+    print("======================================")
 
     if self.options.usrp2:
         cur_tx_power = (self.tx_amplitude*self.scale)**2
@@ -151,7 +151,7 @@ class resource_manager (resource_manager_base):
     #  self.ac_vector (if sounder connected)
 
     if self.is_reset_mode():
-      print "Current mode is reset mode"
+      print("Current mode is reset mode")
       self.pa_vector = [1.0]*self.subcarriers
       self.mod_map = [2]*self.subcarriers
       self.assignment_map = [1] * self.subcarriers
@@ -170,13 +170,13 @@ class resource_manager (resource_manager_base):
       c_ber = max(current_ber, 1e-7)
 
       snr_mean_lin = 10**(snr_mean/10.0)
-      print "Current SNR:", snr_mean
-      print "Current BER:", c_ber
+      print("Current SNR:", snr_mean)
+      print("Current BER:", c_ber)
       snr_func_lin = 2.0*(erfcinv(c_ber)**2.0)# ??????
       snr_func = 10*log10(snr_func_lin)
-      print "Func. SNR:", snr_func
+      print("Func. SNR:", snr_func)
       delta = self._delta = snr_mean_lin/snr_func_lin
-      print "Current delta", delta
+      print("Current delta", delta)
       self._agg_rate = 2
 
 
@@ -184,12 +184,12 @@ class resource_manager (resource_manager_base):
 
       pass
     elif self.is_margin_adaptive_policy():
-      print "Current mode is margin adaptive mode"
+      print("Current mode is margin adaptive mode")
       cur_bit_constraint = ceil(self.constraint*self.block_length/self.bandwidth*12/9)
       self.margin_adaptive_policy(sinr_sc, cur_tx_power, cur_bit_constraint, snr_mean)
       #pass
     elif self.is_rate_adaptive_policy():
-      print "Current mode is rate adaptive mode"
+      print("Current mode is rate adaptive mode")
       cur_tx_constraint = self.constraint**2
       self.rate_adaptive_policy(sinr_sc, cur_tx_power, cur_tx_constraint, snr_mean)
 
@@ -204,8 +204,8 @@ class resource_manager (resource_manager_base):
     #  self.ac_vector:      artificial channel, channel impulse response (complex)
     #                       if sounder not connected
 
-  def rate_adaptive_policy(self,sinr_sc,cur_tx_power,cur_tx_constraint,snr_db):
-    ber = max(self.required_ber,1e-7)
+  def rate_adaptive_policy(self, sinr_sc, cur_tx_power, cur_tx_constraint, snr_db):
+    ber = max(self.required_ber, 1e-7)
 
     snrf = (2)*(erfcinv(ber)**2.0)   #*3.2
     snr_corr = snrf*self._delta
@@ -215,12 +215,12 @@ class resource_manager (resource_manager_base):
     gamma = snr_corr/(2**(self._agg_rate)-1)    #*3.2
 
 
-    print "required ber",ber
-    print "snr gap (dB) for req. ber",10*log10(gamma)
+    print("required ber", ber)
+    print("snr gap (dB) for req. ber", 10*log10(gamma))
 
     N = self.subcarriers
 
-    (b,e) = levin_campello(self.mod_map, N, cur_tx_constraint,
+    (b, e) = levin_campello(self.mod_map, N, cur_tx_constraint,
                            snr_db, sinr_sc, gamma, cur_tx_power)
 
     b = numarray.array(b)
@@ -228,7 +228,7 @@ class resource_manager (resource_manager_base):
     a = numarray.array(zeros(len(self.assignment_map)))
 
     if sum(b < 0) > 0:
-      print "WARNING: bit loading < 0"
+      print("WARNING: bit loading < 0")
       b[b < 0] = 0
 
     a[b > 0] = 1
@@ -236,10 +236,10 @@ class resource_manager (resource_manager_base):
     txpow = sum(e)
     e = e / txpow * N
 
-    print "txpow", txpow
-    print "tx amplitude",sqrt(txpow)
-    print numarray.array(map(lambda x: "%.2f" % (x), e))
-    print numarray.array(map(lambda x: "%d" % (x),b))
+    print("txpow", txpow)
+    print("tx amplitude", sqrt(txpow))
+    print(numarray.array(["%.2f" % (x) for x in e]))
+    print(numarray.array(["%d" % (x) for x in b]))
 
     #return
 
@@ -256,14 +256,14 @@ class resource_manager (resource_manager_base):
     bits_per_frame = sum(b)*9                   # FIXME constant
     frame_duration = frame_length_samples/self.bandwidth
     self.data_rate = bits_per_frame/frame_duration
-    print "Datarate",self.data_rate
-    print "TX amplitude",self.tx_amplitude
+    print("Datarate", self.data_rate)
+    print("TX amplitude", self.tx_amplitude)
 
 
     ####New adaptation -> Experimental ########################
     # Calculating the aggregate rate per used subcarrier
     agg_rate =self._agg_rate = sum(b)/sum(a)
-    print "Aggregate rate:", agg_rate
+    print("Aggregate rate:", agg_rate)
 
     rxperf = self.get_rx_perf_meas()
     if len(rxperf) == 0:
@@ -291,27 +291,27 @@ class resource_manager (resource_manager_base):
     
     #Taking care of only used subcarriers
     str_corr = sum(sinr_sc_lin*a)/sum(a) #Improve lin <-> square
-    print"STR CORR:", 10*log10(str_corr)
+    print("STR CORR:", 10*log10(str_corr))
 
     ##
     c_ber = max(current_ber, 1e-7)
     snr_mean_lin = 10**(snr_mean/10.0)
-    print "Current SNR:", snr_mean
-    print "Current BER:", c_ber
+    print("Current SNR:", snr_mean)
+    print("Current BER:", c_ber)
     snr_func_lin = 2.0*(erfcinv(c_ber)**2.0)
     snr_func = 10*log10(snr_func_lin)
-    print "Func. SNR:", snr_func
+    print("Func. SNR:", snr_func)
     #delta = self._delta = snr_mean_lin/snr_func_lin*str_corr
     delta = self._delta = str_corr/snr_func_lin
-    print "Current delta", delta
+    print("Current delta", delta)
 
 
     ###########################################################
 
 ################################################################################
 
-  def margin_adaptive_policy(self,sinr_sc,cur_tx_power,cur_bit_constraint,snr_db):
-    ber = max(self.required_ber,1e-7)
+  def margin_adaptive_policy(self, sinr_sc, cur_tx_power, cur_bit_constraint, snr_db):
+    ber = max(self.required_ber, 1e-7)
 
     snrf = (2)*(erfcinv(ber)**2.0)   #*3.2
     snr_corr = snrf*self._delta
@@ -321,20 +321,20 @@ class resource_manager (resource_manager_base):
     #gamma = snr_corr/3.0    #*3.2
     gamma = snr_corr/(2**(self._agg_rate)-1)
 
-    print "required ber",ber
-    print "snr gap (dB) for req. ber",10*log10(gamma)
+    print("required ber", ber)
+    print("snr gap (dB) for req. ber", 10*log10(gamma))
 
     N = self.subcarriers
 
-    (b,e) = levin_campello_margin(self.mod_map, N, cur_bit_constraint,
-                           snr_db ,sinr_sc, gamma, cur_tx_power)
+    (b, e) = levin_campello_margin(self.mod_map, N, cur_bit_constraint,
+                           snr_db, sinr_sc, gamma, cur_tx_power)
 
     b = numarray.array(b)
     e = numarray.array(e)
     a = numarray.array(zeros(len(self.assignment_map)))
 
     if sum(b < 0) > 0:
-      print "WARNING: bit loading < 0"
+      print("WARNING: bit loading < 0")
       b[b < 0] = 0
 
     a[b > 0] = 1
@@ -342,10 +342,10 @@ class resource_manager (resource_manager_base):
     txpow = sum(e)
     e = e / txpow * N
 
-    print "txpow", txpow
-    print "tx amplitude",sqrt(txpow)
-    print numarray.array(map(lambda x: "%.2f" % (x), e))
-    print numarray.array(map(lambda x: "%d" % (x),b))
+    print("txpow", txpow)
+    print("tx amplitude", sqrt(txpow))
+    print(numarray.array(["%.2f" % (x) for x in e]))
+    print(numarray.array(["%d" % (x) for x in b]))
 
     #return
 
@@ -362,12 +362,12 @@ class resource_manager (resource_manager_base):
     bits_per_frame = sum(b)*9                   # FIXME constant
     frame_duration = frame_length_samples/self.bandwidth
     self.data_rate = bits_per_frame/frame_duration
-    print "Datarate",self.data_rate
+    print("Datarate", self.data_rate)
 
         ####New adaptation -> Experimental ########################
     # Calculating the aggregate rate per used subcarrier
     agg_rate =self._agg_rate = sum(b)/sum(a)
-    print "Aggregate rate:", agg_rate
+    print("Aggregate rate:", agg_rate)
 
     rxperf = self.get_rx_perf_meas()
     if len(rxperf) == 0:
@@ -395,19 +395,19 @@ class resource_manager (resource_manager_base):
     
     #Taking care of only used subcarriers
     str_corr = sum(sinr_sc_lin*a)/sum(a) #Improve lin <-> square
-    print"STR CORR:", 10*log10(str_corr)
+    print("STR CORR:", 10*log10(str_corr))
 
     ##
     c_ber = max(current_ber, 1e-7)
     snr_mean_lin = 10**(snr_mean/10.0)
-    print "Current SNR:", snr_mean
-    print "Current BER:", c_ber
+    print("Current SNR:", snr_mean)
+    print("Current BER:", c_ber)
     snr_func_lin = 2.0*(erfcinv(c_ber)**2.0)
     snr_func = 10*log10(snr_func_lin)
-    print "Func. SNR:", snr_func
+    print("Func. SNR:", snr_func)
     #delta = self._delta = snr_mean_lin/snr_func_lin*str_corr
     delta = self._delta = str_corr/snr_func_lin
-    print "Current delta", delta
+    print("Current delta", delta)
 
   def start_measurement(self):
     self.bervec = list()
@@ -416,7 +416,7 @@ class resource_manager (resource_manager_base):
     self.txamp_vec = list()
     self.start_time = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
 
-    self.filename_prefix = strftime("%Y%m%d%H%M%S",gmtime())
+    self.filename_prefix = strftime("%Y%m%d%H%M%S", gmtime())
 
   def end_measurement(self):
     bervec = numpy.array(self.bervec)
@@ -463,19 +463,19 @@ class resource_manager (resource_manager_base):
 
 
 
-  def process_received_events(self,rxperf):
+  def process_received_events(self, rxperf):
     assert(len(rxperf)>0)
 
 
     for x in rxperf:
 
-      if x.rx_id in self.ctrl_events.keys():
+      if x.rx_id in list(self.ctrl_events.keys()):
 
         previd = x.rx_id - 1
         if previd < 0:
           previd += self.max_tx_id
 
-        if previd in self.ctrl_events.keys():
+        if previd in list(self.ctrl_events.keys()):
           del self.ctrl_events[previd]
 
 #        self.logger.debug("Found corresponding RX Id in control event buffer")
@@ -498,7 +498,7 @@ class resource_manager (resource_manager_base):
     """
     Adds receiver-specific options to the Options Parser
     """
-    resource_manager_base.add_options(normal,expert)
+    resource_manager_base.add_options(normal, expert)
     normal.add_option("", "--automode",
                       action="store_true",
                       default=False,
@@ -540,7 +540,7 @@ class resource_manager (resource_manager_base):
 #
 #  return (b,e)
 
-def levin_campello(b,N,constraint,snr_db,sinr_sc,gamma,txpow):
+def levin_campello(b, N, constraint, snr_db, sinr_sc, gamma, txpow):
   sinr_sc = numarray.array(sinr_sc) 
   #ctf = numarray.array(ctf)
   b = numarray.array(b)
@@ -561,26 +561,26 @@ def levin_campello(b,N,constraint,snr_db,sinr_sc,gamma,txpow):
   
   # prepare
   beta = 1
-  gn = prepare_table(g,gamma,beta)
-  min_ie = lambda b : min_c(gn,b/beta)
-  max_ie = lambda b : max_c(gn,b/beta)
-  energy = lambda b,n : gamma/g[n]*(2.0**b[n]-1)
+  gn = prepare_table(g, gamma, beta)
+  min_ie = lambda b : min_c(gn, b/beta)
+  max_ie = lambda b : max_c(gn, b/beta)
+  energy = lambda b, n : gamma/g[n]*(2.0**b[n]-1)
 
   # energy efficiency
-  b = EF(b,beta,min_ie,max_ie)
+  b = EF(b, beta, min_ie, max_ie)
 
   # e-tightness
-  S = sum(map(lambda x : energy(b,x),range(N)))
-  b = ET(b,beta,constraint,S,min_ie,max_ie)
+  S = sum([energy(b, x) for x in range(N)])
+  b = ET(b, beta, constraint, S, min_ie, max_ie)
 
   # set changes
-  e = map(lambda x :energy(b,x),range(N))
-  print "sum(e)",sum(e)
+  e = [energy(b, x) for x in range(N)]
+  print("sum(e)", sum(e))
 
   b = list(b)
-  return (b,e)
+  return (b, e)
 
-def levin_campello_margin(b,N,constraint,snr_db,sinr_sc,gamma,txpow):
+def levin_campello_margin(b, N, constraint, snr_db, sinr_sc, gamma, txpow):
   sinr_sc = numarray.array(sinr_sc)
   #ctf = numarray.array(ctf)
   b = numarray.array(b)
@@ -596,41 +596,41 @@ def levin_campello_margin(b,N,constraint,snr_db,sinr_sc,gamma,txpow):
 
   # prepare
   beta = 1
-  gn = prepare_table(g,gamma,beta)
-  min_ie = lambda b : min_c(gn,b/beta)
-  max_ie = lambda b : max_c(gn,b/beta)
-  energy = lambda b,n : gamma/g[n]*(2.0**b[n]-1)
+  gn = prepare_table(g, gamma, beta)
+  min_ie = lambda b : min_c(gn, b/beta)
+  max_ie = lambda b : max_c(gn, b/beta)
+  energy = lambda b, n : gamma/g[n]*(2.0**b[n]-1)
 
   # energy efficiency
-  b = EF(b,beta,min_ie,max_ie)
+  b = EF(b, beta, min_ie, max_ie)
 
   # e-tightness
   #S = sum(map(lambda x : energy(b,x),range(N)))
-  print "sum_b", sum(b)
+  print("sum_b", sum(b))
   #b_sum=sum(map(lambda x : b(x),range(N)))
   b_sum=sum(b)
-  b = BT(b,beta,constraint,b_sum,min_ie,max_ie)
+  b = BT(b, beta, constraint, b_sum, min_ie, max_ie)
 
   # set changes
-  e = map(lambda x :energy(b,x),range(N))
-  print "sum(e)",sum(e)
+  e = [energy(b, x) for x in range(N)]
+  print("sum(e)", sum(e))
 
   b = list(b)
-  return (b,e)
+  return (b, e)
 #########################################################################################
-def prepare_table(g,gamma,beta):
+def prepare_table(g, gamma, beta):
   max_nbits = 8
   nsubc = len(g)
 
-  gn = zeros((max_nbits/beta+1,nsubc))
+  gn = zeros((max_nbits/beta+1, nsubc))
 
-  for b in range(beta,max_nbits+beta,beta):
+  for b in range(beta, max_nbits+beta, beta):
     for n in range(nsubc):
         gn[b/beta][n] = gamma/g[n]*(2.0**b)*(1.0-2.0**(-beta))
 
   return gn
 
-def min_c(gn,ind):
+def min_c(gn, ind):
     # constrained minimum search over incremental energies
     # for each index in ind(:), find minimum gn(index) if index within bounds
 
@@ -647,9 +647,9 @@ def min_c(gn,ind):
             ie = gn[i][n]
             c = n
 
-    return (ie,c)
+    return (ie, c)
 
-def max_c(gn,ind):
+def max_c(gn, ind):
     # constrained maximum search over incremental energies
     # for each index in ind(:), find maximum gn(index) if index within bounds
 
@@ -665,7 +665,7 @@ def max_c(gn,ind):
         if ie < gn[i][n]:
             ie = gn[i][n]
             c = n
-    return (ie,c)
+    return (ie, c)
 
 # Energy efficiency
 #
@@ -675,19 +675,19 @@ def max_c(gn,ind):
 # bit loading: b
 # minimum search over incremental energy: min_ie
 # maximum search over incremental energy: max:ie
-def EF(b,beta,min_ie,max_ie):
-  (ie_m,m) = min_ie(b+beta)
-  (ie_n,n) = max_ie(b)
+def EF(b, beta, min_ie, max_ie):
+  (ie_m, m) = min_ie(b+beta)
+  (ie_n, n) = max_ie(b)
 
   # EF
   while (m >= 0 and n >= 0) and (ie_m < ie_n): # inc_energy(b+beta,m) < inc_energy(b,n)
       b[m] = b[m] + beta
       b[n] = b[n] - beta
 
-      print "Swapping bits from %d to %d" %(m,n)
+      print("Swapping bits from %d to %d" %(m, n))
 
-      (ie_m,m) = min_ie(b+beta)
-      (ie_n,n) = max_ie(b)
+      (ie_m, m) = min_ie(b+beta)
+      (ie_n, n) = max_ie(b)
 
   return b
 
@@ -726,69 +726,67 @@ def EF(b,beta,min_ie,max_ie):
 # minimum search over incremental energy: min_ie
 # maximum search over incremental energy: max:ie
 
-def ET(b,beta,K,S,min_ie,max_ie):
+def ET(b, beta, K, S, min_ie, max_ie):
 #function [b] = ET(b,beta,K,S,min_ie,max_ie)
 
-  (ie_m,m) = min_ie(b+beta)
+  (ie_m, m) = min_ie(b+beta)
 
-  print "Constraint K",K
-  print "Energy level S",S
+  print("Constraint K", K)
+  print("Energy level S", S)
 
   # ET
   while ((m >= 0) and ((K - S) >= ie_m)) or ((K - S) < 0):
       if (K-S) < 0:
-          (ie_n,n) = max_ie(b)
+          (ie_n, n) = max_ie(b)
           if ie_n >= 0:
               S = S - ie_n
               b[n] = b[n] - beta
-              print "Reducing bit loading for subchannel %d to achieve constraint" % (n)
+              print("Reducing bit loading for subchannel %d to achieve constraint" % (n))
           else:
-              raise SystemError, \
-                  "ERROR: exceeding constraint, but maximum incremental energy to be reduced is zero"
+              raise SystemError("ERROR: exceeding constraint, but maximum incremental energy to be reduced is zero")
               break
       else:
           S = S + ie_m
           b[m] = b[m] + beta;
-          print "Increasing bit loading for subchannel %d to achieve constraint" % (m)
+          print("Increasing bit loading for subchannel %d to achieve constraint" % (m))
 
-      (ie_m,m) = min_ie(b+beta);
+      (ie_m, m) = min_ie(b+beta);
 
 
-  print "Energy level S",S
+  print("Energy level S", S)
 
   return b
 #
-def BT(b,beta,K,BS,min_ie,max_ie):
+def BT(b, beta, K, BS, min_ie, max_ie):
 #function [b] = ET(b,beta,K,S,min_ie,max_ie)
 
   #(ie_m,m) = min_ie(b+beta)
 
-  print "Constraint K",K
-  print "Bit_rate",BS
+  print("Constraint K", K)
+  print("Bit_rate", BS)
 
   # ET
   while BS != K:
       if (BS-K) > 0:
-          (ie_n,n) = max_ie(b)
+          (ie_n, n) = max_ie(b)
           if ie_n >= 0:
               BS = BS - beta
               b[n] = b[n] - beta
-              print "Reducing bit loading for subchannel %d to achieve constraint" % (n)
+              print("Reducing bit loading for subchannel %d to achieve constraint" % (n))
           else:
-              raise SystemError, \
-                  "ERROR: exceeding constraint, but maximum incremental energy to be reduced is zero"
+              raise SystemError("ERROR: exceeding constraint, but maximum incremental energy to be reduced is zero")
               break
       else:
-          (ie_m,m) = min_ie(b+beta)
+          (ie_m, m) = min_ie(b+beta)
           BS = BS + beta
           b[m] = b[m] + beta;
-          print "Increasing bit loading for subchannel %d to achieve constraint" % (m)
-          print "Bit_rate", BS
+          print("Increasing bit loading for subchannel %d to achieve constraint" % (m))
+          print("Bit_rate", BS)
 
       #(ie_m,m) = min_ie(b+beta);
 
 
-  print "Bit_rate",BS
+  print("Bit_rate", BS)
 
   return b
 #
@@ -860,11 +858,11 @@ def main():
   (options, args) = parser.parse_args()
 
   if options.cfg is not None:
-    (options,args) = parser.parse_args(files=[options.cfg])
-    print "Using configuration file %s" % ( options.cfg )
+    (options, args) = parser.parse_args(files=[options.cfg])
+    print("Using configuration file %s" % ( options.cfg ))
 
 
-  start_resource_manager(resource_manager, "PA",options)
+  start_resource_manager(resource_manager, "PA", options)
 
 if __name__ == '__main__':
   try:

@@ -32,14 +32,14 @@ class qa_multiply_frame_fc (gr_unittest.TestCase):
         self.tb = None
 
     def test_multiply_frame(self):
-        src1_data =(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
-        src2_data =(1,2,3,4)
-        expected_result2 =(1,2,1,2,1,2,1,2,3,4,3,4,3,4,3,4)
+        src1_data =(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+        src2_data =(1, 2, 3, 4)
+        expected_result2 =(1, 2, 1, 2, 1, 2, 1, 2, 3, 4, 3, 4, 3, 4, 3, 4)
 
-        op = ofdm.multiply_frame_fc(4,2)
+        op = ofdm.multiply_frame_fc(4, 2)
 
-        src1 = blocks.vector_source_c(src1_data,False,2)
-        src2 = blocks.vector_source_f(src2_data,False,2)
+        src1 = blocks.vector_source_c(src1_data, False, 2)
+        src2 = blocks.vector_source_f(src2_data, False, 2)
         self.tb.connect(src1, (op, 0))
         self.tb.connect(src2, (op, 1))
 

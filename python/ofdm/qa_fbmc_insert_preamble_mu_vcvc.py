@@ -21,8 +21,8 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from fbmc_remove_preamble_vcvc import fbmc_remove_preamble_vcvc
-from fbmc_insert_preamble_mu_vcvc import fbmc_insert_preamble_mu_vcvc
+from .fbmc_remove_preamble_vcvc import fbmc_remove_preamble_vcvc
+from .fbmc_insert_preamble_mu_vcvc import fbmc_insert_preamble_mu_vcvc
 
 import math
 import random
@@ -38,7 +38,7 @@ class qa_fbmc_insert_preamble_mu_vcvc (gr_unittest.TestCase):
     def test_001_t (self):
         M = 256
         syms_per_frame = 4
-        num_frame = int(math.pow(2,10))
+        num_frame = int(math.pow(2, 10))
         start = 4
         end = 11
         zero_pads = 3
@@ -73,10 +73,10 @@ class qa_fbmc_insert_preamble_mu_vcvc (gr_unittest.TestCase):
 
 
 
-        src = blocks.vector_source_c(src_data,vlen=M)
+        src = blocks.vector_source_c(src_data, vlen=M)
         ipr = fbmc_insert_preamble_mu_vcvc(M=M, syms_per_frame=syms_per_frame, start=start, end=end, sel_eq=0, sel_preamble=sel_preamble, zero_pads=zero_pads, extra_pad=extra_pad)
         dst = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,ipr,dst)
+        self.tb.connect(src, ipr, dst)
         self.tb.run ()
         # check data
         result_data = dst.data()
@@ -88,12 +88,12 @@ class qa_fbmc_insert_preamble_mu_vcvc (gr_unittest.TestCase):
         # 	print(str(i/M)+"-"+str(i%M)+" "+str(result_data[i])+" "+str(expected_result[i]))
         
         # print result_data
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data))
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data))
 
     def test_002_t (self):
         M = 256
         syms_per_frame = 4
-        num_frame = int(math.pow(2,10))
+        num_frame = int(math.pow(2, 10))
         start = 4
         end = 10
         zero_pads = 3
@@ -128,10 +128,10 @@ class qa_fbmc_insert_preamble_mu_vcvc (gr_unittest.TestCase):
 
 
 
-        src = blocks.vector_source_c(src_data,vlen=M)
+        src = blocks.vector_source_c(src_data, vlen=M)
         ipr = fbmc_insert_preamble_mu_vcvc(M=M, syms_per_frame=syms_per_frame, start=start, end=end, sel_eq=0, sel_preamble=sel_preamble, zero_pads=zero_pads, extra_pad=extra_pad)
         dst = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,ipr,dst)
+        self.tb.connect(src, ipr, dst)
         self.tb.run ()
         # check data
         result_data = dst.data()
@@ -143,12 +143,12 @@ class qa_fbmc_insert_preamble_mu_vcvc (gr_unittest.TestCase):
         # 	print(str(i/M)+"-"+str(i%M)+" "+str(result_data[i])+" "+str(expected_result[i]))
         
         # print result_data
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data))
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data))
 
     def test_003_t (self):
         M = 16
         syms_per_frame = 20
-        num_frame = int(math.pow(2,10))
+        num_frame = int(math.pow(2, 10))
         start = 5
         end = 9
         zero_pads = 1
@@ -184,10 +184,10 @@ class qa_fbmc_insert_preamble_mu_vcvc (gr_unittest.TestCase):
 
 
 
-        src = blocks.vector_source_c(src_data,vlen=M)
+        src = blocks.vector_source_c(src_data, vlen=M)
         ipr = fbmc_insert_preamble_mu_vcvc(M=M, syms_per_frame=syms_per_frame, start=start, end=end, sel_eq=sel_eq, sel_preamble=sel_preamble, zero_pads=zero_pads, extra_pad=extra_pad)
         dst = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,ipr,dst)
+        self.tb.connect(src, ipr, dst)
         self.tb.run ()
         # check data
         result_data = dst.data()
@@ -199,13 +199,13 @@ class qa_fbmc_insert_preamble_mu_vcvc (gr_unittest.TestCase):
         # 	print(str(i/M)+"-"+str(i%M)+" "+str(result_data[i])+" "+str(expected_result[i]))
         
         # print result_data
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data))
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data))
 
     def test_004_t (self):
         # just to see if when syms_per_frame=0, it is still working.
         M = 16
         syms_per_frame = 1
-        num_frame = int(math.pow(2,10))
+        num_frame = int(math.pow(2, 10))
         start = 5
         end = 9
         zero_pads = 1
@@ -241,10 +241,10 @@ class qa_fbmc_insert_preamble_mu_vcvc (gr_unittest.TestCase):
 
 
 
-        src = blocks.vector_source_c(src_data,vlen=M)
+        src = blocks.vector_source_c(src_data, vlen=M)
         ipr = fbmc_insert_preamble_mu_vcvc(M=M, syms_per_frame=syms_per_frame, start=start, end=end, sel_eq=sel_eq, sel_preamble=sel_preamble, zero_pads=zero_pads, extra_pad=extra_pad)
         dst = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,ipr,dst)
+        self.tb.connect(src, ipr, dst)
         self.tb.run ()
         # check data
         result_data = dst.data()
@@ -256,13 +256,13 @@ class qa_fbmc_insert_preamble_mu_vcvc (gr_unittest.TestCase):
         #   print(str(i/M)+"-"+str(i%M)+" "+str(result_data[i])+" "+str(expected_result[i]))
         
         # print result_data
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data))
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data))
 
     def test_005_t (self):
         # just to see if when syms_per_frame=0, it is still working.
         M = 256
         syms_per_frame = 10
-        num_frame = int(math.pow(2,10))
+        num_frame = int(math.pow(2, 10))
         start = 5
         end = 9
         zero_pads = 1
@@ -300,16 +300,16 @@ class qa_fbmc_insert_preamble_mu_vcvc (gr_unittest.TestCase):
 
 
 
-        src = blocks.vector_source_c(src_data,vlen=M)
+        src = blocks.vector_source_c(src_data, vlen=M)
         ipr = fbmc_insert_preamble_mu_vcvc(M=M, syms_per_frame=syms_per_frame, start=start, end=end, sel_eq=sel_eq, sel_preamble=sel_preamble, zero_pads=zero_pads, extra_pad=extra_pad)
         rpr = fbmc_remove_preamble_vcvc(M, syms_per_frame, sel_preamble, zero_pads, extra_pad)
         dst = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,ipr,rpr,dst)
+        self.tb.connect(src, ipr, rpr, dst)
         self.tb.run ()
         # check data
         result_data = dst.data()
         # print result_data
-        self.assertComplexTuplesAlmostEqual(tuple(expected_result),tuple(result_data))
+        self.assertComplexTuplesAlmostEqual(tuple(expected_result), tuple(result_data))
 
 
 if __name__ == '__main__':

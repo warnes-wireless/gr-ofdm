@@ -25,7 +25,7 @@ from optparse import OptionParser
 import ofdm as ofdm
 import math
 
-def add_options(normal,expert):
+def add_options(normal, expert):
   normal.add_option("", "--fft-length",
     type="int", default=None,
     help="fft-length")
@@ -47,9 +47,9 @@ def main():
   file = options.file or "input.compl"
   out = options.out or "output.compl"
 
-  src = gr.file_source(gr.sizeof_gr_complex,file)
+  src = gr.file_source(gr.sizeof_gr_complex, file)
   sampler = ofdm.vector_sampler( gr.sizeof_gr_complex, fft_length )
-  trig = gr.vector_source_b([1],True)
+  trig = gr.vector_source_b([1], True)
 
   fft = gr.fft_vcc( fft_length, True, [], True )
   mag = gr.complex_to_mag( fft_length )
@@ -59,7 +59,7 @@ def main():
 
   fg = gr.top_block()
   fg.connect( src, sampler, fft, mag, avg, nlog, dst )
-  fg.connect( trig, (sampler,1))
+  fg.connect( trig, (sampler, 1))
 #  fg.connect(src,limit,
 #             gr.stream_to_vector(gr.sizeof_gr_complex,fft_length),
 #             fft,
@@ -70,7 +70,7 @@ def main():
 #  fg.connect( src, fft, dst )
 
   fg.run()
-  print "done"
+  print("done")
 
 
 

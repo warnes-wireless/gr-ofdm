@@ -62,7 +62,7 @@ class fbmc_symbol_estimation_vcb(gr.hier_block2):
         ##################################################
         self.connect((self.digital_constellation_decoder_cb_0, 0), (self, 0))
         self.connect((self, 0), (self.blocks_vector_to_stream_0, 0))
-        self.connect((self.blocks_vector_to_stream_0, 0),(self.digital_constellation_decoder_cb_0, 0))
+        self.connect((self.blocks_vector_to_stream_0, 0), (self.digital_constellation_decoder_cb_0, 0))
         # self.connect((self.blocks_multiply_xx_0, 0), (self.digital_constellation_decoder_cb_0, 0))
         # self.connect((self.blocks_vector_to_stream_0, 0), (self.blocks_multiply_xx_0, 0))
         # self.connect((self.analog_const_source_x_0, 0), (self.blocks_multiply_xx_0, 1))

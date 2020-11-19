@@ -24,19 +24,19 @@
 # base class
 
 from omniORB import CORBA, PortableServer
-from corba_stubs import ofdm_ti,ofdm_ti__POA
+from corba_stubs import ofdm_ti, ofdm_ti__POA
 import CosNaming
 import CosEventComm__POA, CosEventComm
 import CosEventChannelAdmin
-import os,sys,time,threading
+import os, sys, time, threading
 from omniORB.any import to_any
 
 from gnuradio import gr
 
-import random,cmath
+import random, cmath
 from array import array as array_f
 
-from random import seed,randint
+from random import seed, randint
 
 from corba_servants import *
 
@@ -44,8 +44,8 @@ from threading import Timer
 from numpy import concatenate
 import numpy
 
-import scipy,math
-from scipy import sqrt,log, exp,randn, sum, absolute, multiply, array2string, reshape, ceil, array, zeros,ones, log, floor
+import scipy, math
+from scipy import sqrt, log, exp, randn, sum, absolute, multiply, array2string, reshape, ceil, array, zeros, ones, log, floor
 from pylab import plot, stem, subplot, show, ylim
 from numpy.fft import fftshift
 
@@ -54,7 +54,7 @@ import socket
 std_event_channel = "corbaname:rir:/NameService#"
 
 import logging
-from time import clock,strftime,gmtime
+from time import clock, strftime, gmtime
 
 
 class ctrl_event:
@@ -105,14 +105,14 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
     self._constraint = self.constraint
 
     # get object references
-    self.info_tx = resolve(orb,"info_tx",ofdm_ti.info_tx)
-    self.ci_impulse = resolve(orb,"sounder_cir_c", ofdm_ti.data_buffer)
+    self.info_tx = resolve(orb, "info_tx", ofdm_ti.info_tx)
+    self.ci_impulse = resolve(orb, "sounder_cir_c", ofdm_ti.data_buffer)
 
-    self.tx_power_ref = resolve(orb,"txpower", ofdm_ti.push_vector_f)
+    self.tx_power_ref = resolve(orb, "txpower", ofdm_ti.push_vector_f)
     if options.dyn_freq:
-      self.tx_freq_ref = resolve(orb,"txfreq", ofdm_ti.push_vector_f)
-      self.rx_freq_ref = resolve(orb,"rxfreq", ofdm_ti.push_vector_f)
-    self.tx_ac = resolve(orb,"channelcheat", ofdm_ti.push_vector_c)
+      self.tx_freq_ref = resolve(orb, "txfreq", ofdm_ti.push_vector_f)
+      self.rx_freq_ref = resolve(orb, "rxfreq", ofdm_ti.push_vector_f)
+    self.tx_ac = resolve(orb, "channelcheat", ofdm_ti.push_vector_c)
 
     # current datarate corba servant
     def dummy():
@@ -123,7 +123,7 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
     #self.UDP_client()
 
     if self.info_tx is None:
-      raise SystemExit, "Need TX information"
+      raise SystemExit("Need TX information")
 
     # latch tx information
     self.subcarriers = self.info_tx._get_subcarriers() #data subcarriers w/o pilot subcarriers
@@ -152,11 +152,11 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
 
 
     self.pa_msgq = gr.msg_queue(2)
-    self.pa_disp_servant = corba_data_buffer_servant("padisp",self.subcarriers,
+    self.pa_disp_servant = corba_data_buffer_servant("padisp", self.subcarriers,
                                                      self.pa_msgq)
 
     self.ra_msgq = gr.msg_queue(2)
-    self.ra_disp_servant = corba_data_buffer_servant("radisp",self.subcarriers,
+    self.ra_disp_servant = corba_data_buffer_servant("radisp", self.subcarriers,
                                                      self.ra_msgq)
 
     # tell transmitter initial settings and wait for it to stabilize
@@ -164,7 +164,7 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
     time.sleep(1.0) # seconds
 
   def UDP_client (self):
-    self.clisock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    self.clisock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.serverip = socket.gethostbyname('tabur')
 
     self.rm_logger.info( "Tabur IP: %s" %(str( self.serverip)))
@@ -173,7 +173,7 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
     self.rm_logger.debug( "Data rate: %d"%( vv))
 
     try:
-      self.clisock.connect ((self.serverip,5000))
+      self.clisock.connect ((self.serverip, 5000))
       self.clisock.send(str(vv)+"\n")
       #print self.clisock.recv(100)
       self.clisock.close()
@@ -198,7 +198,7 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
             sys.stderr.write("Event Channel returned nil Supplier Admin!\n")
             sys.exit(1)
           break
-      except CORBA.COMM_FAILURE, ex:
+      except CORBA.COMM_FAILURE as ex:
         sys.stderr.write("Caught COMM_FAILURE Exception. "+ \
           "obtaining Supplier Admin! Retrying...\n")
         time.sleep(1)
@@ -213,7 +213,7 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
           sys.stderr.write("Supplier Admin returned nil proxy_consumer!\n")
           sys.exit(1)
         break
-      except CORBA.COMM_FAILURE, ex:
+      except CORBA.COMM_FAILURE as ex:
         sys.stderr.write("Caught COMM_FAILURE Exception "+ \
           "obtaining Proxy Push Consumer! Retrying...\n")
         time.sleep(1)
@@ -225,14 +225,14 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
       try:
           self.proxy_consumer.connect_push_supplier(sptr)
           break
-      except CORBA.BAD_PARAM, ex:
+      except CORBA.BAD_PARAM as ex:
         sys.stderr.write( \
           'Caught BAD_PARAM Exception connecting Push Supplier!')
         sys.exit(1)
-      except CosEventChannelAdmin.AlreadyConnected, ex:
+      except CosEventChannelAdmin.AlreadyConnected as ex:
         sys.stderr.write('Proxy Push Consumer already connected!')
         sys.exit(1)
-      except CORBA.COMM_FAILURE, ex:
+      except CORBA.COMM_FAILURE as ex:
         sys.stderr.write("Caught COMM_FAILURE Exception " +\
           "connecting Push Supplier! Retrying...")
         time.sleep(1)
@@ -252,7 +252,7 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
             sys.stderr.write("Event Channel returned nil Consumer Admin!\n")
             sys.exit(1)
           break
-      except CORBA.COMM_FAILURE, ex:
+      except CORBA.COMM_FAILURE as ex:
         sys.stderr.write("Caught COMM_FAILURE Exception. "+ \
           "obtaining Consumer Admin! Retrying...\n")
         time.sleep(1)
@@ -271,7 +271,7 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
             sys.stderr.write("Consumer Admin return nil proxy_supplier!\n")
             sys.exit(1)
           break
-      except CORBA.COMM_FAILURE, ex:
+      except CORBA.COMM_FAILURE as ex:
         sys.stderr.write("Caught COMM_FAILURE Exception. "+ \
           "obtaining Proxy Push Supplier! Retrying...\n")
         time.sleep(1)
@@ -283,14 +283,14 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
       try:
           proxy_supplier.connect_push_consumer(consumer._this())
           break
-      except CORBA.BAD_PARAM, ex:
+      except CORBA.BAD_PARAM as ex:
         sys.stderr.write( \
           'Caught BAD_PARAM Exception connecting Push Consumer!\n')
         sys.exit(1)
-      except CosEventChannelAdmin.AlreadyConnected, ex:
+      except CosEventChannelAdmin.AlreadyConnected as ex:
         sys.stderr.write('Proxy Push Supplier already connected!\n')
         sys.exit(1)
-      except CORBA.COMM_FAILURE, ex:
+      except CORBA.COMM_FAILURE as ex:
         sys.stderr.write("Caught COMM_FAILURE Exception " +\
           "connecting Push Consumer! Retrying...\n")
         time.sleep(1)
@@ -298,11 +298,11 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
 
   def push_data(self):
     if sum(self.assignment_map) < 80:
-      print "ABORTING .................................................................................................."
+      print("ABORTING ..................................................................................................")
       return
-    pa_vector = list(map(lambda x : float(x),self.pa_vector))
-    mod_map = array_f('B',self.mod_map).tostring()
-    assignment_map = list(map(lambda  x: int(x),self.assignment_map))
+    pa_vector = list([float(x) for x in self.pa_vector])
+    mod_map = array_f('B', self.mod_map).tostring()
+    assignment_map = list([int(x) for x in self.assignment_map])
     tx_id = self.tx_id
     self.tx_id = (self.tx_id + 1) % self.max_tx_id
 
@@ -311,8 +311,8 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
         assert(assignment_map[x] == 0)
       else:
         assert(assignment_map[x] > 0)
-      if not self.mod_map[x] in (0,1,2,3,4,5,6,7,8):
-        raise SystemError,"Modulation scheme not supported: %d" % (self.mod_map[x])
+      if not self.mod_map[x] in (0, 1, 2, 3, 4, 5, 6, 7, 8):
+        raise SystemError("Modulation scheme not supported: %d" % (self.mod_map[x]))
 
     if sum(pa_vector) > self.subcarriers+10:
       self.rm_logger.error( "sum(pa_vector) = %d too big" %(sum(pa_vector)))
@@ -334,8 +334,8 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
     data_any = to_any(data)
     
     if self.store_ctrl_events:
-      self.ctrl_events[tx_id] = ctrl_event(data,self.tx_amplitude,
-                                           self.required_ber,self.constraint,
+      self.ctrl_events[tx_id] = ctrl_event(data, self.tx_amplitude,
+                                           self.required_ber, self.constraint,
                                            self.data_rate)
     
 
@@ -344,10 +344,10 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
         self.rm_logger.debug(  "Push Supplier: push() called. ")
         self.proxy_consumer.push(data_any)
         break
-      except CosEventComm.Disconnected, ex:
+      except CosEventComm.Disconnected as ex:
         sys.stderr.write("Failed. Caught Disconnected Exception!")
         sys.exit(1)
-      except CORBA.COMM_FAILURE, ex:
+      except CORBA.COMM_FAILURE as ex:
         sys.stderr.write("Failed. Caught COMM_FAILURE Exception! Retrying ...")
         self.rm_logger.warning("Failed. Caught COMM_FAILURE Exception! Retrying ...")
         time.sleep(1)
@@ -392,7 +392,7 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
       self.rm_logger.info( "Pushed new tx power")
     except:
       self.rm_logger.error( "Failed to push new tx power")
-      self.tx_power_ref = resolve(self.orb,"txpower", ofdm_ti.push_vector_f)
+      self.tx_power_ref = resolve(self.orb, "txpower", ofdm_ti.push_vector_f)
 
     acv = self.ac_vector
     acv = acv/sqrt(sum(absolute(acv)**2))
@@ -406,19 +406,19 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
       self.tx_ac.push(list(ac_vector))
     except:
       self.rm_logger.error("FAILED push artificial channel")
-      self.tx_ac = resolve(self.orb,"channelcheat", ofdm_ti.push_vector_c)
+      self.tx_ac = resolve(self.orb, "channelcheat", ofdm_ti.push_vector_c)
 
     self.rm_logger.debug( "Pushed artificial channel update")
 
     # display pa scheme
-    pa_vector_s = array_f('f',array(self.pa_vector)**(1./2)).tostring()
+    pa_vector_s = array_f('f', array(self.pa_vector)**(1./2)).tostring()
     msg = gr.message_from_string(pa_vector_s)
     if not self.pa_msgq.full_p():
       self.pa_msgq.insert_tail(msg)
 
     self.rm_logger.debug("Pushed pa scheme to GUI")
 
-    ra_vector_s = array_f('f',array(self.mod_map)).tostring()
+    ra_vector_s = array_f('f', array(self.mod_map)).tostring()
     msg_ra = gr.message_from_string(ra_vector_s)
     if not self.ra_msgq.full_p():
       self.ra_msgq.insert_tail(msg_ra)
@@ -432,20 +432,20 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
 
   ## CORBA interface to control the PA
   ##############################################################################
-  def _set_required_ber(self,val):
+  def _set_required_ber(self, val):
     self._required_ber = val
 
   def _get_required_ber(self):
     return self.required_ber
 
-  def _set_constraint(self,val):
+  def _set_constraint(self, val):
     # FIXME check if in acceptable range
     self._constraint = val
 
   def _get_constraint(self):
     return self.constraint
 
-  def _set_channel_refresh_interval(self,val):
+  def _set_channel_refresh_interval(self, val):
     self._channel_refresh_interval = val
 
   def _get_channel_refresh_interval(self):
@@ -454,7 +454,7 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
   def _get_data_rate(self):
     return self.data_rate
 
-  def change_strategy(self,mode):
+  def change_strategy(self, mode):
     # FIXME check if contraints etc. fit to the new mode
     self._strategy_mode = mode
 
@@ -475,9 +475,9 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
     except:
       #Stupid CTF#####################################
 
-      ci_imp = concatenate([[1],[0]*(self.ac_vlen-1)])
+      ci_imp = concatenate([[1], [0]*(self.ac_vlen-1)])
 
-      self.ci_impulse = resolve(self.orb,"sounder_cir_c", ofdm_ti.data_buffer)
+      self.ci_impulse = resolve(self.orb, "sounder_cir_c", ofdm_ti.data_buffer)
 
     self.ac_vector = ci_imp
 
@@ -498,19 +498,19 @@ class resource_manager_base (ofdm_ti__POA.PA_Ctrl):
     """
     Adds receiver-specific options to the Options Parser
     """
-    expert.add_option("","--data-blocks",type="intx",
-                      default=9,help="Set number of data blocks per OFDM frame")
+    expert.add_option("", "--data-blocks", type="intx",
+                      default=9, help="Set number of data blocks per OFDM frame")
     normal.add_option("", "--dyn-freq", action="store_true", default=False,
                       help="enable troughput measure, usrp disabled");
-    expert.add_option("","--init-mod",type="intx",
-                      default=2,help="Set init modulation")
+    expert.add_option("", "--init-mod", type="intx",
+                      default=2, help="Set init modulation")
   add_options = staticmethod(add_options)
 
 ################################################################################
 
 class Supplier_i(CosEventComm__POA.PushSupplier):
   def disconnect_push_supplier (self):
-      print "Push Supplier: disconnected."
+      print("Push Supplier: disconnected.")
 
 ################################################################################
 
@@ -527,13 +527,13 @@ class Consumer_i(CosEventComm__POA.PushConsumer):
   def clear_received(self):
     self._received = []
 
-  def push(self,data_any):
+  def push(self, data_any):
     v = data_any.value(CORBA.TypeCode(CORBA.id(ofdm_ti.rx_performance_measure)))
     if v is not None:
       self._received.append(v)
 
   def disconnect_push_consumer(self):
-    print "Push Consumer: disconnected."
+    print("Push Consumer: disconnected.")
 #end class Consumer_i
 
 ################################################################################
@@ -541,7 +541,7 @@ class Consumer_i(CosEventComm__POA.PushConsumer):
 
 
 
-def resolve(orb,uid,c):
+def resolve(orb, uid, c):
   try:
     obj = orb.string_to_object("corbaname:rir:/NameService#ofdm_ti."+str(uid))
     obj_ref = obj._narrow(c)
@@ -553,13 +553,13 @@ def resolve(orb,uid,c):
 ################################################################################
 
 def start_resource_manager(rmanager,unique_id,options=None):
-  orb = CORBA.ORB_init(sys.argv,CORBA.ORB_ID)
+  orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
   poa = orb.resolve_initial_references("RootPOA")
 
   poaManager = poa._get_the_POAManager()
   poaManager.activate()
 
-  rm_i = rmanager(orb,options)
+  rm_i = rmanager(orb, options)
   rm_o = rm_i._this()
   unique_id = str(unique_id)
 
@@ -567,13 +567,13 @@ def start_resource_manager(rmanager,unique_id,options=None):
     obj = orb.resolve_initial_references("NameService")
     rootContext = obj._narrow(CosNaming.NamingContext)
   except:
-    raise SystemExit, "Failed to get NamingContext"
+    raise SystemExit("Failed to get NamingContext")
 
-  corba_name = [CosNaming.NameComponent("ofdm_ti",unique_id)]
+  corba_name = [CosNaming.NameComponent("ofdm_ti", unique_id)]
   try:
-    rootContext.bind(corba_name,rm_o)
+    rootContext.bind(corba_name, rm_o)
   except: # CosNaming.NamingContext.AlreadyBound, ex:
-    rootContext.rebind(corba_name,rm_o)
+    rootContext.rebind(corba_name, rm_o)
 
   seed()
   rm_i.start()

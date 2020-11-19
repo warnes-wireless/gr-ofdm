@@ -37,6 +37,6 @@ class autocorrelator ( gr.hier_block2 ):
     s2 = ofdm.autocorrelator_stage2( n_samples )
 
     self.connect( self, s1, s2, self )
-    self.connect( (s1,1), (s2,1) )
+    self.connect( (s1, 1), (s2, 1) )
 
     self.s2 = s2

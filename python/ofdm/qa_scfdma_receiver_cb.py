@@ -21,7 +21,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from scfdma_receiver_cb import scfdma_receiver_cb
+from .scfdma_receiver_cb import scfdma_receiver_cb
 
 class qa_scfdma_receiver_cb (gr_unittest.TestCase):
 

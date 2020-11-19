@@ -20,11 +20,11 @@
 # Boston, MA 02110-1301, USA.
 #
 
-from numpy import concatenate,mean,var,arange,sqrt, log10, ceil, logspace
+from numpy import concatenate, mean, var, arange, sqrt, log10, ceil, logspace
 import numpy
 import array
 
-from resource_manager_base import resource_manager_base,start_resource_manager
+from .resource_manager_base import resource_manager_base, start_resource_manager
 
 from time import time, strftime, gmtime
 
@@ -35,8 +35,8 @@ import sys
 import os
 
 class resource_manager (resource_manager_base):
-  def __init__(self,orb,options):
-    resource_manager_base.__init__(self,orb,options=options,loggerbase="mber.")
+  def __init__(self, orb, options):
+    resource_manager_base.__init__(self, orb, options=options, loggerbase="mber.")
 
     self.localenv = options.le
     self.snr = options.snr
@@ -134,7 +134,7 @@ class resource_manager (resource_manager_base):
 
         rxid_stable = 0
         last_rxid = int(self.buffer[len(self.buffer)-1].rx_id)
-        for i in arange(len(self.buffer)-1,-1,-1):
+        for i in arange(len(self.buffer)-1, -1, -1):
           if int(self.buffer[i].rx_id) == last_rxid:
             rxid_stable += 1
           else:
@@ -149,8 +149,8 @@ class resource_manager (resource_manager_base):
         else:
           self.state = 0
           for x in self.buffer:
-            print x.rx_id," ",
-          print ""
+            print(x.rx_id, " ", end=' ')
+          print("")
 
     elif self.state == 2:
 
@@ -233,11 +233,11 @@ class resource_manager (resource_manager_base):
         self.f_nfo.write( "Mod: " + str(self.modulations[self.curmod]) + "\n")
         #f_nfo.write( "Power: %f\n" %(self.txpow_range[self.curtxpowind]))
         #f_nfo.write( "expected rx id: %d\n" %(self.expected_rx_id))
-        self.f_nfo.write( "Mean SNR %.8g   Var SNR %.8g\n" %(snr_mean,snr_var))
-        self.f_nfo.write( "Mean BER %.8g   Var BER %.8g\n\n" %(ber_mean,ber_var))
+        self.f_nfo.write( "Mean SNR %.8g   Var SNR %.8g\n" %(snr_mean, snr_var))
+        self.f_nfo.write( "Mean BER %.8g   Var BER %.8g\n\n" %(ber_mean, ber_var))
 
-        self.logger.info("Mean SNR %.8g   Var SNR %.8g" %(snr_mean,snr_var))
-        self.logger.info("Mean BER %.8g   Var BER %.8g" %(ber_mean,ber_var))
+        self.logger.info("Mean SNR %.8g   Var SNR %.8g" %(snr_mean, snr_var))
+        self.logger.info("Mean BER %.8g   Var BER %.8g" %(ber_mean, ber_var))
 
         #f_ber.close()
         #f_snr.close()
@@ -254,15 +254,15 @@ class resource_manager (resource_manager_base):
       if self.curmod >= len(self.nbits):
         #self.curmod = 0
         #sys.exit("Simulation finished")
-        print "Simulation for SNR = %f dB finished" %(self.snr)
-	print "Press <STRG> C to stop the resource manager"
+        print("Simulation for SNR = %f dB finished" %(self.snr))
+	print("Press <STRG> C to stop the resource manager")
         quit()
         #self.curtxpowind += 1
         #if self.curtxpowind >= len(self.txpow_range):
           #self.curtxpowind = 0
 
       ##self.logger.info( "Next mod %d" %(self.nbits[self.curmod]))
-      print "Next modulation ", self.modulations[self.curmod]
+      print("Next modulation ", self.modulations[self.curmod])
 
       self.expected_rx_id += 1
       self.state = 3
@@ -304,7 +304,7 @@ class resource_manager (resource_manager_base):
                       default=False,
                       help="USRP2")
 
-    resource_manager_base.add_options(normal,expert)
+    resource_manager_base.add_options(normal, expert)
   add_options = staticmethod(add_options)
 
 
@@ -315,7 +315,7 @@ def main():
   parser = OptionParser(option_class=eng_option, conflict_handler="resolve")
   normal_grp = parser.add_option_group("Normal")
   expert_grp = parser.add_option_group("Expert")
-  resource_manager.add_options(normal_grp,expert_grp)
+  resource_manager.add_options(normal_grp, expert_grp)
   (options, args) = parser.parse_args()
 
   logger = logging.getLogger("mber")
@@ -340,7 +340,7 @@ def main():
   #logger.info("Log filename is %s" %(logfilename))
 
 
-  start_resource_manager(resource_manager, "PA",options)
+  start_resource_manager(resource_manager, "PA", options)
 
 if __name__ == '__main__':
   try:

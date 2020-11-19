@@ -32,25 +32,25 @@ import random
 import ofdm as ofdm
 import numpy, scipy
 
-from gr_tools import log_to_file
+from .gr_tools import log_to_file
 
-from station_configuration import station_configuration
+from .station_configuration import station_configuration
 
 class awgn_channel(gr.hier_block2):
   def __init__(self, noise_voltage, frequency_offset):
     gr.hier_block2.__init__(self, "awgn_channel", 
-        gr.io_signature(1,1,gr.sizeof_gr_complex),
-        gr.io_signature(1,1,gr.sizeof_gr_complex))
+        gr.io_signature(1, 1, gr.sizeof_gr_complex),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex))
 
     self.noise_adder = gr.add_cc()
-    self.noise = gr.noise_source_c(gr.GR_GAUSSIAN,noise_voltage)
+    self.noise = gr.noise_source_c(gr.GR_GAUSSIAN, noise_voltage)
     self.offset = gr.sig_source_c(1, gr.GR_SIN_WAVE, frequency_offset, 1.0, 0.0)
     self.mixer_offset = gr.multiply_cc()
 
-    self.connect(self, (self.mixer_offset,0))
-    self.connect(self.offset,(self.mixer_offset,1))
-    self.connect(self.mixer_offset, (self.noise_adder,1))
-    self.connect(self.noise, (self.noise_adder,0))
+    self.connect(self, (self.mixer_offset, 0))
+    self.connect(self.offset, (self.mixer_offset, 1))
+    self.connect(self.mixer_offset, (self.noise_adder, 1))
+    self.connect(self.noise, (self.noise_adder, 0))
     self.connect(self.noise_adder, self)
 
     try:
@@ -63,20 +63,20 @@ class awgn_channel(gr.hier_block2):
 class variable_awgn_channel(gr.hier_block2):
   def __init__(self, noise_voltage, sensitivity):
     gr.hier_block2.__init__(self, "variable_awgn_channel", 
-        gr.io_signature(1,1,gr.sizeof_gr_complex),
-        gr.io_signature(1,1,gr.sizeof_gr_complex))
+        gr.io_signature(1, 1, gr.sizeof_gr_complex),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex))
 
     self.noise_adder = gr.add_cc()
-    self.noise = gr.noise_source_c(gr.GR_GAUSSIAN,noise_voltage)
+    self.noise = gr.noise_source_c(gr.GR_GAUSSIAN, noise_voltage)
     self.noise_amp = gr.multiply_cc()
     self.offset = gr.frequency_modulator_fc(sensitivity)
     self.mixer_offset = gr.multiply_cc()
 
-    self.connect(self, (self.mixer_offset,0))
-    self.connect(self.offset,(self.mixer_offset,1))
-    self.connect(self.mixer_offset, (self.noise_adder,1))
-    self.connect(self.noise, (self.noise_amp,0))
-    self.connect(self.noise_amp, (self.noise_adder,0))
+    self.connect(self, (self.mixer_offset, 0))
+    self.connect(self.offset, (self.mixer_offset, 1))
+    self.connect(self.mixer_offset, (self.noise_adder, 1))
+    self.connect(self.noise, (self.noise_amp, 0))
+    self.connect(self.noise_amp, (self.noise_adder, 0))
     self.connect(self.noise_adder, self)
 
     try:
@@ -89,8 +89,8 @@ class variable_awgn_channel(gr.hier_block2):
 class multipath_channel(gr.hier_block2):
   def __init__(self):
     gr.hier_block2.__init__(self, "multipath_channel", 
-        gr.io_signature(1,1,gr.sizeof_gr_complex),
-        gr.io_signature(1,1,gr.sizeof_gr_complex))
+        gr.io_signature(1, 1, gr.sizeof_gr_complex),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex))
 
     #self.taps = [1.0, .2, 0.0, .1, .08, -.4, .12, -.2, 0, 0, 0, .3]
 
@@ -129,12 +129,12 @@ class multipath_channel(gr.hier_block2):
 class fading_channel(gr.hier_block2):
   def __init__(self, noise_voltage, frequency_offset):
     gr.hier_block2.__init__(self, "fading_channel", 
-        gr.io_signature(1,1,gr.sizeof_gr_complex),
-        gr.io_signature(1,1,gr.sizeof_gr_complex))
+        gr.io_signature(1, 1, gr.sizeof_gr_complex),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex))
 
     self.awgn = awgn_channel(noise_voltage, frequency_offset)
     self.multipath = multipath_channel()
-    self.connect(self,self.awgn,self.multipath,self)
+    self.connect(self, self.awgn, self.multipath, self)
 
 
 class time_variant_rayleigh_channel ( gr.hier_block2 ):
@@ -153,7 +153,7 @@ class time_variant_rayleigh_channel ( gr.hier_block2 ):
     self.connect( inp, tap2_delay )
     
     fd = 100
-    z = numpy.arange(-fd+0.1,fd,0.1)
+    z = numpy.arange(-fd+0.1, fd, 0.1)
     t = numpy.sqrt(1. / ( pi * fd * numpy.sqrt( 1. - (z/fd)**2 ) ) )
     
     tap1_noise = ofdm.complex_white_noise( 0.0, taps[0] )
@@ -161,8 +161,8 @@ class time_variant_rayleigh_channel ( gr.hier_block2 ):
     self.connect( tap1_noise, tap1_filter )
     
     tap1_mult = gr.multiply_cc()
-    self.connect( tap1_filter, (tap1_mult,0) )
-    self.connect( tap1_delay, (tap1_mult,1) )
+    self.connect( tap1_filter, (tap1_mult, 0) )
+    self.connect( tap1_delay, (tap1_mult, 1) )
     
     tap2_noise = ofdm.complex_white_noise( 0.0, taps[1] )
     tap2_filter = gr.fft_filter_ccc(1, t)
@@ -170,16 +170,16 @@ class time_variant_rayleigh_channel ( gr.hier_block2 ):
     self.connect( tap2_noise, tap2_filter )
     
     tap2_mult = gr.multiply_cc()
-    self.connect( tap2_filter, (tap2_mult,0) )
-    self.connect( tap2_delay, (tap2_mult,1) )
+    self.connect( tap2_filter, (tap2_mult, 0) )
+    self.connect( tap2_delay, (tap2_mult, 1) )
     
     noise_src = ofdm.complex_white_noise( 0.0, sqrt( noise_power ) )
     chan = gr.add_cc()
     
-    self.connect( inp, (chan,0) )
-    self.connect( tap1_mult, (chan,1) )
-    self.connect( tap2_mult, (chan,2) )
-    self.connect( noise_src, (chan,3) )
+    self.connect( inp, (chan, 0) )
+    self.connect( tap1_mult, (chan, 1) )
+    self.connect( tap2_mult, (chan, 2) )
+    self.connect( noise_src, (chan, 3) )
     
     self.connect( chan, self )
     
@@ -192,17 +192,17 @@ class time_variant_rayleigh_channel ( gr.hier_block2 ):
 class freq_offset(gr.hier_block2):
   def __init__(self, freq_off):
     gr.hier_block2.__init__(self, "freq_offset", 
-        gr.io_signature(1,1,gr.sizeof_gr_complex),
-        gr.io_signature(1,1,gr.sizeof_gr_complex))
+        gr.io_signature(1, 1, gr.sizeof_gr_complex),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex))
 
     freqoff = freq_off
     config = self.config = station_configuration()
     
-    print "Artificial Frequency Offset: ",freqoff
+    print("Artificial Frequency Offset: ", freqoff)
     freq_shift = blocks.multiply_cc()
     norm_freq = freqoff / config.fft_length
     freq_off_src = self.freq_off_src = analog.sig_source_c(1.0, analog.GR_SIN_WAVE, norm_freq, 1.0, 0.0 )
-    self.connect( self,( freq_shift, 0 )  )
+    self.connect( self, ( freq_shift, 0 )  )
     self.connect( freq_off_src, ( freq_shift, 1 ) )
     self.connect( freq_shift, self )
 
@@ -212,15 +212,15 @@ class freq_offset(gr.hier_block2):
     """
     norm_freq = freqoff / self.config.fft_length
     self.freq_off_src.set_frequency(norm_freq)
-    print "Frequency offset changed to", freqoff
+    print("Frequency offset changed to", freqoff)
 
 
 
 class itpp_channel(gr.hier_block2):
   def __init__(self, bw):
     gr.hier_block2.__init__(self, "itpp_channel", 
-        gr.io_signature(1,1,gr.sizeof_gr_complex),
-        gr.io_signature(1,1,gr.sizeof_gr_complex))
+        gr.io_signature(1, 1, gr.sizeof_gr_complex),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex))
 
     self._bandwidth=bw
     fad_chan= self.fad_chan = ofdm.itpp_tdl_channel(  ) #[0, -7, -20], [0, 2, 6]
@@ -229,7 +229,7 @@ class itpp_channel(gr.hier_block2):
 
     self.connect(self, fad_chan, self)
 
-    fad_chan.set_norm_doppler( pow(10,-10) )
+    fad_chan.set_norm_doppler( pow(10, -10) )
 
   def set_norm_doppler(self, doppler):
       self.fad_chan.set_norm_doppler( doppler )

@@ -25,11 +25,11 @@ from gnuradio import fft as fft_blocks
 from numpy import concatenate, array, complex, sum
 import ofdm as ofdm
 
-from delaylines import *
+from .delaylines import *
 
 def ifft(subcarrier_data, virtual_subcarriers=0):
   if virtual_subcarriers > 0:
-    vec = concatenate([[0.0]*virtual_subcarriers,subcarrier_data,[0.0]*virtual_subcarriers])
+    vec = concatenate([[0.0]*virtual_subcarriers, subcarrier_data, [0.0]*virtual_subcarriers])
   else:
     vec = subcarrier_data
 
@@ -84,21 +84,21 @@ def ofdm_mapper(bits_per_channel, bitdata):
   
   assert( ( len( bitdata ) % bits ) == 0 )
 
-  cv_src = blocks.vector_source_b(bits_per_channel,True,vlen)
+  cv_src = blocks.vector_source_b(bits_per_channel, True, vlen)
   data_src = blocks.vector_source_b(bitdata)
   trigger = [0]*ofdm_blocks
   trigger[0] = 1
   trigger = blocks.vector_source_b( trigger )
   mapper = ofdm.generic_mapper_bcv(vlen)
-  v2s = blocks.vector_to_stream(gr.sizeof_gr_complex,vlen)
+  v2s = blocks.vector_to_stream(gr.sizeof_gr_complex, vlen)
   dst = blocks.vector_sink_c()
 
   fg = gr.top_block()
 
-  fg.connect(data_src, (mapper,0))
-  fg.connect(cv_src,(mapper,1))
+  fg.connect(data_src, (mapper, 0))
+  fg.connect(cv_src, (mapper, 1))
   fg.connect( trigger, ( mapper, 2 ) )
-  fg.connect(mapper,v2s,dst)
+  fg.connect(mapper, v2s, dst)
   fg.run()
 
   ofdm_symbol = dst.data()
@@ -113,7 +113,7 @@ def unpack_array(arr):
   data_p2u = gr.packed_to_unpacked_bb(1, gr.GR_LSB_FIRST)
   dst = blocks.vector_sink_b()
   fg = gr.top_block()
-  fg.connect(src, data_p2u,dst)
+  fg.connect(src, data_p2u, dst)
   fg.run()
   unpacked_array = dst.data()
   assert(len(unpacked_array) == 8*len(arr))
@@ -146,15 +146,15 @@ def log_to_file(hb,block,filename,mag=False,char_to_float=False):
     hb.connect( block, ctf )
     log_to_file( hb, ctf, filename )
   else:
-    file_log = blocks.file_sink(streamsize,filename)
-    hb.connect(block,file_log)
+    file_log = blocks.file_sink(streamsize, filename)
+    hb.connect(block, file_log)
     
 class char_to_float_stream ( gr.hier_block2 ):
   def __init__( self, block ):
     vlen = determine_streamsize( block )
     gr.hier_block2.__init__( self,
         "char_to_float_stream",
-        gr.io_signature(0,0,0),
+        gr.io_signature(0, 0, 0),
         gr.io_signature( 1, 1, gr.sizeof_float * vlen ) )
     
   
@@ -162,7 +162,7 @@ class char_to_float_stream ( gr.hier_block2 ):
     self.connect( block, cvt, self )
     
     
-def terminate_stream(hb,block):
+def terminate_stream(hb, block):
   streamsize = determine_streamsize(block)
   hb.connect(block, blocks.null_sink(streamsize))
 
@@ -177,14 +177,14 @@ def ms_to_file(hb,block,filename,N=4096,delay=0,fft=False,scale=1):
   blks = [block]
 
   if fft and vlen > 1:
-    gr_fft = fft_blocks.fft_vcc(vlen,True,[],True)
+    gr_fft = fft_blocks.fft_vcc(vlen, True, [], True)
     blks.append(gr_fft)
 
   mag_sqrd = gr.complex_to_mag_squared(vlen)
   blks.append(mag_sqrd)
 
   if vlen > 1:
-    v2s = blocks.vector_to_stream(gr.sizeof_float,vlen)
+    v2s = blocks.vector_to_stream(gr.sizeof_float, vlen)
     blks.append(v2s)
 
   if delay != 0:
@@ -194,10 +194,10 @@ def ms_to_file(hb,block,filename,N=4096,delay=0,fft=False,scale=1):
   gr_scale = gr.multiply_const_ff(scale)
   blks.append(gr_scale)
 
-  filter = gr.fir_filter_fff(1,[1.0/N]*N)
+  filter = gr.fir_filter_fff(1, [1.0/N]*N)
   blks.append(filter)
 
   for i in range(len(blks)-1):
-    hb.connect(blks[i],blks[i+1])
+    hb.connect(blks[i], blks[i+1])
 
-  log_to_file(hb,filter,filename)
+  log_to_file(hb, filter, filename)

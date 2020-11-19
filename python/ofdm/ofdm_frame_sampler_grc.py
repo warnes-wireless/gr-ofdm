@@ -2,16 +2,16 @@ from gnuradio import gr, blocks
 from ofdm import vector_sampler
 
 class ofdm_frame_sampler( gr.hier_block2 ):
-  def __init__(self,subcarriers, frame_length):
+  def __init__(self, subcarriers, frame_length):
     #config = station_configuration()
 
     total_subc = subcarriers
     vlen = total_subc
 
-    gr.hier_block2.__init__(self,"ofdm_frame_sampler_grc",
-      gr.io_signature2(2,2,gr.sizeof_gr_complex*vlen,
+    gr.hier_block2.__init__(self, "ofdm_frame_sampler_grc",
+      gr.io_signature2(2, 2, gr.sizeof_gr_complex*vlen,
                        gr.sizeof_char),
-      gr.io_signature2(2,2,gr.sizeof_gr_complex*vlen,
+      gr.io_signature2(2, 2, gr.sizeof_gr_complex*vlen,
                  gr.sizeof_char))
 
 
@@ -31,6 +31,6 @@ class ofdm_frame_sampler( gr.hier_block2 ):
 
     self.connect( self, frame_sampler, symbol_output, self )
 
-    self.connect( (self,1), delayed_frame_start, ( frame_sampler, 1 ) )
+    self.connect( (self, 1), delayed_frame_start, ( frame_sampler, 1 ) )
 
-    self.connect( damn_static_frame_trigger, (self,1) )
+    self.connect( damn_static_frame_trigger, (self, 1) )

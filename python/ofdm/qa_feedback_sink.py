@@ -33,7 +33,7 @@ class qa_feedback_sink (gr_unittest.TestCase):
 
     def test_feedback_sink(self):
 
-        op = ofdm.feedback_sink(1,"")
+        op = ofdm.feedback_sink(1, "")
 
         #src1 = blocks.vector_source_c(src1_data,False,2)
         #src2 = blocks.vector_source_f(src2_data,False,2)

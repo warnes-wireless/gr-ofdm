@@ -62,8 +62,8 @@ class scfdma_transmitter_bc(gr.hier_block2):
         ##################################################
         self.connect((self.fft_vxx_0, 0), (self.ofdm_scfdma_subcarrier_mapper_vcvc_0, 0))    
         self.connect((self.fft_vxx_0_0, 0), (self.ofdm_cyclic_prefixer_0, 0))    
-        self.connect((self.ofdm_cyclic_prefixer_0, 0), (self.blocks_multiply_const_vxx_0,0))
-        self.connect((self.blocks_multiply_const_vxx_0,0), (self,0))    
+        self.connect((self.ofdm_cyclic_prefixer_0, 0), (self.blocks_multiply_const_vxx_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_0, 0), (self, 0))    
         self.connect((self.ofdm_fbmc_symbol_creation_bvc_0, 0), (self.fft_vxx_0, 0))    
         self.connect((self.ofdm_scfdma_subcarrier_mapper_vcvc_0, 0), (self.fft_vxx_0_0, 0))    
         self.connect((self, 0), (self.ofdm_fbmc_symbol_creation_bvc_0, 0))    

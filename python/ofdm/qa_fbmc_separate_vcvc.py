@@ -35,22 +35,22 @@ class qa_fbmc_separate_vcvc (gr_unittest.TestCase):
 
     def test_001_t (self):
         # set up fg
-        src_data = (1,2,3,4,1j,2j,3j,4j,5,6,7,8,5j,6j,7j,8j)
-        expected_result0 = (1,2,3,4,5,6,7,8)
-        expected_result1 = (1j,2j,3j,4j,5j,6j,7j,8j)
-        src = blocks.vector_source_c(src_data,vlen=4)
-        sep = ofdm.fbmc_separate_vcvc(M=4,num_output=2)
+        src_data = (1, 2, 3, 4, 1j, 2j, 3j, 4j, 5, 6, 7, 8, 5j, 6j, 7j, 8j)
+        expected_result0 = (1, 2, 3, 4, 5, 6, 7, 8)
+        expected_result1 = (1j, 2j, 3j, 4j, 5j, 6j, 7j, 8j)
+        src = blocks.vector_source_c(src_data, vlen=4)
+        sep = ofdm.fbmc_separate_vcvc(M=4, num_output=2)
         dst0 = blocks.vector_sink_c(vlen=4)
         dst1 = blocks.vector_sink_c(vlen=4)
-        self.tb.connect(src,sep)
-        self.tb.connect((sep,0),dst0)
-        self.tb.connect((sep,1),dst1)
+        self.tb.connect(src, sep)
+        self.tb.connect((sep, 0), dst0)
+        self.tb.connect((sep, 1), dst1)
         self.tb.run ()
         # check data
         result0 = dst0.data()
         result1 = dst1.data()
-        self.assertEqual(result1,expected_result1)
-        self.assertEqual(result0,expected_result0)
+        self.assertEqual(result1, expected_result1)
+        self.assertEqual(result0, expected_result0)
 
     def test_002_t(self):
         # set up fg
@@ -69,19 +69,19 @@ class qa_fbmc_separate_vcvc (gr_unittest.TestCase):
             if i%M == M-1:
                 flag = not flag
         
-        src = blocks.vector_source_c(src_data,vlen=M)
-        sep = ofdm.fbmc_separate_vcvc(M=M,num_output=2)
+        src = blocks.vector_source_c(src_data, vlen=M)
+        sep = ofdm.fbmc_separate_vcvc(M=M, num_output=2)
         dst0 = blocks.vector_sink_c(vlen=M)
         dst1 = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,sep)
-        self.tb.connect((sep,0),dst0)
-        self.tb.connect((sep,1),dst1)
+        self.tb.connect(src, sep)
+        self.tb.connect((sep, 0), dst0)
+        self.tb.connect((sep, 1), dst1)
         self.tb.run ()
         # check data
         result0 = dst0.data()
         result1 = dst1.data()
-        self.assertComplexTuplesAlmostEqual(tuple(result1),tuple(expected_result1),150)
-        self.assertComplexTuplesAlmostEqual(tuple(result0),tuple(expected_result0),150)
+        self.assertComplexTuplesAlmostEqual(tuple(result1), tuple(expected_result1), 150)
+        self.assertComplexTuplesAlmostEqual(tuple(result0), tuple(expected_result0), 150)
 
 
 if __name__ == '__main__':

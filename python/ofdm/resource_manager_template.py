@@ -23,11 +23,11 @@
 from numpy import concatenate
 import numpy
 
-from resource_manager_base import resource_manager_base,start_resource_manager
+from .resource_manager_base import resource_manager_base, start_resource_manager
 
 class resource_manager (resource_manager_base):
-  def __init__(self,orb):
-    resource_manager_base.__init__(self,orb)
+  def __init__(self, orb):
+    resource_manager_base.__init__(self, orb)
 
     # set initial parameters
     self.required_ber = 1e-4

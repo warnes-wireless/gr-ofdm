@@ -42,13 +42,13 @@ class qa_ofdm (gr_unittest.TestCase):
 		self.fg.connect(src, uut, dst)
 		self.fg.run()
 
-		ref = concatenate([[1,1,1,1]*repetitions, [1,0,0,0]*repetitions])
+		ref = concatenate([[1, 1, 1, 1]*repetitions, [1, 0, 0, 0]*repetitions])
 		self.assertEqual(list(ref), list(dst.data()))
 
 
 	def test_002 (self):
 		repetitions = 4
-		input = concatenate([[1,1,1,1]*repetitions, [1,0,0,0]*repetitions])
+		input = concatenate([[1, 1, 1, 1]*repetitions, [1, 0, 0, 0]*repetitions])
 
 		#unsigned short output_bits, unsigned short repetitions
 		uut = ofdm.repetition_decoder_bs(4, repetitions, [0]*(4*repetitions))
@@ -66,8 +66,8 @@ class qa_ofdm (gr_unittest.TestCase):
 		repetitions = 4
 		inout = [8+4+2+1, 1]
 		#unsigned short input_bits, unsigned short repetitions
-		uut1 = ofdm.repetition_encoder_sb(4, repetitions, [1,0,1,1,1,0,1,1,1,0,1,1,0,1,1,0])
-		uut2 = ofdm.repetition_decoder_bs(4, repetitions, [1,0,1,1,1,0,1,1,1,0,1,1,0,1,1,0])
+		uut1 = ofdm.repetition_encoder_sb(4, repetitions, [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0])
+		uut2 = ofdm.repetition_decoder_bs(4, repetitions, [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0])
 		src = gr.vector_source_s(inout)
 		dst = gr.vector_sink_s()
 

@@ -25,9 +25,9 @@ import ofdm as ofdm
 import numpy
 
 from numpy import exp, concatenate
-from gr_tools import fft
+from .gr_tools import fft
 
-from preambles import default_block_header
+from .preambles import default_block_header
 
 import os
 
@@ -360,21 +360,21 @@ class qa_LMS_phase_tracking2(gr_unittest.TestCase):
     
     r = time_it( self.tb )
     
-    print "Rate: %s Samples/second" % \
-      eng_notation.num_to_str( float(N) * vlen / r )
+    print("Rate: %s Samples/second" % \
+      eng_notation.num_to_str( float(N) * vlen / r ))
     
     
 def time_it(tb):
     start = os.times()
     tb.run()
     stop = os.times()
-    delta = map((lambda a, b: a-b), stop, start)
+    delta = list(map((lambda a, b: a-b), stop, start))
     user, sys, childrens_user, childrens_sys, real = delta
     total_user = user + childrens_user
     total_sys  = sys + childrens_sys
-    print "real             %7.3f" % (real,)
-    print "user             %7.3f" % (total_user,)
-    print "sys              %7.3f" % (total_sys,)
+    print("real             %7.3f" % (real,))
+    print("user             %7.3f" % (total_user,))
+    print("sys              %7.3f" % (total_sys,))
     
     return real
 

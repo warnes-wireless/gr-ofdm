@@ -22,7 +22,7 @@
 
 from gnuradio import gr, gr_unittest
 import ofdm as ofdm
-from random import seed,randint
+from random import seed, randint
 from numpy import concatenate
 
 
@@ -36,9 +36,9 @@ class qa_stream_controlled_mux (gr_unittest.TestCase):
   # static test
   def test_001 (self):
     stream = [ [0]*10, [1]*10, [2]*10 ]
-    mux = [ 0,2,2,1,1,2,0,2,0,0,
-            1,0,1,0,1,2,1,2,1,1,
-            2,0,0,2,1,2,0,1,2,0 ]
+    mux = [ 0, 2, 2, 1, 1, 2, 0, 2, 0, 0,
+            1, 0, 1, 0, 1, 2, 1, 2, 1, 1,
+            2, 0, 0, 2, 1, 2, 0, 1, 2, 0 ]
     imux = []
     for x in mux:
       imux.append(int(x))
@@ -50,14 +50,14 @@ class qa_stream_controlled_mux (gr_unittest.TestCase):
 
     uut = ofdm.static_mux_v(gr.sizeof_short, imux)
 
-    self.fg.connect(data[0], (uut,0))
-    self.fg.connect(data[1], (uut,1))
-    self.fg.connect(data[2], (uut,2))
+    self.fg.connect(data[0], (uut, 0))
+    self.fg.connect(data[1], (uut, 1))
+    self.fg.connect(data[2], (uut, 2))
 
-    self.fg.connect(uut,dst)
+    self.fg.connect(uut, dst)
     self.fg.run()
 
-    self.assertEqual(mux,list(dst.data()))
+    self.assertEqual(mux, list(dst.data()))
 
   # many input items
   def test_002 (self):
@@ -68,9 +68,9 @@ class qa_stream_controlled_mux (gr_unittest.TestCase):
 
     seed()
     for i in range(l):
-      a = randint(0,len(mux)-1)
-      b = randint(0,len(mux)-1)
-      mux[a],mux[b] = mux[b],mux[a]
+      a = randint(0, len(mux)-1)
+      b = randint(0, len(mux)-1)
+      mux[a], mux[b] = mux[b], mux[a]
 
     imux = []
     for x in mux:
@@ -84,22 +84,22 @@ class qa_stream_controlled_mux (gr_unittest.TestCase):
 
     uut = ofdm.static_mux_v(gr.sizeof_short, imux)
 
-    self.fg.connect(data[0], (uut,0))
-    self.fg.connect(data[1], (uut,1))
-    self.fg.connect(data[2], (uut,2))
-    self.fg.connect(data[3], (uut,3))
+    self.fg.connect(data[0], (uut, 0))
+    self.fg.connect(data[1], (uut, 1))
+    self.fg.connect(data[2], (uut, 2))
+    self.fg.connect(data[3], (uut, 3))
 
-    self.fg.connect(uut,dst)
+    self.fg.connect(uut, dst)
     self.fg.run()
 
-    self.assertEqual(list(mux),list(dst.data()))
+    self.assertEqual(list(mux), list(dst.data()))
 
   # different input stream type
   def test_003 (self):
     stream = [ [float(0)]*10, [float(1)]*10, [float(2)]*10 ]
-    mux = [ 0,2,2,1,1,2,0,2,0,0,
-            1,0,1,0,1,2,1,2,1,1,
-            2,0,0,2,1,2,0,1,2,0 ]
+    mux = [ 0, 2, 2, 1, 1, 2, 0, 2, 0, 0,
+            1, 0, 1, 0, 1, 2, 1, 2, 1, 1,
+            2, 0, 0, 2, 1, 2, 0, 1, 2, 0 ]
 
     imux = []
     for x in mux:
@@ -112,23 +112,23 @@ class qa_stream_controlled_mux (gr_unittest.TestCase):
 
     uut = ofdm.static_mux_v(gr.sizeof_float, imux)
 
-    self.fg.connect(data[0], (uut,0))
-    self.fg.connect(data[1], (uut,1))
-    self.fg.connect(data[2], (uut,2))
+    self.fg.connect(data[0], (uut, 0))
+    self.fg.connect(data[1], (uut, 1))
+    self.fg.connect(data[2], (uut, 2))
 
-    self.fg.connect(uut,dst)
+    self.fg.connect(uut, dst)
     self.fg.run()
 
-    self.assertEqual(map(float,mux),list(dst.data()))
+    self.assertEqual(list(map(float, mux)), list(dst.data()))
 
   # input streams differ in length
   def test_004 (self):
     stream = [ [0]*10, [1]*5, [2]*8 ]
-    mux = [ 0,2,2,1,1,2,0,2,0,0,
-            1,0,1,0,1,2,2,1,1,
-            2,0,0,2,1,2,0,1,2,0 ]
-    ref = [ 0,2,2,1,1,2,0,2,0,0,
-            1,0,1,0,1,2,2]
+    mux = [ 0, 2, 2, 1, 1, 2, 0, 2, 0, 0,
+            1, 0, 1, 0, 1, 2, 2, 1, 1,
+            2, 0, 0, 2, 1, 2, 0, 1, 2, 0 ]
+    ref = [ 0, 2, 2, 1, 1, 2, 0, 2, 0, 0,
+            1, 0, 1, 0, 1, 2, 2]
 
     imux = []
     for x in mux:
@@ -141,20 +141,20 @@ class qa_stream_controlled_mux (gr_unittest.TestCase):
 
     uut = ofdm.static_mux_v(gr.sizeof_short, imux)
 
-    self.fg.connect(data[0], (uut,0))
-    self.fg.connect(data[1], (uut,1))
-    self.fg.connect(data[2], (uut,2))
+    self.fg.connect(data[0], (uut, 0))
+    self.fg.connect(data[1], (uut, 1))
+    self.fg.connect(data[2], (uut, 2))
 
-    self.fg.connect(uut,dst)
+    self.fg.connect(uut, dst)
     self.fg.run()
 
-    self.assertEqual(ref,list(dst.data()))
+    self.assertEqual(ref, list(dst.data()))
     
   def test_005 (self):
     stream = [ [0]*10, [1]*10, [2]*10 ]
-    mux = [ 0,1,2 ]
-    ref = [ 0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,
-           0,1,2,0,1,2,0,1,2 ]
+    mux = [ 0, 1, 2 ]
+    ref = [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2,
+           0, 1, 2, 0, 1, 2, 0, 1, 2 ]
 
     imux = []
     for x in mux:
@@ -167,19 +167,19 @@ class qa_stream_controlled_mux (gr_unittest.TestCase):
 
     uut = ofdm.static_mux_v(gr.sizeof_short, imux)
 
-    self.fg.connect(data[0], (uut,0))
-    self.fg.connect(data[1], (uut,1))
-    self.fg.connect(data[2], (uut,2))
+    self.fg.connect(data[0], (uut, 0))
+    self.fg.connect(data[1], (uut, 1))
+    self.fg.connect(data[2], (uut, 2))
 
-    self.fg.connect(uut,dst)
+    self.fg.connect(uut, dst)
     self.fg.run()
 
-    self.assertEqual(ref,list(dst.data()))
+    self.assertEqual(ref, list(dst.data()))
 
   def test_006 (self):
     l = 100000
     stream = [ [0]*l, [1]*l, [2]*l ]
-    mux = [ 0,2,1 ]
+    mux = [ 0, 2, 1 ]
     ref = concatenate([mux]*l)
 
     imux = []
@@ -193,14 +193,14 @@ class qa_stream_controlled_mux (gr_unittest.TestCase):
 
     uut = ofdm.static_mux_v(gr.sizeof_short, imux)
 
-    self.fg.connect(data[0], (uut,0))
-    self.fg.connect(data[1], (uut,1))
-    self.fg.connect(data[2], (uut,2))
+    self.fg.connect(data[0], (uut, 0))
+    self.fg.connect(data[1], (uut, 1))
+    self.fg.connect(data[2], (uut, 2))
 
-    self.fg.connect(uut,dst)
+    self.fg.connect(uut, dst)
     self.fg.run()
 
-    self.assertEqual(list(ref),list(dst.data()))
+    self.assertEqual(list(ref), list(dst.data()))
     
 #  def test_007(self):
 #    mux = [-1,0,1]

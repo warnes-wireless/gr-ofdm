@@ -24,10 +24,10 @@ from gnuradio import gr
 import ofdm as ofdm
 #import itpp
 import numpy
-from preambles import schmidl_ifo_designer, morellimengali_designer
-from gr_tools import terminate_stream, log_to_file, determine_streamsize
-from gr_tools import ifft as gr_ifft, char_to_float_stream
-from snr_estimator import milans_snr_estimator
+from .preambles import schmidl_ifo_designer, morellimengali_designer
+from .gr_tools import terminate_stream, log_to_file, determine_streamsize
+from .gr_tools import ifft as gr_ifft, char_to_float_stream
+from .snr_estimator import milans_snr_estimator
 
 from numpy import sqrt, concatenate, log10
 from numpy import mean, var, ceil
@@ -98,7 +98,7 @@ class snr_estimator_001 (gr.hier_block2):
   The complex valued estimated snr is on output 1.
   """
 
-  td,fd = None,None
+  td, fd = None, None
   vlen = 0
 
   def __init__( self, vlen ):
@@ -113,11 +113,11 @@ class snr_estimator_001 (gr.hier_block2):
     if snr_estimator_001.vlen != vlen or \
        snr_estimator_001.td is None or \
        snr_estimator_001.fd is None :
-      td,fd = morellimengali_designer.create(vlen, vlen,8) #-> replace the fixed number of periodic parts->8
-      snr_estimator_001.td, snr_estimator_001.fd = td,fd
+      td, fd = morellimengali_designer.create(vlen, vlen, 8) #-> replace the fixed number of periodic parts->8
+      snr_estimator_001.td, snr_estimator_001.fd = td, fd
       snr_estimator_001.vlen = vlen
     else:
-      td,fd = snr_estimator_001.td, snr_estimator_001.fd
+      td, fd = snr_estimator_001.td, snr_estimator_001.fd
 
     self.preamble_td = td
     self.preamble_fd = fd
@@ -144,7 +144,7 @@ class channel_estimator_001 (gr.hier_block2):
   The complex valued estimated CTF is on output 1.
   """
 
-  td,fd = None,None
+  td, fd = None, None
   vlen = 0
 
   def __init__( self, vlen ):
@@ -159,11 +159,11 @@ class channel_estimator_001 (gr.hier_block2):
     if channel_estimator_001.vlen != vlen or \
        channel_estimator_001.td is None or \
        channel_estimator_001.fd is None :
-      td,fd = schmidl_ifo_designer.create(vlen, vlen)
-      channel_estimator_001.td, channel_estimator_001.fd = td,fd
+      td, fd = schmidl_ifo_designer.create(vlen, vlen)
+      channel_estimator_001.td, channel_estimator_001.fd = td, fd
       channel_estimator_001.vlen = vlen
     else:
-      td,fd = channel_estimator_001.td, channel_estimator_001.fd
+      td, fd = channel_estimator_001.td, channel_estimator_001.fd
 
     self.preamble_td = td
     self.preamble_fd = fd
@@ -190,7 +190,7 @@ class channel_estimator_002 (gr.hier_block2):
   The output stream contains the equalized ofdm blocks.
   """
 
-  td,fd = None,None
+  td, fd = None, None
   vlen = 0
 
   def __init__(self, vlen, frame_length ):
@@ -201,17 +201,17 @@ class channel_estimator_002 (gr.hier_block2):
         gr.io_signature( 1, 1, gr.sizeof_gr_complex * vlen ) )
 
     # disable phase tracking
-    nondata_blocks = range(frame_length)
+    nondata_blocks = list(range(frame_length))
     pilot_tones = []
 
     if channel_estimator_002.vlen != vlen or \
        channel_estimator_002.td is None or \
        channel_estimator_002.fd is None :
-      td,fd = schmidl_ifo_designer.create(vlen, vlen)
-      channel_estimator_002.td, channel_estimator_002.fd = td,fd
+      td, fd = schmidl_ifo_designer.create(vlen, vlen)
+      channel_estimator_002.td, channel_estimator_002.fd = td, fd
       channel_estimator_002.vlen = vlen
     else:
-      td,fd = channel_estimator_002.td, channel_estimator_002.fd
+      td, fd = channel_estimator_002.td, channel_estimator_002.fd
 
     self.preamble_td = td
     self.preamble_fd = fd
@@ -373,7 +373,7 @@ class static_fading_channel ( gr.hier_block2 ):
         gr.io_signature( 1, 1, gr.sizeof_gr_complex ),
         gr.io_signature( 1, 1, gr.sizeof_gr_complex ) )
 
-    channel = ofdm.itpp_tdl_channel( [0]*no_taps, range(no_taps) ) #dummy  values
+    channel = ofdm.itpp_tdl_channel( [0]*no_taps, list(range(no_taps)) ) #dummy  values
     channel.set_channel_profile_exponential( no_taps )
     channel.set_fading_type( ofdm.Static )
 
@@ -381,7 +381,7 @@ class static_fading_channel ( gr.hier_block2 ):
 
     if have_LOS:
       LOS_rel_power = numpy.zeros( channel.taps() )
-      print LOS_rel_power
+      print(LOS_rel_power)
       LOS_rel_doppler = numpy.zeros( channel.taps() )
       LOS_rel_power[0] = 10**(LOS_power/10.0)
       channel.set_LOS( LOS_rel_power, LOS_rel_doppler )
@@ -413,7 +413,7 @@ class perfect_block_trigger ( gr.hier_block2 ):
   def __init__( self, block_length ):
     gr.hier_block2.__init__( self,
           "perfect_block_trigger",
-          gr.io_signature( 0,0,0 ),
+          gr.io_signature( 0, 0, 0 ),
           gr.io_signature( 1, 1, gr.sizeof_char ) )
 
     perfect_trigger = [0]*block_length
@@ -486,10 +486,10 @@ class vector_acc_se3 ( gr.hier_block2 ):
 
     if startup > 0:
       startup_skip = gr.skiphead( gr.sizeof_float, startup )
-      self.connect( self, startup_skip,self )
+      self.connect( self, startup_skip, self )
     else:
       self.odd= gr.add_const_ff(0.0)
-      self.connect( self, self.odd,self )
+      self.connect( self, self.odd, self )
 
     #self.mse = mse
     self.startup = startup
@@ -509,7 +509,7 @@ class limit_stream_get_last_item( gr.hier_block2 ):
     gr.hier_block2.__init__( self,
           "limit_stream_get_last_item",
           gr.io_signature( 1, 1, streamsize ),
-          gr.io_signature( 0,0,0) )
+          gr.io_signature( 0, 0, 0) )
 
     self.sink = sink
 
@@ -543,7 +543,7 @@ class limit_stream_get_last_item( gr.hier_block2 ):
 
   def reset(self):
     if self.sink is not None:
-      raise SystemError,"Cannot reset user given sink"
+      raise SystemError("Cannot reset user given sink")
 
     self.disconnect_blocks()
     self.build_blocks(self.streamsize, self.N)
@@ -597,8 +597,8 @@ class mse_simulator_av_snr( gr.hier_block2 ):
                 cp_len = None, startup = 0, have_LOS = True ):
     gr.hier_block2.__init__( self,
               "mse_simulator",
-              gr.io_signature(0,0,0),
-              gr.io_signature(0,0,0) )
+              gr.io_signature(0, 0, 0),
+              gr.io_signature(0, 0, 0) )
 
     N = int( N )
     sigpow = float( vlen )
@@ -616,12 +616,12 @@ class mse_simulator_av_snr( gr.hier_block2 ):
 
   def connect_blocks(self):
     self.connect( self.block_src, self.fading_channel, self.awgn_channel,
-                  self.sampler, self.fft, self.uut, self.compare, self.mean_squared_error,self.dst )
+                  self.sampler, self.fft, self.uut, self.compare, self.mean_squared_error, self.dst )
     self.connect( self.perfect_trigger, ( self.sampler, 1 ) )
 
   def disconnect_blocks(self):
     self.disconnect( self.block_src, self.fading_channel, self.awgn_channel,
-                     self.sampler, self.fft, self.uut, self.compare, self.mean_squared_error,self.dst )
+                     self.sampler, self.fft, self.uut, self.compare, self.mean_squared_error, self.dst )
     self.disconnect( self.perfect_trigger, ( self.sampler, 1 ) )
 
 
@@ -699,8 +699,8 @@ class mse_simulator( gr.hier_block2 ):
                 cp_len = None, startup = 0, have_LOS = True ):
     gr.hier_block2.__init__( self,
               "mse_simulator",
-              gr.io_signature(0,0,0),
-              gr.io_signature(0,0,0) )
+              gr.io_signature(0, 0, 0),
+              gr.io_signature(0, 0, 0) )
 
     N = int( N )
     sigpow = float( vlen )
@@ -797,7 +797,7 @@ class data_block_src ( gr.hier_block2 ):
   def __init__( self, bits_per_subc, vlen, nblocks = 1 ):
     gr.hier_block2.__init__( self,
           "data_block_src",
-          gr.io_signature(0,0,0),
+          gr.io_signature(0, 0, 0),
           gr.io_signature( 1, 1, gr.sizeof_gr_complex * vlen ) )
 
     demapper = ofdm.generic_demapper_vcb(1)
@@ -865,13 +865,13 @@ class ofdm_frame_src ( gr.hier_block2 ):
                 framelength, bits_per_subc ):
     gr.hier_block2.__init__( self,
         "ofdm_frame_src",
-        gr.io_signature(0,0,0),
+        gr.io_signature(0, 0, 0),
         gr.io_signature( 1, 1, gr.sizeof_gr_complex ) )
 
 
     data_block_src_i = data_block_src( bits_per_subc, vlen, data_blocks )
 
-    mux_ctrl = concatenate([[0],[1]*(framelength-1)])
+    mux_ctrl = concatenate([[0], [1]*(framelength-1)])
 
     preamble_src = gr.vector_source_c( preamble_block, True, vlen )
     self.preamble_src = preamble_src
@@ -926,7 +926,7 @@ class ofdm_perfect_frame_trigger ( gr.hier_block2 ):
   def __init__( self, framelength ):
     gr.hier_block2.__init__( self,
           "ofdm_perfect_frame_trigger",
-          gr.io_signature(0,0,0),
+          gr.io_signature(0, 0, 0),
           gr.io_signature( 1, 1, gr.sizeof_char ) )
 
     frame_trigger = [0]*framelength
@@ -947,7 +947,7 @@ class ofdm_ber_estimator( gr.hier_block2 ):
     gr.hier_block2.__init__( self,
           "ofdm_ber_estimator",
           gr.io_signature( 1, 1, gr.sizeof_gr_complex * vlen ),
-          gr.io_signature(0,0,0) )
+          gr.io_signature(0, 0, 0) )
 
     bpsubc = [0] * ( vlen * no_preambles )
     assert( len( bits_per_subc ) == vlen )
@@ -1030,8 +1030,8 @@ class ber_simulator ( gr.hier_block2 ):
 
     gr.hier_block2.__init__( self,
           "ber_simulator",
-          gr.io_signature(0,0,0),
-          gr.io_signature(0,0,0) )
+          gr.io_signature(0, 0, 0),
+          gr.io_signature(0, 0, 0) )
 
     sigpow = float( vlen )
 
@@ -1170,19 +1170,19 @@ class parallel_mse_simulation_av_snr:
 
   def run( self ):
 
-    print "Start simulation"
-    print "SNR: %f dB, no_taps = %d, vlen = %d, N = %d, cp_len = %d, startup = %d" \
-      % ( self.snr_db, self.no_taps, self.vlen, int( self.N ), self.cp_len, self.startup )
+    print("Start simulation")
+    print("SNR: %f dB, no_taps = %d, vlen = %d, N = %d, cp_len = %d, startup = %d" \
+      % ( self.snr_db, self.no_taps, self.vlen, int( self.N ), self.cp_len, self.startup ))
 
     self.tb.run()
 
-    print "End of simulation"
+    print("End of simulation")
 
     results = []
     for simulator in self.simulators:
       mse = simulator.get_result()
       if verbose:
-        print "Mean squared error: %f" % ( mse )
+        print("Mean squared error: %f" % ( mse ))
       results.append( mse )
 
     return results
@@ -1216,21 +1216,21 @@ class parallel_ber_simulation:
       simulator.reset()
 
   def run(self):
-    print "Start simulation"
-    print "SNR: %f dB, no_taps = %d, vlen = %d, N = %d, cp_len = %d, startup = %d" \
-      % ( self.snr_db, self.no_taps, self.vlen, self.N, self.cp_len, self.startup )
+    print("Start simulation")
+    print("SNR: %f dB, no_taps = %d, vlen = %d, N = %d, cp_len = %d, startup = %d" \
+      % ( self.snr_db, self.no_taps, self.vlen, self.N, self.cp_len, self.startup ))
 
     self.tb.run()
 
-    print "End of simulation"
+    print("End of simulation")
 
     uut_results = []
     opt_results = []
     for simulator in self.simulators:
       err = simulator.get_results()
       if verbose:
-        print "BER unit under test:   %f" % ( err[0] )
-        print "BER optimal equalizer: %f" % ( err[1] )
+        print("BER unit under test:   %f" % ( err[0] ))
+        print("BER optimal equalizer: %f" % ( err[1] ))
       uut_results.append( err[0] )
       opt_results.append( err[1] )
 
@@ -1322,7 +1322,7 @@ class test_channel_estimator:
                   parallel_sims, have_LOS )
 
       for i in range( N_per_snr / parallel_sims ):
-        ret1,ret2 = par_sim.run()
+        ret1, ret2 = par_sim.run()
         ret_uut.extend( ret1 )
         ret_opt.extend( ret2 )
         par_sim.reset()
@@ -1333,7 +1333,7 @@ class test_channel_estimator:
                   bits_per_subc, cp_len, startup,
                   N_per_snr % parallel_sims, have_LOS )
 
-        ret1,ret2 = par_sim.run()
+        ret1, ret2 = par_sim.run()
 
         ret_uut.extend( ret1 )
         ret_opt.extend( ret2 )
@@ -1347,13 +1347,13 @@ class test_channel_estimator:
 
 
   def print_matlab_matrix(self, mat, name):
-    print "%s = [" % ( name ),
-    for x in mat.keys():
+    print("%s = [" % ( name ), end=' ')
+    for x in list(mat.keys()):
       curve = mat[x]
       for y in curve:
-        print "%7g," % (y),
-      print ";"
-    print "];"
+        print("%7g," % (y), end=' ')
+      print(";")
+    print("];")
 
 
 
@@ -1367,7 +1367,7 @@ class test_channel_estimator:
     vlen = 256
     LOS_power = -50 # dB higher than first rayleigh path's power #10
 
-    snr_range = range(0,25,5)
+    snr_range = list(range(0, 25, 5))
 
     #taps_range = [1,2,4,5,8,10,16]
     taps_range = [16]
@@ -1380,31 +1380,31 @@ class test_channel_estimator:
 
 
     for x in taps_range:
-      data[x],var[x] = self.simulation_run(snr_range, N_per_chan, N_per_snr,
+      data[x], var[x] = self.simulation_run(snr_range, N_per_chan, N_per_snr,
                                            LOS_power, x, vlen, cp_len, startup)
 
     # SNR Range
-    print "snr = [",
+    print("snr = [", end=' ')
     for snr_db in snr_range:
-      print "%.1f," % ( snr_db ),
-    print "];"
+      print("%.1f," % ( snr_db ), end=' ')
+    print("];")
 
     self.print_matlab_matrix( data, "data" )
     self.print_matlab_matrix( var, "var" )
 
 
-    print "semilogy(snr,data,'x')"
-    print "grid on"
-    print "xlabel 'SNR (dB)'"
-    print "ylabel 'MSE'"
-    print "title 'Normalized MSE of channel estimator'"
-    print "ylabel 'BER'"
-    print "N_per_snr = %d; N_per_chan = %d;" % (N_per_snr,N_per_chan)
+    print("semilogy(snr,data,'x')")
+    print("grid on")
+    print("xlabel 'SNR (dB)'")
+    print("ylabel 'MSE'")
+    print("title 'Normalized MSE of channel estimator'")
+    print("ylabel 'BER'")
+    print("N_per_snr = %d; N_per_chan = %d;" % (N_per_snr, N_per_chan))
 
-    print "taps_range = [",
+    print("taps_range = [", end=' ')
     for x in taps_range:
-      print "%d," % ( x )
-    print "];"
+      print("%d," % ( x ))
+    print("];")
 
 #    print "vlen = %d; no_taps = %d; cp_len = %d; startup = %d;" \
 #       % ( vlen, no_taps, cp_len or -1, startup )
@@ -1418,7 +1418,7 @@ class test_channel_estimator:
     vlen = 256
     LOS_power = -50 # dB higher than first rayleigh path's power #10
 
-    snr_range = range(0,25,5)
+    snr_range = list(range(0, 25, 5))
 
     #taps_range = [1,2,4,5,8,10,16]
     taps_range = [4]
@@ -1435,27 +1435,27 @@ class test_channel_estimator:
                                            LOS_power, x, vlen, cp_len, startup)
 
     # SNR Range
-    print "snr = [",
+    print("snr = [", end=' ')
     for snr_db in snr_range:
-      print "%.1f," % ( snr_db ),
-    print "];"
+      print("%.1f," % ( snr_db ), end=' ')
+    print("];")
 
     self.print_matlab_matrix( data, "data" )
     #self.print_matlab_matrix( var, "var" )
 
 
-    print "semilogy(snr,data,'x')"
-    print "grid on"
-    print "xlabel 'SNR (dB)'"
-    print "ylabel 'NMSE'"
-    print "title 'Normalized MSE of average SNR estimator'"
-    print "ylabel 'BER'"
-    print "N_per_snr = %d; N_per_chan = %d;" % (N_per_snr,N_per_chan)
+    print("semilogy(snr,data,'x')")
+    print("grid on")
+    print("xlabel 'SNR (dB)'")
+    print("ylabel 'NMSE'")
+    print("title 'Normalized MSE of average SNR estimator'")
+    print("ylabel 'BER'")
+    print("N_per_snr = %d; N_per_chan = %d;" % (N_per_snr, N_per_chan))
 
-    print "taps_range = [",
+    print("taps_range = [", end=' ')
     for x in taps_range:
-      print "%d," % ( x )
-    print "];"
+      print("%d," % ( x ))
+    print("];")
 
 
 
@@ -1473,9 +1473,9 @@ class test_channel_estimator:
     LOS_power = 10 # dB higher than first rayleigh path's power
     have_LOS = False
 
-    snr_range = range(0,25,5)
+    snr_range = list(range(0, 25, 5))
 
-    taps_range = [1,2,4,5,8,10,16]
+    taps_range = [1, 2, 4, 5, 8, 10, 16]
 
     bits_per_subc = 2
 
@@ -1489,29 +1489,29 @@ class test_channel_estimator:
           vlen, cp_len, startup, bits_per_subc, have_LOS )
 
     # SNR Range
-    print "snr = [",
+    print("snr = [", end=' ')
     for snr_db in snr_range:
-      print "%.1f," % ( snr_db ),
-    print "];"
+      print("%.1f," % ( snr_db ), end=' ')
+    print("];")
 
 
     self.print_matlab_matrix( uut_results, "uut_results" )
     self.print_matlab_matrix( opt_results, "opt_results" )
 
-    print "figure"
-    print "hold on"
-    print "semilogy(snr,uut_results,'x')"
-    print "semilogy(snr,opt_results,'o')"
-    print "grid on"
-    print "xlabel 'SNR (dB)'"
-    print "ylabel 'BER'"
-    print "N_per_snr = %d; N_per_chan = %d;" % (N_per_snr,N_per_chan)
-    print "Have_LOS = ", ( "true" if have_LOS else "false")
+    print("figure")
+    print("hold on")
+    print("semilogy(snr,uut_results,'x')")
+    print("semilogy(snr,opt_results,'o')")
+    print("grid on")
+    print("xlabel 'SNR (dB)'")
+    print("ylabel 'BER'")
+    print("N_per_snr = %d; N_per_chan = %d;" % (N_per_snr, N_per_chan))
+    print("Have_LOS = ", ( "true" if have_LOS else "false"))
 
-    print "taps_range = [",
+    print("taps_range = [", end=' ')
     for x in taps_range:
-      print "%d, " % ( x ),
-    print "];"
+      print("%d, " % ( x ), end=' ')
+    print("];")
 
 
   def start_mse_sim ( self ):
@@ -1524,7 +1524,7 @@ class test_channel_estimator:
     LOS_power = 10 # dB higher than first rayleigh path's power
     have_LOS = False
 
-    snr_range = range(0,25,5)
+    snr_range = list(range(0, 25, 5))
     #snr_range=[25]
 
     #taps_range = [1,2,4,5,8,10,16]
@@ -1537,31 +1537,31 @@ class test_channel_estimator:
     var = dict()
 
     for x in taps_range:
-      data[x],var[x] = self.simulation_run(snr_range, N_per_chan, N_per_snr,
+      data[x], var[x] = self.simulation_run(snr_range, N_per_chan, N_per_snr,
                                            LOS_power, x, vlen, cp_len, startup,
                                            have_LOS)
 
     # SNR Range
-    print "snr = [",
+    print("snr = [", end=' ')
     for snr_db in snr_range:
-      print "%.1f," % ( snr_db ),
-    print "];"
+      print("%.1f," % ( snr_db ), end=' ')
+    print("];")
 
     self.print_matlab_matrix( data, "data" )
     self.print_matlab_matrix( var, "var" )
 
 
-    print "semilogy(snr,data,'x')"
-    print "grid on"
-    print "xlabel 'SNR (dB)'"
+    print("semilogy(snr,data,'x')")
+    print("grid on")
+    print("xlabel 'SNR (dB)'")
 
-    print "ylabel 'BER'"
-    print "N_per_snr = %d; N_per_chan = %d;" % (N_per_snr,N_per_chan)
+    print("ylabel 'BER'")
+    print("N_per_snr = %d; N_per_chan = %d;" % (N_per_snr, N_per_chan))
 
-    print "taps_range = [",
+    print("taps_range = [", end=' ')
     for x in taps_range:
-      print "%d," % ( x )
-    print "];"
+      print("%d," % ( x ))
+    print("];")
 
 
 

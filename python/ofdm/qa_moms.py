@@ -21,7 +21,7 @@
 #
 
 from gnuradio import gr, gr_unittest, blocks
-from moms import moms
+from .moms import moms
 import ofdm as ofdm
 
 class qa_scf (gr_unittest.TestCase):
@@ -33,19 +33,19 @@ class qa_scf (gr_unittest.TestCase):
         self.tb = None 
 
     def std_test (self, src_data, soff, expected):
-        src = blocks.vector_source_c (src_data,False,1)
-        interp = moms(2,1)
+        src = blocks.vector_source_c (src_data, False, 1)
+        interp = moms(2, 1)
         dst = blocks.vector_sink_c (1)
         self.tb.connect (src, interp)
         self.tb.connect (interp, dst)
         self.tb.run ()
         result_data = dst.data ()
-        print result_data
+        print(result_data)
         self.assertEqual(expected, result_data)
 
     def test_001_moms (self):
         soff = 1
-        src_vec = range(1,10)
+        src_vec = list(range(1, 10))
         expected = (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0)
         self.std_test (src_vec, soff, expected)
 

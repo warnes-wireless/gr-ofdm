@@ -48,10 +48,10 @@ class test_demapper:
     assert( abs( m ) < 0.01 )
     assert( abs( 1.0 - av_pow ) < 0.5  )
     
-    print "Uniform distributed random symbol source has"
-    print "\tno offset for N=%d, relative error: %f" % (arity, abs( m ) )
-    print "\tAverage signal power equal 1.0, relative error: %f\t\tOK" \
-           % ( abs( 1.0 - av_pow ) )
+    print("Uniform distributed random symbol source has")
+    print("\tno offset for N=%d, relative error: %f" % (arity, abs( m ) ))
+    print("\tAverage signal power equal 1.0, relative error: %f\t\tOK" \
+           % ( abs( 1.0 - av_pow ) ))
     
     
     
@@ -84,12 +84,12 @@ class test_demapper:
     
     tb = gr.top_block ( "test_block" )
     
-    tb.connect( (symsrc,0), (channel,0) )
-    tb.connect( noise_src,  (channel,1) )
-    tb.connect( channel,     (demapper,0), (bitstream_xor,0) )
-    tb.connect( bitmap_src,  (demapper,1) )
-    tb.connect( bm_trig_src, (demapper,2) )
-    tb.connect( (symsrc,1), ref_bitstream, (bitstream_xor,1) )
+    tb.connect( (symsrc, 0), (channel, 0) )
+    tb.connect( noise_src,  (channel, 1) )
+    tb.connect( channel,     (demapper, 0), (bitstream_xor, 0) )
+    tb.connect( bitmap_src,  (demapper, 1) )
+    tb.connect( bm_trig_src, (demapper, 2) )
+    tb.connect( (symsrc, 1), ref_bitstream, (bitstream_xor, 1) )
     tb.connect( bitstream_xor, bitstream_c2f, acc_biterr )
     tb.connect( acc_biterr, skiphead, limit, dst )
 
@@ -104,7 +104,7 @@ class test_demapper:
     
   def start ( self ):
     
-    for i in range(1,9):
+    for i in range(1, 9):
       self.test_symbol_src( i )
     
     N = 1e7
@@ -113,17 +113,17 @@ class test_demapper:
     
     ber_curves = dict()
     
-    narity_range = range(1,9)
+    narity_range = list(range(1, 9))
     
     for arity in narity_range:
       ber_arr = []
-      snr_range = range(0, 36, 1)
+      snr_range = list(range(0, 36, 1))
       for snr_db in snr_range:
         ber = self.sim( arity, snr_db, N )
         ber_arr.append( ber )
         
-        print "For n-arity %d and SNR = %.1f dB, BER is ~%g" \
-               % ( arity, snr_db , ber )
+        print("For n-arity %d and SNR = %.1f dB, BER is ~%g" \
+               % ( arity, snr_db, ber ))
   
         if ber < min_ber:
           break
@@ -133,23 +133,23 @@ class test_demapper:
 
 
       
-    print "snr = [",
+    print("snr = [", end=' ')
     for snr_db in snr_range:
-      print "%.1f," % ( snr_db ),
-    print "]"
+      print("%.1f," % ( snr_db ), end=' ')
+    print("]")
 
 
-    print "ber = [",
+    print("ber = [", end=' ')
     for arity in narity_range:
       curve = ber_curves[arity]
       for x in curve:
-        print "%7g," % (x),
+        print("%7g," % (x), end=' ')
       for i in range( len( snr_range ) - len( curve ) ):
-        print " 0.0,",
-      print ";"
-    print "]"
+        print(" 0.0,", end=' ')
+      print(";")
+    print("]")
     
-    print "ber_ref = [",
+    print("ber_ref = [", end=' ')
     for arity in narity_range:
       curve = ber_curves[arity]
       if arity == 1:
@@ -158,24 +158,24 @@ class test_demapper:
         mode = 'psk'
       else:
         mode = 'qam'
-      print "berawgn(snr(1:%d)-10*log10(%d), '%s', %d " \
-               % (len(curve),arity, mode, 2**arity ) ,
+      print("berawgn(snr(1:%d)-10*log10(%d), '%s', %d " \
+               % (len(curve), arity, mode, 2**arity ), end=' ')
       if arity == 2 or arity == 3:
-        print ", 'nondiff'",
-      print "), ",
+        print(", 'nondiff'", end=' ')
+      print("), ", end=' ')
       for i in range( len( snr_range ) - len( curve ) ):
-        print " 0.0,",
-      print ";"
-    print "]"
+        print(" 0.0,", end=' ')
+      print(";")
+    print("]")
     
-    print "semilogy(snr,ber,'x')"
-    print "hold on"
-    print "semilogy(snr,ber_ref,'--o')"
-    print "legend('BPSK','QPSK','8PSK','16QAM','32QAM','64QAM','128QAM','256QAM')"
-    print "grid on"
-    print "xlabel 'SNR (dB)'"
-    print "ylabel 'approximate BER'"
-    print "title 'BER over SNR for OFDM demapper, N=%d window size'" % ( N )
+    print("semilogy(snr,ber,'x')")
+    print("hold on")
+    print("semilogy(snr,ber_ref,'--o')")
+    print("legend('BPSK','QPSK','8PSK','16QAM','32QAM','64QAM','128QAM','256QAM')")
+    print("grid on")
+    print("xlabel 'SNR (dB)'")
+    print("ylabel 'approximate BER'")
+    print("title 'BER over SNR for OFDM demapper, N=%d window size'" % ( N ))
 
 
 if __name__ == '__main__':

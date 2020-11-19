@@ -156,7 +156,7 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
                 # self.UDP_client()
 
         if self.info_tx is None:
-            raise SystemExit, 'Need TX information'
+            raise SystemExit('Need TX information')
 
         # latch tx information
 
@@ -232,7 +232,7 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
         #
         # Get Supplier Admin interface - retrying on Comms Failure.
 
-        while 1:
+        while True:
             try:
                 self.supplier_admin = self.channel.for_suppliers()
                 if self.supplier_admin is None:
@@ -240,7 +240,7 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
                             )
                     sys.exit(1)
                 break
-            except CORBA.COMM_FAILURE, ex:
+            except CORBA.COMM_FAILURE as ex:
                 sys.stderr.write('Caught COMM_FAILURE Exception. '
                         + 'obtaining Supplier Admin! Retrying...\n'
                         )
@@ -250,7 +250,7 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
         #
         # Get proxy consumer - retrying on Comms Failure.
 
-        while 1:
+        while True:
             try:
                 self.proxy_consumer = \
                         self.supplier_admin.obtain_push_consumer()
@@ -259,7 +259,7 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
                             )
                     sys.exit(1)
                 break
-            except CORBA.COMM_FAILURE, ex:
+            except CORBA.COMM_FAILURE as ex:
                 sys.stderr.write('Caught COMM_FAILURE Exception '
                         + 'obtaining Proxy Push Consumer! Retrying...\n'
                         )
@@ -269,19 +269,19 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
         #
         # Connect Push Supplier - retrying on Comms Failure.
 
-        while 1:
+        while True:
             try:
                 self.proxy_consumer.connect_push_supplier(sptr)
                 break
-            except CORBA.BAD_PARAM, ex:
+            except CORBA.BAD_PARAM as ex:
                 sys.stderr.write('Caught BAD_PARAM Exception connecting Push Supplier!'
                         )
                 sys.exit(1)
-            except CosEventChannelAdmin.AlreadyConnected, ex:
+            except CosEventChannelAdmin.AlreadyConnected as ex:
                 sys.stderr.write('Proxy Push Consumer already connected!'
                         )
                 sys.exit(1)
-            except CORBA.COMM_FAILURE, ex:
+            except CORBA.COMM_FAILURE as ex:
                 sys.stderr.write('Caught COMM_FAILURE Exception '
                         + 'connecting Push Supplier! Retrying...'
                         )
@@ -296,7 +296,7 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
         #
         # Get Consumer Admin interface - retrying on Comms Failure.
 
-        while 1:
+        while True:
             try:
                 consumer_admin = channel.for_consumers()
                 if consumer_admin is None:
@@ -304,7 +304,7 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
                             )
                     sys.exit(1)
                 break
-            except CORBA.COMM_FAILURE, ex:
+            except CORBA.COMM_FAILURE as ex:
                 sys.stderr.write('Caught COMM_FAILURE Exception. '
                         + 'obtaining Consumer Admin! Retrying...\n'
                         )
@@ -319,7 +319,7 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
         #
         # Get proxy supplier - retrying on Comms Failure.
 
-        while 1:
+        while True:
             try:
                 proxy_supplier = consumer_admin.obtain_push_supplier()
                 if proxy_supplier is None:
@@ -327,7 +327,7 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
                             )
                     sys.exit(1)
                 break
-            except CORBA.COMM_FAILURE, ex:
+            except CORBA.COMM_FAILURE as ex:
                 sys.stderr.write('Caught COMM_FAILURE Exception. '
                         + 'obtaining Proxy Push Supplier! Retrying...\n'
                         )
@@ -337,19 +337,19 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
         #
         # Connect Push Consumer - retrying on Comms Failure.
 
-        while 1:
+        while True:
             try:
                 proxy_supplier.connect_push_consumer(consumer._this())
                 break
-            except CORBA.BAD_PARAM, ex:
+            except CORBA.BAD_PARAM as ex:
                 sys.stderr.write('Caught BAD_PARAM Exception connecting Push Consumer!\n'
                         )
                 sys.exit(1)
-            except CosEventChannelAdmin.AlreadyConnected, ex:
+            except CosEventChannelAdmin.AlreadyConnected as ex:
                 sys.stderr.write('Proxy Push Supplier already connected!\n'
                         )
                 sys.exit(1)
-            except CORBA.COMM_FAILURE, ex:
+            except CORBA.COMM_FAILURE as ex:
                 sys.stderr.write('Caught COMM_FAILURE Exception '
                         + 'connecting Push Consumer! Retrying...\n'
                         )
@@ -358,12 +358,11 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
 
     def push_data(self):
         if sum(self.assignment_map) < 80:
-            print 'ABORTING ..................................................................................................'
+            print('ABORTING ..................................................................................................')
             return
-        pa_vector = list(map(lambda x: float(x), self.pa_vector))
+        pa_vector = list([float(x) for x in self.pa_vector])
         mod_map = array_f('B', self.mod_map).tostring()
-        assignment_map = list(map(lambda x: int(x),
-            self.assignment_map))
+        assignment_map = list([int(x) for x in self.assignment_map])
         tx_id = self.tx_id
         self.tx_id = (self.tx_id + 1) % self.max_tx_id
 
@@ -383,9 +382,8 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
                     7,
                     8,
                     ):
-                raise SystemError, \
-                        'Modulation scheme not supported: %d' \
-                        % self.mod_map[x]
+                raise SystemError('Modulation scheme not supported: %d' \
+                        % self.mod_map[x])
 
         if sum(pa_vector) > self.subcarriers + 10:
             self.rm_logger.error('sum(pa_vector) = %d too big'
@@ -412,16 +410,16 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
                     self.tx_amplitude, self.required_ber,
                     self.constraint, self.modulation, self.freqoff, self.data_rate)
 
-        while 1:
+        while True:
             try:
                 self.rm_logger.debug('Push Supplier: push() called. ')
                 self.proxy_consumer.push(data_any)
                 break
-            except CosEventComm.Disconnected, ex:
+            except CosEventComm.Disconnected as ex:
                 sys.stderr.write('Failed. Caught Disconnected Exception!'
                         )
                 sys.exit(1)
-            except CORBA.COMM_FAILURE, ex:
+            except CORBA.COMM_FAILURE as ex:
                 sys.stderr.write('Failed. Caught COMM_FAILURE Exception! Retrying ...'
                         )
                 self.rm_logger.warning('Failed. Caught COMM_FAILURE Exception! Retrying ...'
@@ -629,7 +627,7 @@ class resource_manager_base_lab(ofdm_ti__POA.PA_Ctrl):
 class Supplier_i(CosEventComm__POA.PushSupplier):
 
     def disconnect_push_supplier(self):
-        print 'Push Supplier: disconnected.'
+        print('Push Supplier: disconnected.')
 
 
 ################################################################################
@@ -655,7 +653,7 @@ class Consumer_i(CosEventComm__POA.PushConsumer):
             self._received.append(v)
 
     def disconnect_push_consumer(self):
-        print 'Push Consumer: disconnected.'
+        print('Push Consumer: disconnected.')
 
 
 # end class Consumer_i
@@ -693,7 +691,7 @@ def start_resource_manager(rmanager, unique_id, options=None):
         obj = orb.resolve_initial_references('NameService')
         rootContext = obj._narrow(CosNaming.NamingContext)
     except:
-        raise SystemExit, 'Failed to get NamingContext'
+        raise SystemExit('Failed to get NamingContext')
 
     corba_name = [CosNaming.NameComponent('ofdm_ti', unique_id)]
     try:

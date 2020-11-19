@@ -28,7 +28,7 @@ from gnuradio import blocks
 
 import ofdm
 import math
-from fbmc_symbol_creation_bvc import fbmc_symbol_creation_bvc
+from .fbmc_symbol_creation_bvc import fbmc_symbol_creation_bvc
 
 class fbmc_transmitter_multiuser_bc(gr.hier_block2):
     """
@@ -71,13 +71,13 @@ class fbmc_transmitter_multiuser_bc(gr.hier_block2):
         self.fft_vxx_0_0 = fft.fft_vcc(M, False, (), True, 1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_vcc(([1.0/(M*0.6863)]*M))
         self.fbmc_symbol_creation_bvc_0 = ofdm.fbmc_symbol_creation_bvc(allocation, qam_size)
-        self.vector_padding_0 = ofdm.fbmc_asymmetrical_vector_padding_vcvc(start,end,M,-1)
+        self.vector_padding_0 = ofdm.fbmc_asymmetrical_vector_padding_vcvc(start, end, M, -1)
         self.fbmc_separate_vcvc_0 = ofdm.fbmc_separate_vcvc(M, 2)
         self.fbmc_polyphase_network_vcvc_0_0 = ofdm.fbmc_polyphase_network_vcvc(M, K, K*M-1, False)
         self.fbmc_polyphase_network_vcvc_0 = ofdm.fbmc_polyphase_network_vcvc(M, K, K*M-1, False)
         self.fbmc_overlapping_parallel_to_serial_vcc_0 = ofdm.fbmc_overlapping_parallel_to_serial_vcc(M)
         self.fbmc_oqam_preprocessing_vcvc_0 = ofdm.fbmc_oqam_preprocessing_vcvc(M, 0, theta_sel)
-        self.fbmc_insert_preamble_vcvc_0 = ofdm.fbmc_insert_preamble_vcvc(M, syms_per_frame, sel_preamble, zero_pads,extra_pad)
+        self.fbmc_insert_preamble_vcvc_0 = ofdm.fbmc_insert_preamble_vcvc(M, syms_per_frame, sel_preamble, zero_pads, extra_pad)
         self.fbmc_beta_multiplier_vcvc_0 = ofdm.fbmc_beta_multiplier_vcvc(M, K, K*M-1, 0)
         self.blks2_selector_0 = grc_blks2.selector(
             item_size=gr.sizeof_gr_complex*M,
@@ -90,12 +90,12 @@ class fbmc_transmitter_multiuser_bc(gr.hier_block2):
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.fbmc_symbol_creation_bvc_0, 0), (self.vector_padding_0,0))
-        self.connect((self.vector_padding_0,0),(self.fbmc_oqam_preprocessing_vcvc_0, 0))
+        self.connect((self.fbmc_symbol_creation_bvc_0, 0), (self.vector_padding_0, 0))
+        self.connect((self.vector_padding_0, 0), (self.fbmc_oqam_preprocessing_vcvc_0, 0))
         self.connect((self, 0), (self.fbmc_symbol_creation_bvc_0, 0))
         self.connect((self.fbmc_beta_multiplier_vcvc_0, 0), (self.fft_vxx_0_0, 0))
-        self.connect((self.fft_vxx_0_0, 0), (self.blocks_multiply_const_vxx_0,0))
-        self.connect((self.blocks_multiply_const_vxx_0,0), (self.fbmc_separate_vcvc_0, 0))
+        self.connect((self.fft_vxx_0_0, 0), (self.blocks_multiply_const_vxx_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_0, 0), (self.fbmc_separate_vcvc_0, 0))
         self.connect((self.fbmc_polyphase_network_vcvc_0, 0), (self.fbmc_overlapping_parallel_to_serial_vcc_0, 0))
         self.connect((self.fbmc_polyphase_network_vcvc_0_0, 0), (self.fbmc_overlapping_parallel_to_serial_vcc_0, 1))
         self.connect((self.fbmc_separate_vcvc_0, 1), (self.fbmc_polyphase_network_vcvc_0_0, 0))

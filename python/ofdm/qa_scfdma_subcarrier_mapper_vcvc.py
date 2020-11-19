@@ -39,7 +39,7 @@ class qa_scfdma_subcarrier_mapper_vcvc (gr_unittest.TestCase):
         N=12
         num_syms = 2**13
         start = 0
-        indices = range(start,M-1,M/N)
+        indices = list(range(start, M-1, M/N))
         mode = 1 # test dfdma
         src_data = list()
         expected_result = list()
@@ -55,17 +55,17 @@ class qa_scfdma_subcarrier_mapper_vcvc (gr_unittest.TestCase):
     	# print('--a--a--a--a--a--')
     	# print(src_data)
 
-        src = blocks.vector_source_c(src_data,vlen=N)
-        mapper = ofdm.scfdma_subcarrier_mapper_vcvc(N,M,start,mode)
+        src = blocks.vector_source_c(src_data, vlen=N)
+        mapper = ofdm.scfdma_subcarrier_mapper_vcvc(N, M, start, mode)
         dst = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,mapper,dst)
+        self.tb.connect(src, mapper, dst)
 
         self.tb.run ()
         # check data
         # print('res:')
         result_data = dst.data()
         # print(result_data)
-        self.assertComplexTuplesAlmostEqual(expected_result,result_data,7)
+        self.assertComplexTuplesAlmostEqual(expected_result, result_data, 7)
 
     def test_002_t (self):
     	# set up fg
@@ -73,7 +73,7 @@ class qa_scfdma_subcarrier_mapper_vcvc (gr_unittest.TestCase):
         N=12
         num_syms = 2**13
         start = 0
-        indices = range(start,start+N)
+        indices = list(range(start, start+N))
         mode = 0 # test lfdma
         src_data = list()
         expected_result = list()
@@ -89,17 +89,17 @@ class qa_scfdma_subcarrier_mapper_vcvc (gr_unittest.TestCase):
     	# print('--a--a--a--a--a--')
     	# print(src_data)
 
-        src = blocks.vector_source_c(src_data,vlen=N)
-        mapper = ofdm.scfdma_subcarrier_mapper_vcvc(N,M,start,mode)
+        src = blocks.vector_source_c(src_data, vlen=N)
+        mapper = ofdm.scfdma_subcarrier_mapper_vcvc(N, M, start, mode)
         dst = blocks.vector_sink_c(vlen=M)
-        self.tb.connect(src,mapper,dst)
+        self.tb.connect(src, mapper, dst)
 
         self.tb.run ()
         # check data
         # print('res:')
         result_data = dst.data()
         # print(result_data)
-        self.assertComplexTuplesAlmostEqual(expected_result,result_data,7)
+        self.assertComplexTuplesAlmostEqual(expected_result, result_data, 7)
 
 
 if __name__ == '__main__':

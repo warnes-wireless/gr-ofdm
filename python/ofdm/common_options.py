@@ -21,9 +21,9 @@
 #
 
 from gnuradio import eng_notation
-import preambles
+from . import preambles
 
-def add_options(normal,expert):
+def add_options(normal, expert):
     def_data_blocks_per_frame = 9
     expert.add_option("", "--data-blocks", type="int", default=def_data_blocks_per_frame,
                       help="set the number of data blocks per ofdm frame [default=%default]")
@@ -56,7 +56,7 @@ def add_options(normal,expert):
     expert.add_option( "", "--adaptive-fbmc", action="store_true", default=False,
                       help="Enabling adaptive FBMC")
 
-    preambles.default_block_header.add_options(normal,expert)
+    preambles.default_block_header.add_options(normal, expert)
 
 def defaults(options):
     # default values if parameters not set

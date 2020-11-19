@@ -21,21 +21,21 @@
 #
 
 from math import sqrt, pi
-from numpy import concatenate,conjugate,array
-from gr_tools import fft,ifft
+from numpy import concatenate, conjugate, array
+from .gr_tools import fft, ifft
 from gnuradio import gr, blocks
 from cmath import exp
-from numpy import abs,concatenate
+from numpy import abs, concatenate
 import numpy
 import ofdm as ofdm
-from station_configuration import *
-from ofdm import stream_controlled_mux,skip
+from .station_configuration import *
+from ofdm import stream_controlled_mux, skip
 from numpy import *
 
 from ofdm import static_mux_c, static_mux_v
 
 class default_block_header (object):
-  def __init__(self,data_subcarriers,fft_length, fbmc, est_preamble, options):
+  def __init__(self, data_subcarriers, fft_length, fbmc, est_preamble, options):
     self.fbmc = fbmc
     if self.fbmc:
         self.no_preambles = est_preamble
@@ -83,7 +83,7 @@ class default_block_header (object):
     fbmc_fd_2_list[0:len(fbmc_fd_2_list)/2:2] = hh1
     fbmc_fd_2_list[len(fbmc_fd_2_list)/2:len(fbmc_fd_2_list):2] = hh1
     fbmc_fd_2 = numpy.array(fbmc_fd_2_list)#*sqrt(2)
-    fbmc_fd_3 = 1j*numpy.roll(fbmc_fd_2,1+vlen/2)
+    fbmc_fd_3 = 1j*numpy.roll(fbmc_fd_2, 1+vlen/2)
     #fbmc_fd_3 = numpy.roll(fbmc_fd_2,1)
 
 
@@ -131,7 +131,7 @@ class default_block_header (object):
     self.fbmc_no_preambles = len(array(self.fbmc_pilotsym_fd).tolist()[0:]) #fixed for now
     self.fbmc_no_pilotsyms = self.fbmc_no_preambles
     
-    print "Number of channel estimation preambles", self.fbmc_no_pilotsyms
+    print("Number of channel estimation preambles", self.fbmc_no_pilotsyms)
     
     x = norm_fact*array(self.fbmc_pilotsym_fd)
     #x = 2.128*array(self.fbmc_pilotsym_fd)
@@ -169,7 +169,7 @@ class default_block_header (object):
 
     # Morelli & Mengali + Schmidl & Cox Preamble
     self.mm_periodic_parts = L = 8
-    td,fd = morellimengali_designer.create(self.subcarriers, fft_length, L)
+    td, fd = morellimengali_designer.create(self.subcarriers, fft_length, L)
     #td = numpy.array([0 + 0j]*fft_length)
     
     
@@ -202,7 +202,7 @@ class default_block_header (object):
 
 
     # Known pilot block to ease estimation of CTF
-    td,fd,td_1,fd_1,td_2,fd_2 = schmidl_ifo_designer.create(self.subcarriers, fft_length)
+    td, fd, td_1, fd_1, td_2, fd_2 = schmidl_ifo_designer.create(self.subcarriers, fft_length)
     #td = numpy.array([0 + 0j]*fft_length)
                      
                      
@@ -253,7 +253,7 @@ class default_block_header (object):
     #assert(self.no_pilotsyms == len(self.pilotsym_pos))
 
 
-  def _prepare_pilot_subcarriers(self,data_subcarriers,fft_length):
+  def _prepare_pilot_subcarriers(self, data_subcarriers, fft_length):
     # FIXME make this parameterisable
     # FIXME pilot subcarriers fixed to 1.0
     
@@ -266,7 +266,7 @@ class default_block_header (object):
 
     # compute pilot subcarriers
     pilot_dist = subc/2/(self.pilot_subcarriers/2+1)
-    for i in range(1,self.pilot_subcarriers/2+1):
+    for i in range(1, self.pilot_subcarriers/2+1):
       pos = pilot_dist*i
       self.pilot_tones.append(pos)
       self.pilot_tones.append(-pos)
@@ -278,10 +278,10 @@ class default_block_header (object):
     tmp[subc_dc] = 1.0
     assert(numpy.array(ifft(tmp)).all() == 1.0)
 
-    print "pilot tones",self.pilot_tones
+    print("pilot tones", self.pilot_tones)
     self.shifted_pilot_tones = shifted_pilot_tones = \
-        map(lambda x: x+subc_dc, self.pilot_tones)
-    print "shifted pilot tones",self.shifted_pilot_tones
+        [x+subc_dc for x in self.pilot_tones]
+    print("shifted pilot tones", self.shifted_pilot_tones)
 
     self.pilot_tone_map = [0.0]*subc
     for i in range(len(self.pilot_tones)):
@@ -300,9 +300,9 @@ class default_block_header (object):
       partition.append(1)    # pilot subcarrier
       last_pilot = shifted_pilot_tones[x]+1
     partition.append(subc - last_pilot)
-    print "Data/Pilot subcarrier partition: ", partition
+    print("Data/Pilot subcarrier partition: ", partition)
     self.partition = partition
-    print "sum partition",sum(partition)
+    print("sum partition", sum(partition))
 
 
   def add_options(normal, expert):
@@ -324,8 +324,8 @@ class ofdm_pilot_block_inserter(gr.hier_block2):
     vlen = fft_length# + cp_length
 
     gr.hier_block2.__init__(self, "ofdm_pilot_block_inserter_grc",
-        gr.io_signature(1,1,gr.sizeof_gr_complex*vlen),
-        gr.io_signature(1,1,gr.sizeof_gr_complex*vlen))
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*vlen),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*vlen))
 
     mux = ofdm.frame_mux( vlen, frame_length)
     
@@ -340,7 +340,7 @@ class ofdm_pilot_block_inserter(gr.hier_block2):
         for x in range( training_data.no_pilotsyms ):
           ####print "fd", config.training_data.pilotsym_fd[ x ]
           ####print "td", config.training_data.pilotsym_td[ x ]
-          print "TTTTtraining_data.no_pilotsyms: ", training_data.no_pilotsyms 
+          print("TTTTtraining_data.no_pilotsyms: ", training_data.no_pilotsyms) 
           mux.add_preamble( training_data.pilotsym_td[ x ] ) 
 
     self.connect( self, mux, self )
@@ -369,8 +369,8 @@ class pilot_block_inserter2(gr.hier_block2):
       vlen = fft_length
 
     gr.hier_block2.__init__(self, "pilot_block_inserter2",
-        gr.io_signature(1,1,gr.sizeof_gr_complex*vlen/2),
-        gr.io_signature(1,1,gr.sizeof_gr_complex*vlen/2))
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*vlen/2),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*vlen/2))
 
 
     mux = ofdm.frame_mux( vlen/2, 2*config.frame_length + config.training_data.fbmc_no_preambles)
@@ -410,8 +410,8 @@ class fbmc_pilot_block_inserter(gr.hier_block2):
     #vlen = fft_length # padding BEFORE oqam processing
 
     gr.hier_block2.__init__(self, "fbmc_pilot_block_inserter",
-        gr.io_signature(1,1,gr.sizeof_gr_complex*vlen),
-        gr.io_signature(1,1,gr.sizeof_gr_complex*vlen))
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*vlen),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*vlen))
 
 
     mux = ofdm.frame_mux( vlen, 2*frame_data_part+training_data.fbmc_no_preambles)
@@ -426,7 +426,7 @@ class fbmc_pilot_block_inserter(gr.hier_block2):
        
         for x in range( training_data.fbmc_no_pilotsyms ):
           ####print "fd", config.training_data.pilotsym_fd[ x ]
-          print "fbmc_fd", training_data.fbmc_pilotsym_fd[ x ]
+          print("fbmc_fd", training_data.fbmc_pilotsym_fd[ x ])
           mux.add_preamble( training_data.fbmc_pilotsym_fd[ x ] ) 
 
     self.connect( self, mux, self )
@@ -453,11 +453,11 @@ class fbmc_timing_pilot_block_inserter(gr.hier_block2):
     #vlen = fft_length # padding BEFORE oqam processing
 
     gr.hier_block2.__init__(self, "fbmc_timing_pilot_block_inserter",
-        gr.io_signature(1,1,gr.sizeof_gr_complex*vlen),
-        gr.io_signature(1,1,gr.sizeof_gr_complex*vlen))
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*vlen),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*vlen))
 
 
-    mux = ofdm.frame_mux( vlen,2*config.frame_data_part+config.training_data.fbmc_no_preambles+1)
+    mux = ofdm.frame_mux( vlen, 2*config.frame_data_part+config.training_data.fbmc_no_preambles+1)
     
     if ant==1:
         for x in range( config.training_data.no_pilotsyms ):
@@ -469,7 +469,7 @@ class fbmc_timing_pilot_block_inserter(gr.hier_block2):
        
         for x in range( config.training_data.fbmc_no_timing_pilotsyms ):
           ####print "fd", config.training_data.pilotsym_fd[ x ]
-          print "fbmc_fd", config.training_data.fbmc_pilotsym_fd_timing[ x ]
+          print("fbmc_fd", config.training_data.fbmc_pilotsym_fd_timing[ x ])
           mux.add_preamble( config.training_data.fbmc_pilotsym_fd_timing[ x ] ) 
 
     self.connect( self, mux, self )
@@ -484,7 +484,7 @@ class pilot_block_filter(gr.hier_block2):
   Output 0: data blocks
   Output 1: frame trigger for data blocks
   """
-  def __init__ (self,subcarriers,frame_length,training_data):
+  def __init__ (self, subcarriers, frame_length, training_data):
 
     #config = station_configuration()
     
@@ -492,16 +492,16 @@ class pilot_block_filter(gr.hier_block2):
     frame_length = frame_length
 
     gr.hier_block2.__init__(self, "pilot_block_filter",
-        gr.io_signature2(2,2,gr.sizeof_gr_complex*subcarriers,gr.sizeof_char),
-        gr.io_signature2(2,2,gr.sizeof_gr_complex*subcarriers,gr.sizeof_char))
+        gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char),
+        gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char))
 
-    filt = skip(gr.sizeof_gr_complex*subcarriers,frame_length)# skip_known_symbols(frame_length,subcarriers)
+    filt = skip(gr.sizeof_gr_complex*subcarriers, frame_length)# skip_known_symbols(frame_length,subcarriers)
     for x in training_data.pilotsym_pos:
       filt.skip_call(x)
 
-    self.connect(self,filt)
-    self.connect(filt,self)
-    self.connect((self,1),(filt,1),(self,1))
+    self.connect(self, filt)
+    self.connect(filt, self)
+    self.connect((self, 1), (filt, 1), (self, 1))
 
 
 ################################################################################
@@ -523,16 +523,16 @@ class fbmc_inner_pilot_block_filter(gr.hier_block2):
     frame_length = config.frame_length
 
     gr.hier_block2.__init__(self, "fbmc_inner_pilot_block_filter",
-        gr.io_signature2(2,2,gr.sizeof_gr_complex*vlen,gr.sizeof_char),
-        gr.io_signature2(2,2,gr.sizeof_gr_complex*vlen,gr.sizeof_char))
+        gr.io_signature2(2, 2, gr.sizeof_gr_complex*vlen, gr.sizeof_char),
+        gr.io_signature2(2, 2, gr.sizeof_gr_complex*vlen, gr.sizeof_char))
 
-    filt = skip(gr.sizeof_gr_complex*vlen,frame_length)# skip_known_symbols(frame_length,subcarriers)
+    filt = skip(gr.sizeof_gr_complex*vlen, frame_length)# skip_known_symbols(frame_length,subcarriers)
     for x in config.training_data.fbmc_pilotsym_pos_td:
       filt.skip_call(x)
 
-    self.connect(self,filt)
-    self.connect(filt,self)
-    self.connect((self,1),(filt,1),(self,1))
+    self.connect(self, filt)
+    self.connect(filt, self)
+    self.connect((self, 1), (filt, 1), (self, 1))
 
 
 ################################################################################
@@ -546,7 +546,7 @@ class fbmc_pilot_block_filter(gr.hier_block2):
   Output 0: data blocks
   Output 1: frame trigger for data blocks
   """
-  def __init__ (self,subcarriers,frame_length,frame_data_part,training_data):
+  def __init__ (self, subcarriers, frame_length, frame_data_part, training_data):
 
     #config = station_configuration()
     
@@ -556,16 +556,16 @@ class fbmc_pilot_block_filter(gr.hier_block2):
     
 
     gr.hier_block2.__init__(self, "fbmc_pilot_block_filter",
-        gr.io_signature2(2,2,gr.sizeof_gr_complex*subcarriers,gr.sizeof_char),
-        gr.io_signature2(2,2,gr.sizeof_gr_complex*subcarriers,gr.sizeof_char))
+        gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char),
+        gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char))
 
-    filt = skip(gr.sizeof_gr_complex*subcarriers,frame_length/2)# skip_known_symbols(frame_length,subcarriers)
+    filt = skip(gr.sizeof_gr_complex*subcarriers, frame_length/2)# skip_known_symbols(frame_length,subcarriers)
     for x in training_data.fbmc_pilotsym_pos[:len(training_data.fbmc_pilotsym_pos)/2]:
       filt.skip_call(x)
 
-    self.connect(self,filt)
-    self.connect(filt,self)
-    self.connect((self,1),(filt,1),(self,1))
+    self.connect(self, filt)
+    self.connect(filt, self)
+    self.connect((self, 1), (filt, 1), (self, 1))
 
 ################################################################################
 class fbmc_snr_filter(gr.hier_block2):
@@ -577,25 +577,25 @@ class fbmc_snr_filter(gr.hier_block2):
   Output 0: data blocks
   Output 1: frame trigger for data blocks
   """
-  def __init__ (self,subcarriers,frame_length,training_data):
+  def __init__ (self, subcarriers, frame_length, training_data):
 
     #config = station_configuration()
     
 
     gr.hier_block2.__init__(self, "fbmc_snr_filter",
-        gr.io_signature2(2,2,gr.sizeof_gr_complex*subcarriers,gr.sizeof_char),
-        gr.io_signature(1,1,gr.sizeof_gr_complex*subcarriers))
+        gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*subcarriers))
 
     
-    skipping_symbols = [0] + range(training_data.fbmc_no_preambles/2,frame_length/2)
-    snr_est_filt = skip(gr.sizeof_gr_complex*subcarriers,frame_length/2)# skip_known_symbols(frame_length,subcarriers)
+    skipping_symbols = [0] + list(range(training_data.fbmc_no_preambles/2, frame_length/2))
+    snr_est_filt = skip(gr.sizeof_gr_complex*subcarriers, frame_length/2)# skip_known_symbols(frame_length,subcarriers)
     
     for x in skipping_symbols:
       snr_est_filt.skip_call(x)
 
-    self.connect(self,snr_est_filt)
-    self.connect(snr_est_filt,self)
-    self.connect((self,1),(snr_est_filt,1))
+    self.connect(self, snr_est_filt)
+    self.connect(snr_est_filt, self)
+    self.connect((self, 1), (snr_est_filt, 1))
  
 
 
@@ -609,25 +609,25 @@ class ofdm_snr_filter(gr.hier_block2):
   Output 0: data blocks
   Output 1: frame trigger for data blocks
   """
-  def __init__ (self,subcarriers,frame_length):
+  def __init__ (self, subcarriers, frame_length):
 
     #config = station_configuration()
     
 
     gr.hier_block2.__init__(self, "ofdm_snr_filter",
-        gr.io_signature2(2,2,gr.sizeof_gr_complex*subcarriers,gr.sizeof_char),
-        gr.io_signature(1,1,gr.sizeof_gr_complex*subcarriers))
+        gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*subcarriers))
 
     
     #skipping_symbols = [0] + range(training_data.fbmc_no_preambles/2,frame_length/2)
-    snr_est_filt = skip(gr.sizeof_gr_complex*subcarriers,frame_length)# skip_known_symbols(frame_length,subcarriers)
+    snr_est_filt = skip(gr.sizeof_gr_complex*subcarriers, frame_length)# skip_known_symbols(frame_length,subcarriers)
     
-    for x in range(1,frame_length):
+    for x in range(1, frame_length):
       snr_est_filt.skip_call(x)
 
-    self.connect(self,snr_est_filt)
-    self.connect(snr_est_filt,self)
-    self.connect((self,1),(snr_est_filt,1))
+    self.connect(self, snr_est_filt)
+    self.connect(snr_est_filt, self)
+    self.connect((self, 1), (snr_est_filt, 1))
  
 
 
@@ -642,19 +642,19 @@ class scatterplot_subcarrier_filter(gr.hier_block2):
   Output 0: data blocks
   Output 1: frame trigger for data blocks
   """
-  def __init__ (self,subcarriers,data_blocks):
+  def __init__ (self, subcarriers, data_blocks):
 
     gr.hier_block2.__init__(self, "fbmc_pilot_block_filter",
-        gr.io_signature2(2,2,gr.sizeof_gr_complex*subcarriers,gr.sizeof_char),
-        gr.io_signature(1,1,gr.sizeof_gr_complex*subcarriers))
+        gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*subcarriers))
 
     
-    scatter_id_filt = skip(gr.sizeof_gr_complex*subcarriers,data_blocks)
+    scatter_id_filt = skip(gr.sizeof_gr_complex*subcarriers, data_blocks)
     scatter_id_filt.skip_call(0)
 
-    self.connect(self,scatter_id_filt)
-    self.connect(scatter_id_filt,self)
-    self.connect((self,1),(scatter_id_filt,1))
+    self.connect(self, scatter_id_filt)
+    self.connect(scatter_id_filt, self)
+    self.connect((self, 1), (scatter_id_filt, 1))
  
 
 
@@ -666,16 +666,16 @@ class pilot_subcarrier_inserter (gr.hier_block2):
   subcarriers (as vector), the output vector contains data subcarriers
   muxed with pilot subcarriers. Extends vector size.
   """
-  def __init__(self,data_subcarriers,pilots,data_blocks,training_data):
+  def __init__(self, data_subcarriers, pilots, data_blocks, training_data):
 
     #config = station_configuration()
     subc = data_subcarriers
     #pilots = training_data.pilot_subcarriers
     total_subc = subc + pilots
 
-    gr.hier_block2.__init__(self,"pilot_subcarrier_inserter",
-        gr.io_signature(1,1,gr.sizeof_gr_complex*subc),
-        gr.io_signature(1,1,gr.sizeof_gr_complex*total_subc))
+    gr.hier_block2.__init__(self, "pilot_subcarrier_inserter",
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*subc),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*total_subc))
     
     ins = ofdm.pilot_subcarrier_inserter( subc,
         config.training_data.pilot_subc_sym,
@@ -702,9 +702,9 @@ class pilot_subcarrier_inserter_zeroes (gr.hier_block2):
 
     pilot_subc_sym = [0.0] * pilots
 
-    gr.hier_block2.__init__(self,"pilot_subcarrier_inserter_zeroes",
-        gr.io_signature(1,1,gr.sizeof_gr_complex*subc),
-        gr.io_signature(1,1,gr.sizeof_gr_complex*total_subc))
+    gr.hier_block2.__init__(self, "pilot_subcarrier_inserter_zeroes",
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*subc),
+        gr.io_signature(1, 1, gr.sizeof_gr_complex*total_subc))
 
     ins = ofdm.pilot_subcarrier_inserter( subc,
         pilot_subc_sym,
@@ -732,18 +732,18 @@ class pilot_subcarrier_inserter_zeroes (gr.hier_block2):
 
 
 
-    v2s = blocks.vector_to_stream(gr.sizeof_gr_complex,subc)
-    pilot_src = blocks.vector_source_c(pilot_subc_sym,True)
+    v2s = blocks.vector_to_stream(gr.sizeof_gr_complex, subc)
+    pilot_src = blocks.vector_source_c(pilot_subc_sym, True)
 
     mux = static_mux_c(imux)
-    s2v = blocks.stream_to_vector(gr.sizeof_gr_complex,total_subc)
+    s2v = blocks.stream_to_vector(gr.sizeof_gr_complex, total_subc)
 
     # vector to stream, mux with pilot subcarrier symbols,
     # reconvert to vector
 
-    self.connect(self,v2s,(mux,0))
-    self.connect(pilot_src,(mux,1))
-    self.connect(mux,s2v,self)
+    self.connect(self, v2s, (mux, 0))
+    self.connect(pilot_src, (mux, 1))
+    self.connect(mux, s2v, self)
 
 ################################################################################
 
@@ -765,25 +765,25 @@ class pilot_subcarrier_filter (gr.hier_block2):
     else:
       itemsize = gr.sizeof_float
 
-    gr.hier_block2.__init__(self,"pilot_subcarrier_filter",
-        gr.io_signature(1,1,itemsize*subc),
-        gr.io_signature(1,1,itemsize*data_subc))
+    gr.hier_block2.__init__(self, "pilot_subcarrier_filter",
+        gr.io_signature(1, 1, itemsize*subc),
+        gr.io_signature(1, 1, itemsize*data_subc))
 
     # FIXME inefficient
 
-    skipcarrier = skip(itemsize,subc)
+    skipcarrier = skip(itemsize, subc)
     for x in training_data.shifted_pilot_tones:
       skipcarrier.skip_call(x)
 
     trigger = [0]*subc
     trigger[0] = 1
-    trigger_src = blocks.vector_source_b(trigger,True) # FIXME static
+    trigger_src = blocks.vector_source_b(trigger, True) # FIXME static
 
-    v2s = blocks.vector_to_stream(itemsize,subc)
-    s2v = blocks.stream_to_vector(itemsize,data_subc)
+    v2s = blocks.vector_to_stream(itemsize, subc)
+    s2v = blocks.stream_to_vector(itemsize, data_subc)
 
-    self.connect(self,v2s,skipcarrier,s2v,self)
-    self.connect(trigger_src,(skipcarrier,1))
+    self.connect(self, v2s, skipcarrier, s2v, self)
+    self.connect(trigger_src, (skipcarrier, 1))
 
 ################################################################################
 
@@ -792,7 +792,7 @@ Creates a preamble based on a modified version of park's design.
 Can be used for Schmidl's algorithm.
 """
 class mod_park_designer:
-  def create(subcarriers,fft_length):
+  def create(subcarriers, fft_length):
     assert(subcarriers%4==0)
     assert((fft_length-subcarriers)%2==0)
 
@@ -811,7 +811,7 @@ class mod_park_designer:
     td = ifft(seq1, (fft_length-subcarriers)/2)
     fd = seq1
 
-    return (td,fd)
+    return (td, fd)
 
   create = staticmethod(create)
 
@@ -819,15 +819,15 @@ class mod_park_designer:
     # A -> A | B* | A | B*
     # with B symmetric to A
     x = conjugate(seq[1:len(seq)])
-    td = concatenate([seq,[seq[0]],x[::-1]]*2)
+    td = concatenate([seq, [seq[0]], x[::-1]]*2)
     assert(len(td)==4*len(seq))
     fd = array(fft(td)) / len(td)
-    return (td,fd)
+    return (td, fd)
 
   transform_td = staticmethod(transform_td)
 
   def transform_fd(seq):
-    return mod_park_designer.transform_td(ifft(seq,0))
+    return mod_park_designer.transform_td(ifft(seq, 0))
 
   transform_fd = staticmethod(transform_fd)
 
@@ -838,20 +838,20 @@ Creates a preamble that is used by the Schmidl's integer frequency offset
 estimator.
 """
 class schmidl_ifo_designer:
-  def create(subcarriers,fft_length):
+  def create(subcarriers, fft_length):
     assert(subcarriers%2==0)
     assert((fft_length-subcarriers)%2==0)
 
     # fully loaded ofdm symbol as preamble.
-    mod = [1,1j,-1,-1j] # subset of QPSK, |x| = 1.0
+    mod = [1, 1j, -1, -1j] # subset of QPSK, |x| = 1.0
 
     seq1 = [(fixed_real_pn1[2*i]+1)/2+(fixed_real_pn1[2*i+1]+1) for i in range(subcarriers)]
     seq1 = [mod[seq1[i]] for i in range(subcarriers)]
     
     #seq1 = [fixed_real_pn1[i] + ((1j)**(2*i+1))*fixed_real_pn1[i] for i in range(208)]/numpy.sqrt(2)
     
-    mimo_mask_1 = zeros(subcarriers,int)
-    mimo_mask_2 = zeros(subcarriers,int)
+    mimo_mask_1 = zeros(subcarriers, int)
+    mimo_mask_2 = zeros(subcarriers, int)
     mimo_mask_1[0::2]=sqrt(2.0)
     mimo_mask_2[1::2]=sqrt(2.0)
     fd_1 = seq1*mimo_mask_1
@@ -863,7 +863,7 @@ class schmidl_ifo_designer:
     td = ifft(seq1, (fft_length-subcarriers)/2)
     fd = seq1
 
-    return (td,fd,td_1,fd_1,td_2,fd_2)
+    return (td, fd, td_1, fd_1, td_2, fd_2)
 
   create = staticmethod(create)
 
@@ -874,22 +874,22 @@ Creates a preamble that is used by the Schmidl's fractional frequency offset
 estimator.
 """
 class schmidl_ffo_designer:
-  def create(subcarriers,fft_length):
+  def create(subcarriers, fft_length):
     assert(subcarriers%4==0)
     assert((fft_length-subcarriers)%2==0)
 
     # every second subcarrier loaded. results in a periodicity in time
     # A | A
-    mod = [1+1j,1-1j,-1-1j,-1-1j] # subset of QPSK |x|=sqrt(2.0)
+    mod = [1+1j, 1-1j, -1-1j, -1-1j] # subset of QPSK |x|=sqrt(2.0)
 
     seq1 = [(fixed_real_pn1[2*i]+1)/2+(fixed_real_pn1[2*i+1]+1) for i in range(subcarriers/2)]
-    seq1 = concatenate([[mod[seq1[i]],0.0] for i in range(subcarriers/2)])
+    seq1 = concatenate([[mod[seq1[i]], 0.0] for i in range(subcarriers/2)])
 
     # transform to time domain
     td = ifft(seq1, (fft_length-subcarriers)/2)
     fd = seq1
 
-    return (td,fd)
+    return (td, fd)
 
   create = staticmethod(create)
 
@@ -897,29 +897,29 @@ class schmidl_ffo_designer:
     # A -> A | A
     td = concatenate([seq]*2)
     fd = array(fft(td)) / len(td)
-    return (td,fd)
+    return (td, fd)
 
   transform_td = staticmethod(transform_td)
 
   def transform_fd(seq):
     # every second subcarrier to zero
-    fd = concatenate([[seq[i],0.0] for i in range(len(seq))])
-    td = ifft(fd,0)
+    fd = concatenate([[seq[i], 0.0] for i in range(len(seq))])
+    td = ifft(fd, 0)
 
-    return (td,fd)
+    return (td, fd)
 
   transform_fd = staticmethod(transform_fd)
 
 ################################################################################
 
 class morellimengali_designer:
-  def create(subcarriers,fft_length,L):
+  def create(subcarriers, fft_length, L):
     assert(subcarriers%(2*L)==0)
 #    assert((fft_length-subcarriers)%2==0)
 
     # every subcarrier loaded. results in a periodicity in time
     # A | A
-    mod = [1+1j,1-1j,-1-1j,-1-1j] # subset of QPSK |x|=sqrt(2.0)
+    mod = [1+1j, 1-1j, -1-1j, -1-1j] # subset of QPSK |x|=sqrt(2.0)
     mod = numpy.array(mod) * sqrt(L/2.0)
 
     seq1 = [(fixed_real_pn1[2*i]+1)/2+(fixed_real_pn1[2*i+1]+1) for i in range(subcarriers/L)]
@@ -933,33 +933,33 @@ class morellimengali_designer:
     td = ifft(seq1, (fft_length-subcarriers)/2)
     fd = seq1
 
-    return (td,fd)
+    return (td, fd)
 
   create = staticmethod(create)
 
 ################################################################################
 
 class mod_schmidl_ffo_designer:
-  def create(subcarriers,fft_length):
+  def create(subcarriers, fft_length):
     assert(subcarriers%4 == 0)
     assert((fft_length-subcarriers)%2==0)
 
-    td,fd = cazac_designer.create(subcarriers/2, fft_length/2)
-    td,fd = array(schmidl_ffo_designer.transform_td(td))*sqrt(2.0)
+    td, fd = cazac_designer.create(subcarriers/2, fft_length/2)
+    td, fd = array(schmidl_ffo_designer.transform_td(td))*sqrt(2.0)
 
     td = [td[i]*float(fixed_real_pn1[i]) for i in range(len(td))]
-    fd = array(fft(td,(fft_length-subcarriers)/2)) / len(td)
+    fd = array(fft(td, (fft_length-subcarriers)/2)) / len(td)
    #print fd
    # print sum([abs(fd[i])**2 for i in range(len(fd))])
 
-    return (td,fd)
+    return (td, fd)
 
   create = staticmethod(create)
 
 
 ################################################################################
 
-def gcd(a,b):
+def gcd(a, b):
   """Return greatest common divisor using Euclid's Algorithm."""
   while b:
     a, b = b, a % b
@@ -972,7 +972,7 @@ The fft window needs to be fully used, i.e. fft_length=subcarriers.
 This algorithm should work with any subcarrier number.
 """
 class cazac_designer:
-  def create(subcarriers,fft_length):
+  def create(subcarriers, fft_length):
     assert((fft_length-subcarriers)%2==0)
     #assert(subcarriers == fft_length)
 
@@ -980,11 +980,11 @@ class cazac_designer:
     M = 0
 
     # find number that is relatively prime to subcarrier number
-    for i in range(2,N):
-      if gcd(i,N) == 1:
+    for i in range(2, N):
+      if gcd(i, N) == 1:
         M = i
         break
-    assert(gcd(M,N)==1)
+    assert(gcd(M, N)==1)
 
     if subcarriers % 2 == 0: #even
       index = lambda k: k**2 +2*k
@@ -994,10 +994,10 @@ class cazac_designer:
     fd = [exp(1j*M*pi*index(k)/N) for k in range(N)]
     if fft_length > subcarriers:
       vs = (fft_length-subcarriers)/2
-      fd = concatenate([[0.0]*vs,fd,[0.0]*vs])
-    td = ifft(fd,0)
+      fd = concatenate([[0.0]*vs, fd, [0.0]*vs])
+    td = ifft(fd, 0)
 
-    return (td,fd)
+    return (td, fd)
 
   create = staticmethod(create)
 

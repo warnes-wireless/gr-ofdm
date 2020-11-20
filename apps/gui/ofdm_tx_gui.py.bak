@@ -42,7 +42,7 @@ class OFDMRxGUI(QtGui.QMainWindow):
         self.options = options
 
         # load and uic the file right away, no additional step necessary
-        self.gui = uic.loadUi(os.path.join(os.path.dirname(__file__), 'ofdm_tx_gui_window.ui'), self)
+        self.gui = uic.loadUi(os.path.join(os.path.dirname(__file__),'ofdm_tx_gui_window.ui'), self)
 
         # GUI update timer
         self.plot_timer = Qt.QTimer()
@@ -68,7 +68,7 @@ class OFDMRxGUI(QtGui.QMainWindow):
         self.grid_powerallocation.enableXMin(True)
         self.grid_powerallocation.setPen(Qt.QPen(Qt.Qt.black, 1, Qt.Qt.DotLine))
         self.grid_powerallocation.attach(self.gui.qwtPlotPowerallocation)
-        self.powerallocation_x = list(range(-99, 101))
+        self.powerallocation_x = range(-99,101)
         self.powerallocation_y = [0]*len(self.powerallocation_x)
         self.curve_powerallocation = Qwt.QwtPlotCurve()
         self.curve_powerallocation.setPen(Qt.QPen(Qt.Qt.green, 1))
@@ -85,7 +85,7 @@ class OFDMRxGUI(QtGui.QMainWindow):
         self.grid_bitloading.enableXMin(True)
         self.grid_bitloading.setPen(Qt.QPen(Qt.Qt.black, 1, Qt.Qt.DotLine))
         self.grid_bitloading.attach(self.gui.qwtPlotBitloading)
-        self.bitloading_x = list(range(-99, 101))
+        self.bitloading_x = range(-99,101)
         self.bitloading_y = [0]*len(self.bitloading_x)
         self.curve_bitloading = Qwt.QwtPlotCurve()
         self.curve_bitloading.setPen(Qt.QPen(Qt.Qt.magenta, 1))
@@ -102,13 +102,13 @@ class OFDMRxGUI(QtGui.QMainWindow):
 
 
     def plot_powerallocation(self, samples):
-        self.powerallocation_x = list(range(-99, 101))
+        self.powerallocation_x = range(-99,101)
         self.powerallocation_y = samples
         self.curve_powerallocation.setData(self.powerallocation_x, self.powerallocation_y)
         self.gui.qwtPlotPowerallocation.replot()
 
     def plot_bitloading(self, samples):
-        self.bitloading_x = list(range(-99, 101))
+        self.bitloading_x = range(-99,101)
         self.bitloading_y = samples
         self.curve_bitloading.setData(self.bitloading_x, self.bitloading_y)
         self.gui.qwtPlotBitloading.replot()

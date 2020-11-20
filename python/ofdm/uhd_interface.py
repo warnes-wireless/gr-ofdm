@@ -127,7 +127,7 @@ class uhd_interface:
                 print("No gain specified.")
                 print("Setting gain to %f (from [%f, %f])" % \
                 (gain_abs, gain_range.start(), gain_range.stop()))
-            	self.u.set_gain(gain_abs, 0)
+                self.u.set_gain(gain_abs, 0)
         else:
             gain_delta = gain_range.stop() - gain_range.start()
             gain_abs_delta = gain_rel * gain_delta

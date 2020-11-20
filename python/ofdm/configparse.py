@@ -89,7 +89,12 @@ class Option(_Option):
             raise OptionError("must supply dest for option", self)
 
     # Replace the base _check_dest method by our own.
-    CHECK_METHODS[CHECK_METHODS.index(_Option._check_dest.__func__)] = _check_dest
+    # https://stackoverflow.com/questions/34467701/decorating-methods-attributeerror-function-object-has-no-attribute-self
+    # https://stackoverflow.com/questions/12935241/python-call-instance-method-using-func
+    # Based on above the below is for Python 2.7
+    # CHECK_METHODS[CHECK_METHODS.index(_Option._check_dest.__func__)] = _check_dest
+    # This is correct for Python3
+    CHECK_METHODS[CHECK_METHODS.index(_Option._check_dest)] = _check_dest
 
     # Implement a __str__ method that does die when there are no
     # option strings.

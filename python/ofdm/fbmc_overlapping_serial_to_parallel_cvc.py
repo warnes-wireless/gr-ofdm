@@ -24,7 +24,7 @@ from gnuradio import blocks
 from gnuradio.filter import firdes
 
 from .fbmc_vector_reshape_vcvc import fbmc_vector_reshape_vcvc
-import ofdm_swig as ofdm
+import ofdm
 
 class fbmc_overlapping_serial_to_parallel_cvc(gr.hier_block2):
     """

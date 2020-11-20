@@ -25,15 +25,15 @@ from gnuradio import eng_notation
 from configparse import OptionParser
 from gnuradio import filter, channels
 
-from .station_configuration import station_configuration
+from station_configuration import station_configuration
 
 from math import log10, sqrt
 
 import sys
 import os
 
-from .transmit_path import transmit_path
-from .receive_path import receive_path
+from transmit_path import transmit_path
+from receive_path import receive_path
 from ofdm import throughput_measure, vector_sampler
 from . import common_options
 from .gr_tools import log_to_file, ms_to_file

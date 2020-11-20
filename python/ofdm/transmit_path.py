@@ -24,8 +24,8 @@ from gnuradio import eng_notation
 from gnuradio import gr, blocks, analog, filter, zeromq
 from gnuradio import fft as fft_blocks
 from gnuradio import trellis
-from .gr_tools import log_to_file, unpack_array, terminate_stream
-import ofdm as ofdm
+from gr_tools import log_to_file, unpack_array, terminate_stream
+import ofdm
 from ofdm import generic_mapper_bcv
 from ofdm import puncture_bb, cyclic_prefixer, vector_padding_dc_null, skip
 from ofdm import stream_controlled_mux, reference_data_source_02_ib #reference_data_source_ib

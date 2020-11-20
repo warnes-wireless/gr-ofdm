@@ -72,7 +72,7 @@ class OFDMRxGUI(QtWidgets.QMainWindow):
         self.powerallocation_y = [0]*len(self.powerallocation_x)
         self.curve_powerallocation = Qwt.QwtPlotCurve()
         self.curve_powerallocation.setPen(Qt.QPen(Qt.Qt.green, 1))
-        self.curve_powerallocation.setBrush(Qt.Qt.green)
+        self.curve_powerallocation.setBrush(QtCore.Qt.green)
         self.curve_powerallocation.setStyle(Qwt.QwtPlotCurve.Steps)
         self.curve_powerallocation.attach(self.gui.qwtPlotPowerallocation)
 

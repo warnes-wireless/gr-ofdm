@@ -24,7 +24,7 @@ from gnuradio import blocks
 from gnuradio import digital
 
 from gnuradio.filter import firdes
-from ofdm import add_vcc
+import ofdm
 import math
 
 class fbmc_overlapping_parallel_to_serial_vcc(gr.hier_block2):
@@ -47,7 +47,7 @@ class fbmc_overlapping_parallel_to_serial_vcc(gr.hier_block2):
         self.vector_to_stream0 = blocks.vector_to_stream(gr.sizeof_gr_complex*M/2, 2)
         self.vector_to_stream1 = blocks.vector_to_stream(gr.sizeof_gr_complex*M/2, 2)
         self.delay = blocks.delay(gr.sizeof_gr_complex*M/2, 1)
-        self.adder = blocks.add_vcc(M/2)
+        self.adder = ofdm.add_vcc(M/2)
 
         # Connections
         self.connect((self, 0), self.vector_to_stream0)

@@ -24,7 +24,9 @@ from gnuradio import blocks
 from gnuradio import channels
 from gnuradio import gr
 from gnuradio.filter import firdes
-from grc_gnuradio import blks2 as grc_blks2
+# no longer exists in 3.8
+# fused with blocks
+# from grc_gnuradio import blks2 as grc_blks2
 import math
 
 class fbmc_channel_hier_cc(gr.hier_block2):
@@ -112,14 +114,14 @@ class fbmc_channel_hier_cc(gr.hier_block2):
         )
         self.blocks_null_source_0 = blocks.null_source(gr.sizeof_gr_complex*1)
         self.blocks_add_xx_0 = blocks.add_vcc(1)
-        self.blks2_selector_1 = grc_blks2.selector(
+        self.blks2_selector_1 = blocks.selector(
             item_size=gr.sizeof_gr_complex*1,
             num_inputs=2,
             num_outputs=1,
             input_index=exclude_noise,
             output_index=0,
         )
-        self.blks2_selector_0 = grc_blks2.selector(
+        self.blks2_selector_0 = blocks.selector(
             item_size=gr.sizeof_gr_complex*1,
             num_inputs=2,
             num_outputs=1,

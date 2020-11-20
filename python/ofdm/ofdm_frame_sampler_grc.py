@@ -1,5 +1,6 @@
 from gnuradio import gr, blocks
-from ofdm import vector_sampler
+# from ofdm import vector_sampler < in 3.8 that's how you import swigged modules
+import ofdm
 
 class ofdm_frame_sampler( gr.hier_block2 ):
   def __init__(self, subcarriers, frame_length):
@@ -22,7 +23,7 @@ class ofdm_frame_sampler( gr.hier_block2 ):
     # the old outer receiver. The dynamic frame start trigger is hence
     # replaced with a static one, fixed to the frame length.
 
-    frame_sampler = vector_sampler( gr.sizeof_gr_complex * total_subc,
+    frame_sampler = ofdm.vector_sampler( gr.sizeof_gr_complex * total_subc,
                                               frame_length )
     symbol_output = blocks.vector_to_stream( gr.sizeof_gr_complex * total_subc,
                                               frame_length )

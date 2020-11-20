@@ -23,7 +23,8 @@ from gnuradio import gr
 from gnuradio import fft
 from gnuradio.fft import window
 from gnuradio.filter import firdes
-from grc_gnuradio import blks2 as grc_blks2
+# No longer available in GRC 3.8, fuesd with blocks
+# from grc_gnuradio import blks2 as grc_blks2
 from gnuradio import blocks
 
 import ofdm
@@ -79,7 +80,7 @@ class fbmc_transmitter_hier_bc(gr.hier_block2):
         self.fbmc_oqam_preprocessing_vcvc_0 = ofdm.fbmc_oqam_preprocessing_vcvc(M, 0, theta_sel)
         self.fbmc_insert_preamble_vcvc_0 = ofdm.fbmc_insert_preamble_vcvc(M, syms_per_frame, sel_preamble, zero_pads, extra_pad)
         self.fbmc_beta_multiplier_vcvc_0 = ofdm.fbmc_beta_multiplier_vcvc(M, K, K*M-1, 0)
-        self.blks2_selector_0 = grc_blks2.selector(
+        self.blks2_selector_0 = blocks.selector(
             item_size=gr.sizeof_gr_complex*M,
             num_inputs=2,
             num_outputs=1,

@@ -1,5 +1,5 @@
 from gnuradio import gr
-from ofdm import reference_data_source_02_ib
+import ofdm
 from random import seed, randint, getrandbits
 
 class ber_reference_source_grc (gr.hier_block2):
@@ -30,7 +30,7 @@ class ber_reference_source_grc (gr.hier_block2):
     print("Generating random bits...")
     rand_data = [chr(getrandbits(1)) for x in range(subcarriers*8*data_blocks*256)]
 
-    ref_src = self._reference_data_source = reference_data_source_02_ib(rand_data)
+    ref_src = self._reference_data_source = ofdm.reference_data_source_02_ib(rand_data)
     self.connect(id_src, (ref_src, 0))
     self.connect(bc_src, (ref_src, 1))
 

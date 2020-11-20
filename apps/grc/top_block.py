@@ -23,7 +23,6 @@ from gnuradio import zeromq
 from gnuradio.eng_option import eng_option
 from gnuradio.fft import window
 from gnuradio.filter import firdes
-from grc_gnuradio import blks2 as grc_blks2
 from ofdm.fbmc_frame_sampler_grc import fbmc_frame_sampler
 from ofdm.fbmc_rms_amplifier_grc import fbmc_rms_amplifier
 from ofdm.preambles_grc import default_block_header
@@ -238,7 +237,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.blocks_vector_source_x_0 = blocks.vector_source_b([1] + [0]*(data_blocks/2-1), True, 1, [])
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate, True)
         self.blocks_keep_one_in_n_1 = blocks.keep_one_in_n(gr.sizeof_float*subcarriers, 20)
-        self.blks2_selector_0 = grc_blks2.selector(
+        self.blks2_selector_0 = blocks.selector(
         	item_size=gr.sizeof_float*1,
         	num_inputs=2,
         	num_outputs=1,

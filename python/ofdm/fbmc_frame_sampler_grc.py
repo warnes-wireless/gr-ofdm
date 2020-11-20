@@ -1,5 +1,6 @@
 from gnuradio import gr, blocks
-from ofdm import vector_sampler
+# from ofdm import vector_sampler
+import ofdm
 
 class fbmc_frame_sampler( gr.hier_block2 ):
   def __init__(self, total_subcarriers, frame_length, frame_data_part, training_data):
@@ -23,7 +24,7 @@ class fbmc_frame_sampler( gr.hier_block2 ):
     # the old outer receiver. The dynamic frame start trigger is hence
     # replaced with a static one, fixed to the frame length.
 
-    frame_sampler = vector_sampler( gr.sizeof_gr_complex * total_subc,
+    frame_sampler = ofdm.vector_sampler( gr.sizeof_gr_complex * total_subc,
                                               frame_size )
     symbol_output = blocks.vector_to_stream( gr.sizeof_gr_complex * total_subc,
                                               frame_size )

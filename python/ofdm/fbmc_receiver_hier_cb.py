@@ -27,7 +27,8 @@ from gnuradio import fft
 from gnuradio import gr
 from gnuradio.fft import window
 from gnuradio.filter import firdes
-from grc_gnuradio import blks2 as grc_blks2
+# No longer available in GRC3.8, fused with blocks
+# from grc_gnuradio import blks2 as grc_blks2
 import ofdm
 
 class fbmc_receiver_hier_cb(gr.hier_block2):
@@ -94,7 +95,7 @@ class fbmc_receiver_hier_cb(gr.hier_block2):
         self.blocks_skiphead_0_0 = blocks.skiphead(gr.sizeof_gr_complex*M, skip)
         self.blocks_skiphead_0 = blocks.skiphead(gr.sizeof_gr_complex*M, 2*K-1-1)
         self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_gr_complex*M)
-        self.blks2_selector_0_0 = grc_blks2.selector(
+        self.blks2_selector_0_0 = blocks.selector(
             item_size=gr.sizeof_gr_complex*M,
             num_inputs=2,
             num_outputs=1,

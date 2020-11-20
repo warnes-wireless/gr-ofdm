@@ -25,7 +25,7 @@ from gnuradio import fft as fft_blocks
 from numpy import concatenate, array, complex, sum
 import ofdm as ofdm
 
-from .delaylines import *
+from delaylines import *
 
 def ifft(subcarrier_data, virtual_subcarriers=0):
   if virtual_subcarriers > 0:

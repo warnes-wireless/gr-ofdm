@@ -21,7 +21,7 @@
 #
 
 from numpy import concatenate, conjugate, arange
-from .delaylines import delayline_cc
+from delaylines import delayline_cc
 from gnuradio import gr
 from ofdm import peak_resync_bb #gate_ff
 from ofdm import  vector_sum_vff

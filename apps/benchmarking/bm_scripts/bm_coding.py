@@ -3,7 +3,7 @@
 from gnuradio import gr, blocks, digital, analog, trellis
 import random, numpy
 from random import randint
-from ofdm import generic_mapper_bcv, puncture_bb
+import ofdm
 import os
 
 class bm_coding:
@@ -37,7 +37,7 @@ class bm_coding:
         
         self.encoder = self._encoder = trellis.encoder_bb(self.fo,0)
         self.unpack = self._unpack = blocks.unpack_k_bits_bb(2)
-        self.puncturing = puncture_bb(self.data_subcarriers)
+        self.puncturing = ofdm.puncture_bb(self.data_subcarriers)
         bmaptrig_stream_puncturing = [1]+[0]*(10/2-1)
         self.bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
         if self.interleave:
@@ -53,7 +53,7 @@ class bm_coding:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
         
         
@@ -85,7 +85,7 @@ class bm_coding:
          
         self.encoder = self._encoder = trellis.encoder_bb(self.fo,0)
         self.unpack = self._unpack = blocks.unpack_k_bits_bb(2)
-        self.puncturing = puncture_bb(self.data_subcarriers)
+        self.puncturing = ofdm.puncture_bb(self.data_subcarriers)
         bmaptrig_stream_puncturing = [1]+[0]*(10/2-1)
         self.bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
         if self.interleave:
@@ -101,7 +101,7 @@ class bm_coding:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
          
          
@@ -133,7 +133,7 @@ class bm_coding:
          
         self.encoder = self._encoder = trellis.encoder_bb(self.fo,0)
         self.unpack = self._unpack = blocks.unpack_k_bits_bb(2)
-        self.puncturing = puncture_bb(self.data_subcarriers)
+        self.puncturing = ofdm.puncture_bb(self.data_subcarriers)
         bmaptrig_stream_puncturing = [1]+[0]*(10/2-1)
         self.bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
         if self.interleave:
@@ -149,7 +149,7 @@ class bm_coding:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
          
          
@@ -181,7 +181,7 @@ class bm_coding:
          
         self.encoder = self._encoder = trellis.encoder_bb(self.fo,0)
         self.unpack = self._unpack = blocks.unpack_k_bits_bb(2)
-        self.puncturing = puncture_bb(self.data_subcarriers)
+        self.puncturing = ofdm.puncture_bb(self.data_subcarriers)
         bmaptrig_stream_puncturing = [1]+[0]*(10/2-1)
         self.bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
         if self.interleave:
@@ -197,7 +197,7 @@ class bm_coding:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
          
          
@@ -229,7 +229,7 @@ class bm_coding:
          
         self.encoder = self._encoder = trellis.encoder_bb(self.fo,0)
         self.unpack = self._unpack = blocks.unpack_k_bits_bb(2)
-        self.puncturing = puncture_bb(self.data_subcarriers)
+        self.puncturing = ofdm.puncture_bb(self.data_subcarriers)
         bmaptrig_stream_puncturing = [1]+[0]*(10/2-1)
         self.bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
         if self.interleave:
@@ -245,7 +245,7 @@ class bm_coding:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
          
          
@@ -277,7 +277,7 @@ class bm_coding:
          
         self.encoder = self._encoder = trellis.encoder_bb(self.fo,0)
         self.unpack = self._unpack = blocks.unpack_k_bits_bb(2)
-        self.puncturing = puncture_bb(self.data_subcarriers)
+        self.puncturing = ofdm.puncture_bb(self.data_subcarriers)
         bmaptrig_stream_puncturing = [1]+[0]*(10/2-1)
         self.bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
         if self.interleave:
@@ -293,7 +293,7 @@ class bm_coding:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
          
          
@@ -325,7 +325,7 @@ class bm_coding:
          
         self.encoder = self._encoder = trellis.encoder_bb(self.fo,0)
         self.unpack = self._unpack = blocks.unpack_k_bits_bb(2)
-        self.puncturing = puncture_bb(self.data_subcarriers)
+        self.puncturing = ofdm.puncture_bb(self.data_subcarriers)
         bmaptrig_stream_puncturing = [1]+[0]*(10/2-1)
         self.bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
         if self.interleave:
@@ -341,7 +341,7 @@ class bm_coding:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
          
          
@@ -379,7 +379,7 @@ class bm_coding:
          
         self.encoder = self._encoder = trellis.encoder_bb(self.fo,0)
         self.unpack = self._unpack = blocks.unpack_k_bits_bb(2)
-        self.puncturing = puncture_bb(self.data_subcarriers)
+        self.puncturing = ofdm.puncture_bb(self.data_subcarriers)
         bmaptrig_stream_puncturing = [1]+[0]*(10/2-1)
         self.bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
         if self.interleave:
@@ -395,7 +395,7 @@ class bm_coding:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
          
          

@@ -3,7 +3,7 @@
 from gnuradio import gr, blocks, digital, analog
 import random, numpy
 from random import randint
-from ofdm import generic_mapper_bcv
+import ofdm
 import os
 
 class bm_modulator:
@@ -40,7 +40,7 @@ class bm_modulator:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
         self.tb.connect(self.src, self.modulator, self.snk)
         self.tb.connect(self.bitmap_src, (self.modulator,1))
@@ -68,7 +68,7 @@ class bm_modulator:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
         self.tb.connect(self.src, self.modulator, self.snk)
         self.tb.connect(self.bitmap_src, (self.modulator,1))
@@ -96,7 +96,7 @@ class bm_modulator:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
         self.tb.connect(self.src, self.modulator, self.snk)
         self.tb.connect(self.bitmap_src, (self.modulator,1))
@@ -124,7 +124,7 @@ class bm_modulator:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
         self.tb.connect(self.src, self.modulator, self.snk)
         self.tb.connect(self.bitmap_src, (self.modulator,1))
@@ -152,7 +152,7 @@ class bm_modulator:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
         self.tb.connect(self.src, self.modulator, self.snk)
         self.tb.connect(self.bitmap_src, (self.modulator,1))
@@ -180,7 +180,7 @@ class bm_modulator:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
         self.tb.connect(self.src, self.modulator, self.snk)
         self.tb.connect(self.bitmap_src, (self.modulator,1))
@@ -208,7 +208,7 @@ class bm_modulator:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
         self.tb.connect(self.src, self.modulator, self.snk)
         self.tb.connect(self.bitmap_src, (self.modulator,1))
@@ -242,7 +242,7 @@ class bm_modulator:
         self.src = blocks.vector_source_b(self.bitdata)
         self.bitmap_src = blocks.vector_source_b(self.bitmap,True, self.data_subcarriers)
         #self.bitmap_trigger = blocks.vector_source_b(self.bmaptrig_stream, True)
-        self.modulator = generic_mapper_bcv(self.data_subcarriers,self.coding,10)
+        self.modulator = ofdm.generic_mapper_bcv(self.data_subcarriers,self.coding,10)
         self.snk = blocks.null_sink(gr.sizeof_gr_complex*self.data_subcarriers)
         self.tb.connect(self.src, self.modulator, self.snk)
         self.tb.connect(self.bitmap_src, (self.modulator,1))

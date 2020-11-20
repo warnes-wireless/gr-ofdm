@@ -26,19 +26,13 @@ from gnuradio import fft as fft_blocks
 from gnuradio import trellis
 from gr_tools import log_to_file, unpack_array, terminate_stream
 import ofdm
-from ofdm import generic_mapper_bcv
-from ofdm import puncture_bb, cyclic_prefixer, vector_padding_dc_null, skip
-from ofdm import stream_controlled_mux, reference_data_source_02_ib #reference_data_source_ib
-from ofdm import multiply_frame_fc
-from .preambles import default_block_header
-from .preambles import pilot_subcarrier_inserter, pilot_block_inserter
-from . import common_options
+#reference_data_source_ib
+from preambles import default_block_header
+from preambles import pilot_subcarrier_inserter, pilot_block_inserter
+import common_options
 import math, copy
 import numpy
 
-from ofdm import repetition_encoder_sb
-from ofdm import stream_controlled_mux_b
-from ofdm import allocation_src
 from .station_configuration import *
 
 from random import seed, randint, getrandbits
@@ -114,7 +108,7 @@ class transmit_path(gr.hier_block2):
     self.keep_frame_n = int(1.0 / ( config.frame_length * (config.cp_length + config.fft_length) / config.bandwidth ) / config.gui_frame_rate)
 
     ## Allocation Control
-    self.allocation_src = allocation_src(config.data_subcarriers, config.frame_data_blocks, config.coding, "tcp://*:3333", "tcp://"+options.rx_hostname+":3322")
+    self.ofdm.allocation_src = ofdm.allocation_src(config.data_subcarriers, config.frame_data_blocks, config.coding, "tcp://*:3333", "tcp://"+options.rx_hostname+":3322")
     if options.static_allocation: #DEBUG
         # how many bits per subcarrier
         
@@ -156,26 +150,26 @@ class transmit_path(gr.hier_block2):
         mux_vec = [0]*dsubc+[1]*bitcount_vec[0]
         mux_ctrl = blocks.vector_source_b(mux_vec, True, 1)
     else:
-        id_src = (self.allocation_src, 0)
-        bitcount_src = (self.allocation_src, 4)
-        bitloading_src = (self.allocation_src, 2)
-        power_src = (self.allocation_src, 1)
+        id_src = (self.ofdm.allocation_src, 0)
+        bitcount_src = (self.ofdm.allocation_src, 4)
+        bitloading_src = (self.ofdm.allocation_src, 2)
+        power_src = (self.ofdm.allocation_src, 1)
         if options.coding: 
-            modul_bitcount_src = (self.allocation_src, 5)
+            modul_bitcount_src = (self.ofdm.allocation_src, 5)
         else:
             modul_bitcount_src = bitcount_src
         mux_ctrl = ofdm.tx_mux_ctrl(dsubc)
         self.connect(modul_bitcount_src, mux_ctrl)
         
         #Initial allocation
-        self.allocation_src.set_allocation([1]*config.data_subcarriers, [1]*config.data_subcarriers)   
-        self.allocation_src.set_allocation_scheme(0)
+        self.ofdm.allocation_src.set_allocation([1]*config.data_subcarriers, [1]*config.data_subcarriers)   
+        self.ofdm.allocation_src.set_allocation_scheme(0)
         if options.benchmarking:
-            self.allocation_src.set_allocation([4]*config.data_subcarriers, [1]*config.data_subcarriers)        
+            self.ofdm.allocation_src.set_allocation([4]*config.data_subcarriers, [1]*config.data_subcarriers)        
 
     
     if options.lab_special_case:
-        self.allocation_src.set_allocation([0]*(config.data_subcarriers/4)+[2]*(config.data_subcarriers/2)+[0]*(config.data_subcarriers/4), [1]*config.data_subcarriers)
+        self.ofdm.allocation_src.set_allocation([0]*(config.data_subcarriers/4)+[2]*(config.data_subcarriers/2)+[0]*(config.data_subcarriers/4), [1]*config.data_subcarriers)
 
     if options.log:
         log_to_file(self, id_src, "data/id_src.short")
@@ -185,7 +179,7 @@ class transmit_path(gr.hier_block2):
 
     ## GUI probe output
     zmq_probe_bitloading = zeromq.pub_sink(gr.sizeof_char, dsubc, "tcp://*:4445")
-    # also skip ID symbol bitloading with keep_one_in_n (side effect)
+    # also ofdm.skip ID symbol bitloading with keep_one_in_n (side effect)
     # factor 2 for bitloading because we have two vectors per frame, one for id symbol and one for all payload/data symbols
     # factor config.frame_data_part for power because there is one vector per ofdm symbol per frame
     self.connect(bitloading_src, blocks.keep_one_in_n(gr.sizeof_char*dsubc, 2*40), zmq_probe_bitloading)
@@ -198,7 +192,7 @@ class transmit_path(gr.hier_block2):
     whitener_pn = [randint(0, 1) for i in range(used_id_bits*rep_id_bits)]
 
     ## ID Encoder
-    id_enc = self._id_encoder = repetition_encoder_sb(used_id_bits, rep_id_bits, whitener_pn)
+    id_enc = self._id_encoder = ofdm.repetition_encoder_sb(used_id_bits, rep_id_bits, whitener_pn)
     self.connect(id_src, id_enc)
 
     if options.log:
@@ -236,7 +230,7 @@ class transmit_path(gr.hier_block2):
     # Input 0: control stream
     # Input 1: encoded ID stream
     # Inputs 2..n: data streams
-    dmux = self._data_multiplexer = stream_controlled_mux_b()
+    dmux = self._data_multiplexer = ofdm.stream_controlled_mux_b()
     self.connect(mux_ctrl, (dmux, 0))
     self.connect(id_enc, (dmux, 1))
     
@@ -254,7 +248,7 @@ class transmit_path(gr.hier_block2):
         if not options.nopunct:
             bmaptrig_stream_puncturing = [1]+[0]*(config.frame_data_blocks/2-1)
             btrig_puncturing = self._bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
-            puncturing = self._puncturing = puncture_bb(config.data_subcarriers)
+            puncturing = self._puncturing = ofdm.puncture_bb(config.data_subcarriers)
             self.connect(bitloading_src, (puncturing, 1))
             self.connect(self._bitmap_trigger_puncturing, (puncturing, 2))
             self.connect(unpack, puncturing)
@@ -287,7 +281,7 @@ class transmit_path(gr.hier_block2):
       log_to_file(self, dmux_f, "data/dmux_out.float")
 
     ## Modulator
-    mod = self._modulator = generic_mapper_bcv(config.data_subcarriers, config.coding, config.frame_data_part)
+    mod = self._modulator = ofdm.generic_mapper_bcv(config.data_subcarriers, config.coding, config.frame_data_part)
     self.connect(dmux, (mod, 0))
     self.connect(bitloading_src, (mod, 1))
     #log_to_file(self, mod, "data/mod_out.compl")
@@ -302,7 +296,7 @@ class transmit_path(gr.hier_block2):
       log_to_file(self, modr, "data/mod_real_out.float")
 
     ## Power allocator
-    pa = self._power_allocator = multiply_frame_fc(config.frame_data_part, config.data_subcarriers)
+    pa = self._power_allocator = ofdm.multiply_frame_fc(config.frame_data_part, config.data_subcarriers)
     self.connect(mod, (pa, 0))
     self.connect(power_src, (pa, 1))
 
@@ -321,7 +315,7 @@ class transmit_path(gr.hier_block2):
     ## Add virtual subcarriers
     if config.fft_length > config.subcarriers:
       vsubc = self._virtual_subcarrier_extender = \
-              vector_padding_dc_null(config.subcarriers, config.fft_length, config.dc_null)
+              ofdm.vector_padding_dc_null(config.subcarriers, config.fft_length, config.dc_null)
       self.connect(psubc, vsubc)
     else:
       vsubc = self._virtual_subcarrier_extender = psubc
@@ -344,7 +338,7 @@ class transmit_path(gr.hier_block2):
       log_to_file(self, pblocks, "data/pilot_block_ins_out.compl")
 
     ## Cyclic Prefix
-    cp = self._cyclic_prefixer = cyclic_prefixer(config.fft_length,
+    cp = self._cyclic_prefixer = ofdm.cyclic_prefixer(config.fft_length,
                                                  config.block_length)
     self.connect( pblocks, cp )
 
@@ -358,7 +352,7 @@ class transmit_path(gr.hier_block2):
     rep = blocks.repeat(gr.sizeof_gr_complex, config.frame_length * config.block_length)
     amp = blocks.multiply_cc()
     self.connect( lastblock, (amp, 0) )
-    self.connect((self.allocation_src, 3), rep, (amp, 1) )
+    self.connect((self.ofdm.allocation_src, 3), rep, (amp, 1) )
     lastblock = amp
 
 
@@ -493,7 +487,7 @@ class ber_reference_source (gr.hier_block2):
     print("Generating random bits...")
     rand_data = [chr(getrandbits(1)) for x in range(options.subcarriers*8*options.data_blocks*256)]
 
-    ref_src = self._reference_data_source = reference_data_source_02_ib(rand_data)
+    ref_src = self._reference_data_source = ofdm.reference_data_source_02_ib(rand_data)
     self.connect(id_src, (ref_src, 0))
     self.connect(bc_src, (ref_src, 1))
 

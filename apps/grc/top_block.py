@@ -33,7 +33,7 @@ from ofdm.rx_rpc_manager_grc import rx_rpc_manager
 from ofdm.tx_rpc_manager_grc import tx_rpc_manager
 from optparse import OptionParser
 from random import seed, randint, getrandbits
-import PyQt4.Qwt5 as Qwt
+import qwt as Qwt
 import math, numpy, copy
 import ofdm
 import sys

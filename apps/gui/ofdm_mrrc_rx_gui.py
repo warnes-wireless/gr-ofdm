@@ -20,9 +20,9 @@
 # Boston, MA 02110-1301, USA.
 #
 
-from PyQt4 import QtCore, QtGui, uic
-import PyQt4.Qt as Qt
-import PyQt4.Qwt5 as Qwt
+from PyQt5 import QtCore, QtGui, uic
+import PyQt5.Qt as Qt
+import qwt as Qwt
 from gnuradio import eng_notation
 from gnuradio import gr
 from gnuradio import zeromq

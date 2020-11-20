@@ -22,7 +22,7 @@
 
 from gnuradio import gr, blocks, analog, zeromq
 from gnuradio import eng_notation
-from .configparse import OptionParser
+from configparse import OptionParser
 from gnuradio import filter, channels
 
 from .station_configuration import station_configuration

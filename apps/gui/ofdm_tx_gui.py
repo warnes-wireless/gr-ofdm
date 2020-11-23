@@ -72,7 +72,7 @@ class OFDMRxGUI(QtWidgets.QMainWindow):
         self.powerallocation_y = [0]*len(self.powerallocation_x)
         self.curve_powerallocation = Qwt.QwtPlotCurve()
         self.curve_powerallocation.setPen(Qt.QPen(Qt.Qt.green, 1))
-        self.curve_powerallocation.setBrush(QtCore.Qt.green)
+        self.curve_powerallocation.setBrush(QtGui.QBrush(Qt.Qt.green))
         self.curve_powerallocation.setStyle(Qwt.QwtPlotCurve.Steps)
         self.curve_powerallocation.attach(self.gui.qwtPlotPowerallocation)
 
@@ -89,7 +89,7 @@ class OFDMRxGUI(QtWidgets.QMainWindow):
         self.bitloading_y = [0]*len(self.bitloading_x)
         self.curve_bitloading = Qwt.QwtPlotCurve()
         self.curve_bitloading.setPen(Qt.QPen(Qt.Qt.magenta, 1))
-        self.curve_bitloading.setBrush(Qt.Qt.magenta)
+        self.curve_bitloading.setBrush(QtGui.QBrush(Qt.Qt.magenta))
         self.curve_bitloading.setStyle(Qwt.QwtPlotCurve.Steps)
         self.curve_bitloading.attach(self.gui.qwtPlotBitloading)
 

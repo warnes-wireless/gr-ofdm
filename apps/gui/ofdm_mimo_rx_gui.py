@@ -88,7 +88,7 @@ class OFDMMIMORxGUI(QtGui.QMainWindow):
         self.gui.qwtPlotBER.setAxisScale(Qwt.QwtPlot.xBottom, 0, 127)
         self.gui.qwtPlotBER.enableAxis(Qwt.QwtPlot.xBottom, False)
         self.gui.qwtPlotBER.setAxisScale(Qwt.QwtPlot.yLeft, 0.0001, 0.5)
-        scale_engine = Qwt.QwtLog10ScaleEngine()
+        scale_engine = Qwt.QwtLogScaleEngine()
         self.gui.qwtPlotBER.setAxisScaleEngine(Qwt.QwtPlot.yLeft, scale_engine)
         self.ber_x = list(range(0, 128))
         self.ber_y = [0.0]

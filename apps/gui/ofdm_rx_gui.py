@@ -80,7 +80,7 @@ class OFDMRxGUI(QtWidgets.QMainWindow):
         self.snr_y = [0.0]
         self.curve_snr = Qwt.QwtPlotCurve()
         self.curve_snr.setPen(Qt.QPen(Qt.Qt.red, 1))
-        self.curve_snr.setBrush(Qt.Qt.red)
+        self.curve_snr.setBrush(QtGui.QBrush(Qt.Qt.green))
         self.curve_snr.setStyle(Qwt.QwtPlotCurve.Steps)
         self.curve_snr.attach(self.gui.qwtPlotSNR)
 
@@ -92,14 +92,14 @@ class OFDMRxGUI(QtWidgets.QMainWindow):
         self.grid_ber = Qwt.QwtPlotGrid()
         self.grid_ber.setPen(Qt.QPen(Qt.Qt.black, 1, Qt.Qt.DotLine))
         self.grid_ber.attach(self.gui.qwtPlotBER)
-        scale_engine = Qwt.QwtLog10ScaleEngine()
+        scale_engine = Qwt.QwtLogScaleEngine()
         self.gui.qwtPlotBER.setAxisScaleEngine(Qwt.QwtPlot.yLeft, scale_engine)
         self.ber_x = list(range(0, 128))
         self.ber_y = [0.0]
         self.curve_ber = Qwt.QwtPlotCurve()
         self.curve_ber.setBaseline(1e-100)
         self.curve_ber.setPen(Qt.QPen(Qt.Qt.green, 1))
-        self.curve_ber.setBrush(Qt.Qt.green)
+        self.curve_ber.setBrush(QtGui.QBrush(Qt.Qt.green))
         self.curve_ber.setStyle(Qwt.QwtPlotCurve.Steps)
         self.curve_ber.attach(self.gui.qwtPlotBER)
 
@@ -129,7 +129,7 @@ class OFDMRxGUI(QtWidgets.QMainWindow):
         self.rate_y = [0]*len(self.rate_x)
         self.curve_rate = Qwt.QwtPlotCurve()
         self.curve_rate.setPen(Qt.QPen(Qt.Qt.lightGray, 1))
-        self.curve_rate.setBrush(Qt.Qt.lightGray)
+        self.curve_rate.setBrush(QtGui.QBrush(Qt.Qt.lightGray))
         self.curve_rate.setStyle(Qwt.QwtPlotCurve.Steps)
         self.curve_rate.attach(self.gui.qwtPlotRate)
 
@@ -146,7 +146,7 @@ class OFDMRxGUI(QtWidgets.QMainWindow):
         self.csi_y = [0]*len(self.csi_x)
         self.curve_csi = Qwt.QwtPlotCurve()
         self.curve_csi.setPen(Qt.QPen(Qt.Qt.blue, 1))
-        self.curve_csi.setBrush(Qt.Qt.blue)
+        self.curve_csi.setBrush(QtGui.QBrush(Qt.Qt.blue))
         self.curve_csi.setStyle(Qwt.QwtPlotCurve.Steps)
         self.curve_csi.attach(self.gui.qwtPlotCSI)
 

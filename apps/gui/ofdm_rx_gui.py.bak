@@ -92,7 +92,7 @@ class OFDMRxGUI(QtGui.QMainWindow):
         self.grid_ber = Qwt.QwtPlotGrid()
         self.grid_ber.setPen(Qt.QPen(Qt.Qt.black, 1, Qt.Qt.DotLine))
         self.grid_ber.attach(self.gui.qwtPlotBER)
-        scale_engine = Qwt.QwtLog10ScaleEngine()
+        scale_engine = Qwt.QwtLogScaleEngine()
         self.gui.qwtPlotBER.setAxisScaleEngine(Qwt.QwtPlot.yLeft, scale_engine)
         self.ber_x = range(0,128)
         self.ber_y = [0.0]

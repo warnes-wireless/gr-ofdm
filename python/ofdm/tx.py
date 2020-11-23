@@ -27,7 +27,7 @@ from .configparse import OptionParser
 from gnuradio import blocks
 from .uhd_interface import uhd_transmitter
 
-from .transmit_path import transmit_path
+from transmit_path import transmit_path
 from .fbmc_transmit_path import transmit_path as fbmc_transmit_path
 
 import os

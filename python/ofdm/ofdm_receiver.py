@@ -28,8 +28,8 @@ from ofdm import vector_sampler, peak_detector_02_fb
 from ofdm import vector_mask
 from gnuradio.blocks import delay
 from optparse import OptionParser
-from . import schmidl
-from .gr_tools import log_to_file, terminate_stream
+import schmidl
+from gr_tools import log_to_file, terminate_stream
 from .morelli import morelli_foe
 
 import ofdm as ofdm

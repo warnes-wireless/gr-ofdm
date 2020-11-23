@@ -25,31 +25,23 @@ from gnuradio import eng_notation
 from gnuradio import gr, filter, zeromq
 from gnuradio import blocks
 from gnuradio import trellis
-from .gr_tools import log_to_file, terminate_stream
+from gr_tools import log_to_file, terminate_stream
 
-from ofdm import normalize_vcc, lms_phase_tracking, vector_sum_vcc
-from ofdm import generic_demapper_vcb, generic_softdemapper_vcf, vector_mask, vector_sampler
-from ofdm import skip, channel_estimator_02, scatterplot_sink
-from ofdm import trigger_surveillance, ber_measurement, vector_sum_vff
-from ofdm import generic_mapper_bcv, dynamic_trigger_ib, snr_estimator, snr_estimator_dc_null
-from .preambles import pilot_subcarrier_filter, pilot_block_filter, default_block_header
-from ofdm import depuncture_ff
-from ofdm import multiply_const_ii
-from ofdm import divide_frame_fc
+from preambles import pilot_subcarrier_filter, pilot_block_filter, default_block_header
 import ofdm as ofdm
 
 from time import strftime, gmtime
 
-from .snr_estimator import milans_snr_estimator, milans_sinr_sc_estimator, milans_sinr_sc_estimator2, milans_sinr_sc_estimator3
+from snr_estimator import milans_snr_estimator, milans_sinr_sc_estimator, milans_sinr_sc_estimator2, milans_sinr_sc_estimator3
 
 
 
-from .station_configuration import *
-from .transmit_path import ber_reference_source
-from . import common_options
-from . import gr_tools
+from station_configuration import *
+from transmit_path import ber_reference_source
+import common_options
+import gr_tools
 import copy
-from . import preambles
+import preambles
 
 from os import getenv
 import os
@@ -59,12 +51,11 @@ import numpy
 
 from random import seed, randint
 
-from ofdm import repetition_decoder_bs
 from gnuradio.blocks import delay
 
-from .transmit_path import static_control
+from transmit_path import static_control
 
-from .ofdm_receiver2 import ofdm_inner_receiver
+from ofdm_receiver2 import ofdm_inner_receiver
 
 
 #print 'Blocked waiting for GDB attach (pid = %d)' % (os.getpid(),)
@@ -208,7 +199,7 @@ class receive_path(gr.hier_block2):
 #    # the old outer receiver. The dynamic frame start trigger is hence
 #    # replaced with a static one, fixed to the frame length.
 #
-#    frame_sampler = ofdm.vector_sampler( gr.sizeof_gr_complex * total_subc,
+#    frame_sampler = ofdm.ofdm.vector_sampler( gr.sizeof_gr_complex * total_subc,
 #                                              config.frame_length )
 #    self.symbol_output = blocks.vector_to_stream( gr.sizeof_gr_complex * total_subc,
 #                                              config.frame_length )
@@ -216,7 +207,7 @@ class receive_path(gr.hier_block2):
 #    damn_static_frame_trigger = blocks.vector_source_b( ft, True )
 #
 #    if options.enable_erasure_decision:
-#      frame_gate = vector_sampler(
+#      frame_gate = ofdm.vector_sampler(
 #        gr.sizeof_gr_complex * total_subc * config.frame_length, 1 )
 #      self.connect( ofdm_blocks, frame_sampler, frame_gate,
 #                    self.symbol_output )
@@ -342,8 +333,8 @@ class receive_path(gr.hier_block2):
     if not options.enable_erasure_decision:
 
       ## ID Block Filter
-      # Filter ID block, skip data blocks
-      id_bfilt = self._id_block_filter = vector_sampler(
+      # Filter ID block, ofdm.skip data blocks
+      id_bfilt = self._id_block_filter = ofdm.vector_sampler(
             gr.sizeof_gr_complex * dsubc, 1 )
       if not config.frame_id_blocks == 1:
         raise SystemExit("# ID Blocks > 1 not supported")
@@ -353,8 +344,8 @@ class receive_path(gr.hier_block2):
       
       
 #      ## ID Block Filter
-#      # Filter ID block, skip data blocks
-#      id_bfilt_2 = self._id_block_filter = vector_sampler(
+#      # Filter ID block, ofdm.skip data blocks
+#      id_bfilt_2 = self._id_block_filter = ofdm.vector_sampler(
 #            gr.sizeof_gr_complex * dsubc, 1 )
 #      if not config.frame_id_blocks == 1:
 #        raise SystemExit, "# ID Blocks > 1 not supported"
@@ -376,7 +367,7 @@ class receive_path(gr.hier_block2):
 
     else: # options.enable_erasure_decision:
 
-      id_bfilt = self._id_block_filter = vector_sampler(
+      id_bfilt = self._id_block_filter = ofdm.vector_sampler(
         gr.sizeof_gr_complex * total_subc, config.frame_id_blocks )
 
       id_bfilt_trig_delay = 0
@@ -407,8 +398,8 @@ class receive_path(gr.hier_block2):
       min_llr = ( self.id_dec, 1 )
       erasure_threshold = gr.threshold_ff( 10.0, 10.0, 0 ) # FIXME is it the optimal threshold?
       erasure_dec = gr.float_to_char()
-      id_gate = vector_sampler( gr.sizeof_short, 1 )
-      ctf_gate = vector_sampler( gr.sizeof_float * total_subc, 1 )
+      id_gate = ofdm.vector_sampler( gr.sizeof_short, 1 )
+      ctf_gate = ofdm.vector_sampler( gr.sizeof_float * total_subc, 1 )
 
 
       self.connect( self.id_dec,       id_gate )
@@ -478,7 +469,7 @@ class receive_path(gr.hier_block2):
         log_to_file(self, self.id_dec, "data/id_dec_rx.short")
     
     ## Power Deallocator
-    pda = self._power_deallocator = divide_frame_fc(config.frame_data_part, dsubc)
+    pda = self._power_deallocator = ofdm.divide_frame_fc(config.frame_data_part, dsubc)
     self.connect(pda_in, (pda, 0))
     self.connect(power_src, (pda, 1))
 
@@ -511,8 +502,8 @@ class receive_path(gr.hier_block2):
             int_object=trellis.interleaver(2000, 666)
             deinterlv = trellis.permutation(int_object.K(), int_object.DEINTER(), 1, gr.sizeof_float)
             
-        demod = self._data_demodulator = generic_softdemapper_vcf(dsubc, config.frame_data_part, config.coding)
-        #demod_2 = self._data_demodulator_2 = generic_softdemapper_vcf(dsubc, config.frame_data_part, config.coding)
+        demod = self._data_demodulator = ofdm.generic_softdemapper_vcf(dsubc, config.frame_data_part, config.coding)
+        #demod_2 = self._data_demodulator_2 = ofdm.generic_softdemapper_vcf(dsubc, config.frame_data_part, config.coding)
         if(options.ideal):
             self.connect(dm_csi, blocks.stream_to_vector(gr.sizeof_float, dsubc), (demod, 2))
         else:
@@ -527,7 +518,7 @@ class receive_path(gr.hier_block2):
             self.connect(dm_csi_add, (demod, 2))
             #log_to_file(self, dm_csi_filter, "data/softs_csi.float")
     else:
-        demod = self._data_demodulator = generic_demapper_vcb(dsubc, config.frame_data_part)
+        demod = self._data_demodulator = ofdm.generic_demapper_vcb(dsubc, config.frame_data_part)
     if options.benchmarking:
         # Do receiver benchmarking until the number of frames x symbols are collected
         self.connect(pda, blocks.head(gr.sizeof_gr_complex*dsubc, options.N*config.frame_data_blocks), demod)
@@ -538,7 +529,7 @@ class receive_path(gr.hier_block2):
     if(options.coding):
         ## Depuncturing
         if not options.nopunct:
-            depuncturing = depuncture_ff(dsubc, 0)
+            depuncturing = ofdm.depuncture_ff(dsubc, 0)
             frametrigger_bitmap_filter = blocks.vector_source_b([1, 0], True)
             self.connect(bitloading_src, (depuncturing, 1))
             self.connect(dp_trig, (depuncturing, 2))
@@ -561,13 +552,13 @@ class receive_path(gr.hier_block2):
                 self.connect(demod, depuncturing, decoding)
         else:
             self.connect(demod, decoding)
-        self.connect(self.bitcount_src, multiply_const_ii(1./chunkdivisor), (decoding, 1))
+        self.connect(self.bitcount_src, ofdm.multiply_const_ii(1./chunkdivisor), (decoding, 1))
 
     if options.scatterplot or options.scatter_plot_before_phase_tracking:
         scatter_vec_elem = self._scatter_vec_elem = ofdm.vector_element(dsubc, 1)
         scatter_s2v = self._scatter_s2v = blocks.stream_to_vector(gr.sizeof_gr_complex, config.frame_data_blocks)
 
-        scatter_id_filt = skip(gr.sizeof_gr_complex*dsubc, config.frame_data_blocks)
+        scatter_id_filt = ofdm.skip(gr.sizeof_gr_complex*dsubc, config.frame_data_blocks)
         scatter_id_filt.skip_call(0)
         scatter_trig = [0]*config.frame_data_part
         scatter_trig[0] = 1
@@ -670,7 +661,7 @@ class receive_path(gr.hier_block2):
 
       fftlen = 256
       my_window = filter.hamming(fftlen) #.blackmanharris(fftlen)
-      rxs_sampler = vector_sampler(gr.sizeof_gr_complex, fftlen)
+      rxs_sampler = ofdm.vector_sampler(gr.sizeof_gr_complex, fftlen)
       rxs_sampler_vect = concatenate([[1], [0]*49])
       rxs_trigger = blocks.vector_source_b(rxs_sampler_vect.tolist(), True)
       rxs_window = blocks.multiply_const_vcc(my_window)
@@ -736,10 +727,10 @@ class receive_path(gr.hier_block2):
     print("Normal BER measurement")
 
 
-    trig_src = dynamic_trigger_ib(False)
+    trig_src = ofdm.dynamic_trigger_ib(False)
     self.connect(self.bitcount_src, trig_src)
 
-    ber_sampler = vector_sampler(gr.sizeof_float, 1)
+    ber_sampler = ofdm.vector_sampler(gr.sizeof_float, 1)
     self.connect(ber_mst, (ber_sampler, 0))
     self.connect(trig_src, (ber_sampler, 1))
       
@@ -828,7 +819,7 @@ class receive_path(gr.hier_block2):
     
 
     ## BER Measuring Tool
-    ber_mst = self._ber_measuring_tool = ber_measurement(int(config.ber_window))
+    ber_mst = self._ber_measuring_tool = ofdm.ber_measurement(int(config.ber_window))
     if(self._options.coding):
         self.connect(decoding, ber_mst)
     else:
@@ -904,7 +895,7 @@ class receive_path(gr.hier_block2):
     frame_length = config.frame_length
     L = config.periodic_parts
 
-    snr_est_filt = skip(gr.sizeof_gr_complex*vlen, frame_length)
+    snr_est_filt = ofdm.skip(gr.sizeof_gr_complex*vlen, frame_length)
     for x in range(1, frame_length):
       snr_est_filt.skip_call(x)
       
@@ -924,7 +915,7 @@ class receive_path(gr.hier_block2):
 
     #Addition for SINR estimation
     if self._options.sinr_est:
-        snr_est_filt_2 = skip(gr.sizeof_gr_complex*vlen, frame_length)
+        snr_est_filt_2 = ofdm.skip(gr.sizeof_gr_complex*vlen, frame_length)
         for x in range(frame_length):
           if x != config.training_data.channel_estimation_pilot[0]:
             snr_est_filt_2.skip_call(x)
@@ -942,7 +933,7 @@ class receive_path(gr.hier_block2):
 
     else:
         #snrm = self._snr_measurement = milans_snr_estimator( vlen, vlen, L )
-        snr_estim = snr_estimator_dc_null(vlen, L, config.dc_null)
+        snr_estim = ofdm.snr_estimator_dc_null(vlen, L, config.dc_null)
         scsnrdb = filter.single_pole_iir_filter_ff(0.1)
         snrm = self._snr_measurement = blocks.nlog10_ff(10, 1, 0)
         self.connect(snr_est_filt, snr_estim, scsnrdb, snrm)
@@ -975,7 +966,7 @@ class receive_path(gr.hier_block2):
     frame_length = config.frame_length
     L = config.periodic_parts
 
-    snr_est_filt_2_1 = skip(gr.sizeof_gr_complex*vlen, frame_length)
+    snr_est_filt_2_1 = ofdm.skip(gr.sizeof_gr_complex*vlen, frame_length)
     for x in range(1, frame_length):
       snr_est_filt_2_1.skip_call(x)
 
@@ -996,7 +987,7 @@ class receive_path(gr.hier_block2):
 
     #Addition for SINR estimation
     if self._options.sinr_est:
-        snr_est_filt_2_2 = skip(gr.sizeof_gr_complex*vlen, frame_length)
+        snr_est_filt_2_2 = ofdm.skip(gr.sizeof_gr_complex*vlen, frame_length)
         for x in range(frame_length):
           if x != config.training_data.channel_estimation_pilot[0]:
             snr_est_filt_2_2.skip_call(x)
@@ -1014,7 +1005,7 @@ class receive_path(gr.hier_block2):
 
     else:
         #snrm = self._snr_measurement = milans_snr_estimator( vlen, vlen, L )
-        snr_estim_2 = snr_estimator_dc_null(vlen, L, config.dc_null)
+        snr_estim_2 = ofdm.snr_estimator_dc_null(vlen, L, config.dc_null)
         scsnrdb_2 = filter.single_pole_iir_filter_ff(0.1)
         snrm_2 = self._snr_measurement_2 = blocks.nlog10_ff(10, 1, 0)
         self.connect(snr_est_filt_2_1, snr_estim_2, scsnrdb_2, snrm_2)
@@ -1068,7 +1059,7 @@ class receive_path(gr.hier_block2):
     frame_len = config.frame_length
 
 #    # we want the preamble used for channel estimation
-#    keep_est_preamble = skip(gr.sizeof_float*config.subcarriers, frame_len)
+#    keep_est_preamble = ofdm.skip(gr.sizeof_float*config.subcarriers, frame_len)
 #    for i in range( frame_len ):
 #      if i != config.training_data.channel_estimation_pilot[0]:
 #        keep_est_preamble.skip_call(i)
@@ -1099,7 +1090,7 @@ class receive_path(gr.hier_block2):
     frame_len = config.frame_length
 
 #    # we want the preamble used for channel estimation
-#    keep_est_preamble = skip(gr.sizeof_float*config.subcarriers, frame_len)
+#    keep_est_preamble = ofdm.skip(gr.sizeof_float*config.subcarriers, frame_len)
 #    for i in range( frame_len ):
 #      if i != config.training_data.channel_estimation_pilot[0]:
 #        keep_est_preamble.skip_call(i)
@@ -1170,7 +1161,7 @@ class receive_path(gr.hier_block2):
     config = self.config
     msgq = gr.msg_queue(10)
     msg_sink = gr.message_sink(gr.sizeof_float*config.fft_length, msgq, True)
-    sampler = vector_sampler(gr.sizeof_float, config.fft_length)
+    sampler = ofdm.vector_sampler(gr.sizeof_float, config.fft_length)
 
     self.connect(self.receiver.timing_metric, (sampler, 0))
     self.connect(self.receiver.time_sync, delay(gr.sizeof_char, config.fft_length/2-1), (sampler, 1))
@@ -1286,7 +1277,7 @@ class ofdm_bpsk_demodulator (gr.hier_block2):
 
     trig_src = blocks.vector_source_b([1], True)
 
-    demod = generic_demapper_vcb(data_subcarriers)
+    demod = ofdm.generic_demapper_vcb(data_subcarriers)
 
     self.connect(self, demod, self)
     self.connect(map_src, (demod, 1))
@@ -1361,7 +1352,7 @@ class ofdm_frame_sampler( gr.hier_block2 ):
     # the old outer receiver. The dynamic frame start trigger is hence
     # replaced with a static one, fixed to the frame length.
 
-    frame_sampler = ofdm.vector_sampler( gr.sizeof_gr_complex * total_subc,
+    frame_sampler = ofdm.ofdm.vector_sampler( gr.sizeof_gr_complex * total_subc,
                                               config.frame_length )
     symbol_output = blocks.vector_to_stream( gr.sizeof_gr_complex * total_subc,
                                               config.frame_length )
@@ -1369,7 +1360,7 @@ class ofdm_frame_sampler( gr.hier_block2 ):
     damn_static_frame_trigger = blocks.vector_source_b( ft, True )
 
     if options.enable_erasure_decision:
-      self.frame_gate = vector_sampler(
+      self.frame_gate = ofdm.vector_sampler(
         gr.sizeof_gr_complex * total_subc * config.frame_length, 1 )
       self.connect( self, frame_sampler, self.frame_gate,
                     symbol_output )

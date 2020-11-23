@@ -24,7 +24,7 @@ from gnuradio import gr, gr_unittest
 from .schmidl import coarse_frequency_offset_estimator
 from numpy import concatenate, pi, exp, conjugate, arctan2
 from random import randint, seed
-from .gr_tools import ifft
+from gr_tools import ifft
 
 class qa_schmidl_coarse_frequency_offset_estimator (gr_unittest.TestCase):
   def setUp (self):

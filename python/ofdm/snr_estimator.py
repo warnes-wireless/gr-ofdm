@@ -24,14 +24,17 @@ from gnuradio import gr
 import math
 from numpy import concatenate
 
-from .gr_tools import log_to_file
+from gr_tools import log_to_file
+# C++ imports
+import ofdm as ofdm
+# Python imports
 
-from ofdm import skip, vector_sum_vff, static_mux_v, sinr_interpolator, sinr_estimator, sinr_estimator_02
+
 from gnuradio.blocks import null_sink, divide_ff, add_const_vff, add_vff
 
 from gnuradio import blocks, filter
 
-from .station_configuration import *
+from station_configuration import *
 
 
 
@@ -39,11 +42,11 @@ class milans_snr_estimator(gr.hier_block2):
   """
   Based on Milans idea (to be published)
 
-  rho_hat = ((skip-1)*sum(|Y1_k|^2)/sum(|Y0_k|^2) -1)*(1/skip)
+  rho_hat = ((ofdm.skip-1)*sum(|Y1_k|^2)/sum(|Y0_k|^2) -1)*(1/ofdm.skip)
   where
    Y_1 is the received Morelli preamble signal in frequency domain (on used subcarriers)
    Y_0 is the received Morelli preamble signal in frequency domain (on non-used subcarriers)
-   skip is the number of periodic parts in the Morelli preamble symbol (eg 2, 4, 8)
+   ofdm.skip is the number of periodic parts in the Morelli preamble symbol (eg 2, 4, 8)
   """
   def __init__(self, subc, vlen, ss):
     gr.hier_block2.__init__(self, "new_snr_estimator",
@@ -59,18 +62,18 @@ class milans_snr_estimator(gr.hier_block2):
     u = list(range(vlen/ss*(ss-1)))
     zeros_ind= [z+1+z/(ss-1) for z in u]
 
-    skip1 = skip(gr.sizeof_gr_complex, vlen)
+    skip1 = ofdm.skip(gr.sizeof_gr_complex, vlen)
     for x in zeros_ind:
-      skip1.skip(x)
+      skip1.ofdm.skip(x)
 
     #print "skipped zeros",zeros_ind
 
     v = list(range(vlen/ss))
     ones_ind= [z*ss for z in v]
 
-    skip2 = skip(gr.sizeof_gr_complex, vlen)
+    skip2 = ofdm.skip(gr.sizeof_gr_complex, vlen)
     for x in ones_ind:
-      skip2.skip(x)
+      skip2.ofdm.skip(x)
 
     #print "skipped ones",ones_ind
 
@@ -87,8 +90,8 @@ class milans_snr_estimator(gr.hier_block2):
     filt_ones = gr.single_pole_iir_filter_ff(0.1, vlen/ss)
     filt_zeros = gr.single_pole_iir_filter_ff(0.1, vlen/ss*(ss-1))
 
-    sum_ones = vector_sum_vff(vlen/ss)
-    sum_zeros = vector_sum_vff(vlen/ss*(ss-1))
+    sum_ones = ofdm.vector_sum_vff(vlen/ss)
+    sum_zeros = ofdm.vector_sum_vff(vlen/ss*(ss-1))
 
     D = gr.divide_ff()
     P = gr.multiply_ff()
@@ -119,11 +122,11 @@ class milans_snr_estimator(gr.hier_block2):
 #  """
 #  Based on Milans idea (to be published)
 #
-#  rho_hat = ((skip-1)*sum(|Y1_k|^2)/sum(|Y0_k|^2) -1)*(1/skip)
+#  rho_hat = ((ofdm.skip-1)*sum(|Y1_k|^2)/sum(|Y0_k|^2) -1)*(1/ofdm.skip)
 #  where
 #   Y_1 is the received Morelli preamble signal in frequency domain (on used subcarriers)
 #   Y_0 is the received Morelli preamble signal in frequency domain (on non-used subcarriers)
-#   skip is the number of periodic parts in the Morelli preamble symbol (eg 2, 4, 8)
+#   ofdm.skip is the number of periodic parts in the Morelli preamble symbol (eg 2, 4, 8)
 #  """
 #  def __init__(self, subc, vlen, ss):
 #    gr.hier_block2.__init__(self, "new_snr_estimator",
@@ -140,22 +143,22 @@ class milans_snr_estimator(gr.hier_block2):
 #    u = range (vlen/ss*(ss-1))
 #    zeros_ind= map(lambda z: z+1+z/(ss-1),u)
 #
-#    skip1_pr0 = skip(gr.sizeof_gr_complex,vlen)
-#    skip1_pr1 = skip(gr.sizeof_gr_complex,vlen)
+#    skip1_pr0 = ofdm.skip(gr.sizeof_gr_complex,vlen)
+#    skip1_pr1 = ofdm.skip(gr.sizeof_gr_complex,vlen)
 #    for x in zeros_ind:
-#      skip1_pr0.skip(x)
-#      skip1_pr1.skip(x)
+#      skip1_pr0.ofdm.skip(x)
+#      skip1_pr1.ofdm.skip(x)
 #
 #    #print "skipped zeros",zeros_ind
 #
 #    v = range (vlen/ss)
 #    ones_ind= map(lambda z: z*ss,v)
 #
-#    skip2_pr0 = skip(gr.sizeof_gr_complex,vlen)
-#    skip2_pr1 = skip(gr.sizeof_gr_complex,vlen)
+#    skip2_pr0 = ofdm.skip(gr.sizeof_gr_complex,vlen)
+#    skip2_pr1 = ofdm.skip(gr.sizeof_gr_complex,vlen)
 #    for x in ones_ind:
-#      skip2_pr0.skip(x)
-#      skip2_pr1.skip(x)
+#      skip2_pr0.ofdm.skip(x)
+#      skip2_pr1.ofdm.skip(x)
 #
 #    #print "skipped ones",ones_ind
 #
@@ -298,14 +301,14 @@ class milans_snr_estimator(gr.hier_block2):
 #
 ##    for i in range (vlen/ss):
 ##        imux.append(i+1)
-##        for s in range (skip-1):
+##        for s in range (ofdm.skip-1):
 ##                imux.append(0)
 #    self.connect(div_z,v2s_z)
 #    self.connect(div_p,v2s_p)
 #
 #
 #
-#    muxvec = static_mux_v(gr.sizeof_float, imux)
+#    muxvec = ofdm.static_mux_v(gr.sizeof_float, imux)
 #    self.connect(v2s_z,(muxvec,0))
 #    self.connect(v2s_p,(muxvec,1))
 #
@@ -331,14 +334,14 @@ class milans_sinr_sc_estimator(gr.hier_block2):
   """
   Based on Milans idea (to be published)
 
-  rho_hat = ((skip-1)*sum(|Y1_k|^2)/sum(|Y0_k|^2) -1)*(1/skip)
+  rho_hat = ((ofdm.skip-1)*sum(|Y1_k|^2)/sum(|Y0_k|^2) -1)*(1/ofdm.skip)
   where
    input_0 is the received Morelli preamble signal in frequency domain (on nulled subcarriers)
    input_1 is the received second preamble (used for ch. estimation) signal in frequency domain (on non-used subcarriers)
    
    output_0 is the SINR per subcarrier
    output_1 is the average SINR (is uniform Gussian noise over all subcarriers is assumed)
-   skip is the number of periodic parts in the Morelli preamble symbol (eg 2, 4, 8)
+   ofdm.skip is the number of periodic parts in the Morelli preamble symbol (eg 2, 4, 8)
   """
   def __init__(self, subc, vlen, ss):
     gr.hier_block2.__init__(self, "new_snr_estimator",
@@ -354,11 +357,11 @@ class milans_sinr_sc_estimator(gr.hier_block2):
     v = list(range(vlen/ss))
     ones_ind= [z*ss for z in v]
 
-    skip2_pr0 = skip(gr.sizeof_gr_complex, vlen)
-    skip2_pr1 = skip(gr.sizeof_gr_complex, vlen)
+    skip2_pr0 = ofdm.skip(gr.sizeof_gr_complex, vlen)
+    skip2_pr1 = ofdm.skip(gr.sizeof_gr_complex, vlen)
     for x in ones_ind:
-      skip2_pr0.skip(x)
-      skip2_pr1.skip(x)
+      skip2_pr0.ofdm.skip(x)
+      skip2_pr1.ofdm.skip(x)
 
     #print "skipped ones",ones_ind
 
@@ -384,7 +387,7 @@ class milans_sinr_sc_estimator(gr.hier_block2):
     sum_zeros = add_vff(vlen/ss*(ss-1))
     
     # For average
-    sum_all = vector_sum_vff(vlen)
+    sum_all = ofdm.vector_sum_vff(vlen)
     mult = gr.multiply_const_ff(1./vlen)
     scsnr_db_av = gr.nlog10_ff(10, 1, 0)
     filt_end_av = gr.single_pole_iir_filter_ff(0.1)
@@ -415,7 +418,7 @@ class milans_sinr_sc_estimator(gr.hier_block2):
     for i in range (vlen/ss):
         dd.extend([i*ss])
     #print dd
-    interpolator = sinr_interpolator(vlen, ss, dd)
+    interpolator = ofdm.sinr_interpolator(vlen, ss, dd)
 
     self.connect(div_z, interpolator, filt_end, scsnr_db, self)
     self.connect(interpolator, sum_all, mult, scsnr_db_av, filt_end_av, (self, 1))
@@ -427,14 +430,14 @@ class milans_sinr_sc_estimator2(gr.hier_block2):
   """
   Based on Milans idea (to be published)
 
-  rho_hat = ((skip-1)*sum(|Y1_k|^2)/sum(|Y0_k|^2) -1)*(1/skip)
+  rho_hat = ((ofdm.skip-1)*sum(|Y1_k|^2)/sum(|Y0_k|^2) -1)*(1/ofdm.skip)
   where
    input_0 is the received Morelli preamble signal in frequency domain (on nulled subcarriers)
    input_1 is the received second preamble (used for ch. estimation) signal in frequency domain (on non-used subcarriers)
    
    output_0 is the SINR per subcarrier
    output_1 is the average SINR (is uniform Gussian noise over all subcarriers is assumed)
-   skip is the number of periodic parts in the Morelli preamble symbol (eg 2, 4, 8)
+   ofdm.skip is the number of periodic parts in the Morelli preamble symbol (eg 2, 4, 8)
   """
   def __init__(self, subc, vlen, ss):
     gr.hier_block2.__init__(self, "new_snr_estimator",
@@ -452,11 +455,11 @@ class milans_sinr_sc_estimator2(gr.hier_block2):
 #    v = range (vlen/ss)
 #    ones_ind= map(lambda z: z*ss,v)
 #
-#    skip2_pr0 = skip(gr.sizeof_gr_complex,vlen)
-#    skip2_pr1 = skip(gr.sizeof_gr_complex,vlen)
+#    skip2_pr0 = ofdm.skip(gr.sizeof_gr_complex,vlen)
+#    skip2_pr1 = ofdm.skip(gr.sizeof_gr_complex,vlen)
 #    for x in ones_ind:
-#      skip2_pr0.skip(x)
-#      skip2_pr1.skip(x)
+#      skip2_pr0.ofdm.skip(x)
+#      skip2_pr1.ofdm.skip(x)
 #
 #    #print "skipped ones",ones_ind
 #
@@ -482,7 +485,7 @@ class milans_sinr_sc_estimator2(gr.hier_block2):
 #    sum_zeros = add_vff(vlen/ss*(ss-1))
 #    
     # For average
-    #sum_all = vector_sum_vff(vlen)
+    #sum_all = ofdm.vector_sum_vff(vlen)
     #mult = blocks.multiply_const_ff(1./vlen)
     #scsnr_db_av = blocks.nlog10_ff(10,1,0)
     #filt_end_av = filter.single_pole_iir_filter_ff(0.1)
@@ -504,7 +507,7 @@ class milans_sinr_sc_estimator2(gr.hier_block2):
 #    self.connect(filt_zeros_pr0,(div_z,1))
     
 
-    estimator = sinr_estimator(vlen, ss, config.dc_null)
+    estimator = ofdm.sinr_estimator(vlen, ss, config.dc_null)
 
     scsnr_db = blocks.nlog10_ff(10, vlen, 0)
     #filt_end = filter.single_pole_iir_filter_ff(0.1,vlen)
@@ -521,7 +524,7 @@ class milans_sinr_sc_estimator2(gr.hier_block2):
             dd.extend([i*ss + 4 - config.dc_null/2])
 
     #print dd
-    interpolator = sinr_interpolator(vlen, ss, dd)
+    interpolator = ofdm.sinr_interpolator(vlen, ss, dd)
     
     self.connect((self, 0), (estimator, 0))
     self.connect((self, 1), (estimator, 1))
@@ -538,14 +541,14 @@ class milans_sinr_sc_estimator3(gr.hier_block2):
   """
   Based on Milans idea (to be published)
 
-  rho_hat = ((skip-1)*sum(|Y1_k|^2)/sum(|Y0_k|^2) -1)*(1/skip)
+  rho_hat = ((ofdm.skip-1)*sum(|Y1_k|^2)/sum(|Y0_k|^2) -1)*(1/ofdm.skip)
   where
    input_0 is the received Morelli preamble signal in frequency domain (on nulled subcarriers)
    input_1 is the received second preamble (used for ch. estimation) signal in frequency domain (on non-used subcarriers)
    
    output_0 is the SINR per subcarrier
    output_1 is the average SINR (is uniform Gussian noise over all subcarriers is assumed)
-   skip is the number of periodic parts in the Morelli preamble symbol (eg 2, 4, 8)
+   ofdm.skip is the number of periodic parts in the Morelli preamble symbol (eg 2, 4, 8)
   """
   def __init__(self, subc, vlen, ss):
     gr.hier_block2.__init__(self, "new_snr_estimator",
@@ -561,11 +564,11 @@ class milans_sinr_sc_estimator3(gr.hier_block2):
 #    v = range (vlen/ss)
 #    ones_ind= map(lambda z: z*ss,v)
 #
-#    skip2_pr0 = skip(gr.sizeof_gr_complex,vlen)
-#    skip2_pr1 = skip(gr.sizeof_gr_complex,vlen)
+#    skip2_pr0 = ofdm.skip(gr.sizeof_gr_complex,vlen)
+#    skip2_pr1 = ofdm.skip(gr.sizeof_gr_complex,vlen)
 #    for x in ones_ind:
-#      skip2_pr0.skip(x)
-#      skip2_pr1.skip(x)
+#      skip2_pr0.ofdm.skip(x)
+#      skip2_pr1.ofdm.skip(x)
 #
 #    #print "skipped ones",ones_ind
 #
@@ -591,7 +594,7 @@ class milans_sinr_sc_estimator3(gr.hier_block2):
 #    sum_zeros = add_vff(vlen/ss*(ss-1))
 #    
     # For average
-    #sum_all = vector_sum_vff(vlen)
+    #sum_all = ofdm.vector_sum_vff(vlen)
     #mult = gr.multiply_const_ff(1./vlen)
     scsnr_db_av = gr.nlog10_ff(10, 1, 0)
     filt_end_av = gr.single_pole_iir_filter_ff(0.1)
@@ -623,7 +626,7 @@ class milans_sinr_sc_estimator3(gr.hier_block2):
     for i in range (vlen/ss):
         dd.extend([i*ss])
     #print dd
-    #interpolator = sinr_interpolator(vlen, ss,dd)
+    #interpolator = ofdm.sinr_interpolator(vlen, ss,dd)
     
     self.connect((self, 0), (estimator, 0))
     self.connect((self, 1), (estimator, 1))
@@ -683,8 +686,8 @@ class effective_snr_estimator(gr.hier_block2):
     self.connect(received, received_magsqrd)
     self.connect(reference, reference_magsqrd)
 
-    received_sum = vector_sum_vff(vlen)
-    reference_sum = vector_sum_vff(vlen)
+    received_sum = ofdm.vector_sum_vff(vlen)
+    reference_sum = ofdm.vector_sum_vff(vlen)
     self.connect(received_magsqrd, received_sum)
     self.connect(reference_magsqrd, reference_sum)
 

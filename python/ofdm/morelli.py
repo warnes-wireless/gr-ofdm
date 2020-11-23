@@ -29,7 +29,7 @@ from ofdm import vector_sampler, vector_sum_vcc, complex_to_arg
 from ofdm import mm_frequency_estimator
 from gnuradio.blocks import delay
 
-from .gr_tools import log_to_file
+from gr_tools import log_to_file
 
 class morelli_foe(gr.hier_block2):
   def __init__(self, fft_length, L):

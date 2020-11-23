@@ -32,9 +32,9 @@ import random
 import ofdm as ofdm
 import numpy, scipy
 
-from .gr_tools import log_to_file
+from gr_tools import log_to_file
 
-from .station_configuration import station_configuration
+from station_configuration import station_configuration
 
 class awgn_channel(gr.hier_block2):
   def __init__(self, noise_voltage, frequency_offset):

@@ -24,10 +24,10 @@ from gnuradio import gr
 import ofdm as ofdm
 #import itpp
 import numpy
-from .preambles import schmidl_ifo_designer, morellimengali_designer
-from .gr_tools import terminate_stream, log_to_file, determine_streamsize
-from .gr_tools import ifft as gr_ifft, char_to_float_stream
-from .snr_estimator import milans_snr_estimator
+from preambles import schmidl_ifo_designer, morellimengali_designer
+from gr_tools import terminate_stream, log_to_file, determine_streamsize
+from gr_tools import ifft as gr_ifft, char_to_float_stream
+from snr_estimator import milans_snr_estimator
 
 from numpy import sqrt, concatenate, log10
 from numpy import mean, var, ceil

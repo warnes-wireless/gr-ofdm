@@ -24,24 +24,19 @@ from gnuradio import eng_notation
 from gnuradio import gr, blocks, analog, filter, zeromq
 from gnuradio import fft as fft_blocks
 from gnuradio import trellis
-from .gr_tools import log_to_file, unpack_array, terminate_stream
+from gr_tools import log_to_file, unpack_array, terminate_stream
 import ofdm as ofdm
-from ofdm import generic_mapper_bcv, midamble_insert
-from ofdm import puncture_bb, cyclic_prefixer, vector_padding, vector_padding_dc_null, skip
-from ofdm import stream_controlled_mux, reference_data_source_02_ib #reference_data_source_ib
-from ofdm import multiply_frame_fc
-from ofdm import fbmc_oqam_preprocessing_vcvc, fbmc_beta_multiplier_vcvc, fbmc_separate_vcvc, fbmc_polyphase_network_vcvc
-from ofdm import fbmc_overlapping_parallel_to_serial_vcc, fbmc_insert_preamble_vcvc
-from .preambles import default_block_header
-from .preambles import pilot_subcarrier_inserter, pilot_block_inserter, pilot_block_inserter2, fbmc_pilot_block_inserter, fbmc_timing_pilot_block_inserter
-from . import common_options
+# from ofdm import fbmc_oqam_preprocessing_vcvc, fbmc_beta_multiplier_vcvc, fbmc_separate_vcvc, fbmc_polyphase_network_vcvc
+# from ofdm import fbmc_overlapping_parallel_to_serial_vcc, fbmc_insert_preamble_vcvc
+from preambles import default_block_header
+from preambles import pilot_subcarrier_inserter, pilot_block_inserter, pilot_block_inserter2, fbmc_pilot_block_inserter, fbmc_timing_pilot_block_inserter
+import common_options
 import math, copy
 import numpy
 
 from ofdm import repetition_encoder_sb
-from ofdm import stream_controlled_mux_b
 from ofdm import allocation_src
-from .station_configuration import *
+from station_configuration import *
 
 from random import seed, randint, getrandbits
 
@@ -219,7 +214,7 @@ class transmit_path(gr.hier_block2):
     # Input 0: control stream
     # Input 1: encoded ID stream
     # Inputs 2..n: data streams
-    dmux = self._data_multiplexer = stream_controlled_mux_b()
+    dmux = self._data_multiplexer = ofdm.stream_controlled_mux_b()
     self.connect(mux_ctrl, (dmux, 0))
     self.connect(id_enc, (dmux, 1))
 
@@ -236,7 +231,7 @@ class transmit_path(gr.hier_block2):
         if not options.nopunct:
             bmaptrig_stream_puncturing = [1]+[0]*(config.frame_data_blocks/2-1)
             btrig_puncturing = self._bitmap_trigger_puncturing = blocks.vector_source_b(bmaptrig_stream_puncturing, True)
-            puncturing = self._puncturing = puncture_bb(config.data_subcarriers)
+            puncturing = self._puncturing = ofdm.puncture_bb(config.data_subcarriers)
             self.connect(bitloading_src, (puncturing, 1))
             self.connect(self._bitmap_trigger_puncturing, (puncturing, 2))
             self.connect(unpack, puncturing)
@@ -270,7 +265,7 @@ class transmit_path(gr.hier_block2):
       log_to_file(self, dmux_f, "data/dmux_out.float")
 
     ## Modulator
-    mod = self._modulator = generic_mapper_bcv(config.data_subcarriers, config.coding, config.frame_data_part)
+    mod = self._modulator = ofdm.generic_mapper_bcv(config.data_subcarriers, config.coding, config.frame_data_part)
     self.connect(dmux, (mod, 0))
     self.connect(bitloading_src, (mod, 1))
 
@@ -284,7 +279,7 @@ class transmit_path(gr.hier_block2):
       log_to_file(self, modr, "data/mod_real_out.float")
 
     ## Power allocator
-    pa = self._power_allocator = multiply_frame_fc(config.frame_data_part, config.data_subcarriers)
+    pa = self._power_allocator = ofdm.multiply_frame_fc(config.frame_data_part, config.data_subcarriers)
     self.connect(mod, (pa, 0))
     self.connect(power_src, (pa, 1))
 
@@ -305,7 +300,7 @@ class transmit_path(gr.hier_block2):
     
     #fbmc_pblocks_timing = self._fbmc_timing_pilot_block_inserter = fbmc_timing_pilot_block_inserter(5,False)
     
-    oqam_prep = self._oqam_prep = fbmc_oqam_preprocessing_vcvc(config.subcarriers, 0, 0)
+    oqam_prep = self._oqam_prep = ofdm.fbmc_oqam_preprocessing_vcvc(config.subcarriers, 0, 0)
     self.connect(psubc, oqam_prep)
     
     
@@ -322,14 +317,14 @@ class transmit_path(gr.hier_block2):
 
 
       
-    beta_mult = self._beta_mult = fbmc_beta_multiplier_vcvc(config.subcarriers, 4, 4*config.fft_length-1, 0)
+    beta_mult = self._beta_mult = ofdm.fbmc_beta_multiplier_vcvc(config.subcarriers, 4, 4*config.fft_length-1, 0)
     self.connect(fbmc_pblocks, beta_mult)
     log_to_file(self, beta_mult, "data/beta_mult.compl")
     
         ## Add virtual subcarriers
     if config.fft_length > subcarriers:
       vsubc = self._virtual_subcarrier_extender = \
-              vector_padding_dc_null(config.subcarriers, config.fft_length, config.dc_null)
+              ofdm.vector_padding_dc_null(config.subcarriers, config.fft_length, config.dc_null)
       self.connect(beta_mult, vsubc)
     else:
       vsubc = self._virtual_subcarrier_extender = beta_mult
@@ -346,10 +341,10 @@ class transmit_path(gr.hier_block2):
       
       
     #FBMC separate stream + filterbanks
-    separate_oqam = self._separate_oqam = fbmc_separate_vcvc(config.fft_length, 2)
-    poly_netw_1 = self._poly_netw_1 = fbmc_polyphase_network_vcvc(config.fft_length, 4, 4*config.fft_length-1, False)
-    poly_netw_2 = self._poly_netw_2 = fbmc_polyphase_network_vcvc(config.fft_length, 4, 4*config.fft_length-1, False)
-    overlap_p2s = self._overlap_p2s = fbmc_overlapping_parallel_to_serial_vcc(config.fft_length)
+    separate_oqam = self._separate_oqam = ofdm.fbmc_separate_vcvc(config.fft_length, 2)
+    poly_netw_1 = self._poly_netw_1 = ofdm.fbmc_polyphase_network_vcvc(config.fft_length, 4, 4*config.fft_length-1, False)
+    poly_netw_2 = self._poly_netw_2 = ofdm.fbmc_polyphase_network_vcvc(config.fft_length, 4, 4*config.fft_length-1, False)
+    overlap_p2s = self._overlap_p2s = ofdm.fbmc_overlapping_parallel_to_serial_vcc(config.fft_length)
       
     self.connect(ifft, (separate_oqam, 0), poly_netw_1)
     self.connect((separate_oqam, 1), poly_netw_2)
@@ -530,7 +525,7 @@ class ber_reference_source (gr.hier_block2):
     print("Generating random bits...")
     rand_data = [chr(getrandbits(1)) for x in range(options.subcarriers*8*options.data_blocks*256)]
 
-    ref_src = self._reference_data_source = reference_data_source_02_ib(rand_data)
+    ref_src = self._reference_data_source = ofdm.reference_data_source_02_ib(rand_data)
     self.connect(id_src, (ref_src, 0))
     self.connect(bc_src, (ref_src, 1))
 

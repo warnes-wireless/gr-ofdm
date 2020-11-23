@@ -31,7 +31,7 @@ from .uhd_interface import uhd_mimo_receiver
 
 from .receive_path import receive_path as receive_path
 from .receive_path12 import receive_path as receive_path_12
-from .gr_tools import log_to_file
+from gr_tools import log_to_file
 
 import os
 

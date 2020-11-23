@@ -23,17 +23,11 @@
 from numpy import concatenate, conjugate, arange
 from delaylines import delayline_cc
 from gnuradio import gr
-from ofdm import peak_resync_bb #gate_ff
-from ofdm import  vector_sum_vff
-from ofdm import frequency_shift_vcc, cyclic_prefixer, schmidl_cfo_estimator
-from ofdm import vector_sampler, complex_to_arg
-from ofdm import subc_snr_estimator
-from ofdm import vector_sum_vcc, limit_vff
-import numpy, math
+
+# C++ imports
 import ofdm as ofdm
 
-from ofdm import accumulator_cc, accumulator_ff
-from ofdm import schmidl_tm_rec_stage1, schmidl_tm_rec_stage2
+import numpy, math
 
 from gnuradio.blocks import delay
 
@@ -77,8 +71,8 @@ class integer_fo_estimator(gr.hier_block2):
           block_header.schmidl_fine_sync[0]*block_length)
 
     # sample ofdm symbol (preamble 1 and 2)
-    sampler_symbol1 = vector_sampler(gr.sizeof_gr_complex, fft_length)
-    sampler_symbol2 = vector_sampler(gr.sizeof_gr_complex, fft_length)
+    sampler_symbol1 = ofdm.vector_sampler(gr.sizeof_gr_complex, fft_length)
+    sampler_symbol2 = ofdm.vector_sampler(gr.sizeof_gr_complex, fft_length)
     time_delay1 = delay(gr.sizeof_char, block_length*block_header.schmidl_fine_sync[1])
     self.connect(self.input, (sampler_symbol1, 0))
     self.connect(self.input, (sampler_symbol2, 0))
@@ -98,13 +92,13 @@ class integer_fo_estimator(gr.hier_block2):
     #  freq_shift third input: reset phase accumulator
 
     # symbol/preamble 1
-    freq_shift_sym1 = frequency_shift_vcc(fft_length, 1.0/fft_length)
+    freq_shift_sym1 = ofdm.frequency_shift_vcc(fft_length, 1.0/fft_length)
     self.connect(sampler_symbol1, (freq_shift_sym1, 0))
     self.connect(epsilon, (freq_shift_sym1, 1))
     self.connect(gr.vector_source_b([1], True), (freq_shift_sym1, 2))
 
     # symbol/preamble 2
-    freq_shift_sym2 = frequency_shift_vcc(fft_length, 1.0/fft_length)
+    freq_shift_sym2 = ofdm.frequency_shift_vcc(fft_length, 1.0/fft_length)
     self.connect(sampler_symbol2, (freq_shift_sym2, 0))
     self.connect(epsilon, (freq_shift_sym2, 1))
     self.connect(gr.vector_source_b([1], True), (freq_shift_sym2, 2))
@@ -118,7 +112,7 @@ class integer_fo_estimator(gr.hier_block2):
     pre1 = block_header.pilotsym_fd[block_header.schmidl_fine_sync[0]]
     pre2 = block_header.pilotsym_fd[block_header.schmidl_fine_sync[1]]
     diff_pn = concatenate([[conjugate(math.sqrt(2)*pre2[2*i]/pre1[2*i]), 0.0j] for i in arange(len(pre1)/2)])
-    cfo_estimator = schmidl_cfo_estimator(fft_length, len(pre1),
+    cfo_estimator = ofdm.schmidl_cfo_estimator(fft_length, len(pre1),
                                           self._range, diff_pn)
     self.connect(freq_shift_sym1, fft_sym1, (cfo_estimator, 0))   # preamble 1
     self.connect(freq_shift_sym2, fft_sym2, (cfo_estimator, 1))   # preamble 2
@@ -150,7 +144,7 @@ class integer_fo_estimator(gr.hier_block2):
 
     # peak filtering
     # resynchronize and suppress peaks that didn't match a preamble
-    filtered_time_sync = peak_resync_bb(True) # replace
+    filtered_time_sync = ofdm.peak_resync_bb(True) # replace
     self.connect(self.time_sync, (filtered_time_sync, 0))
     self.connect(ifo_thr_f2b, (filtered_time_sync, 1))
 
@@ -192,7 +186,7 @@ class integer_fo_estimator(gr.hier_block2):
       self.connect(freq_shift_sym2, gr.fft_vcc(fft_length, True, [], True), gr.complex_to_mag(fft_length), gr.file_sink(gr.sizeof_float * fft_length, "data/pre2.float"))
 
       # calculate epsilon from corrected source to check function
-      test_cp = cyclic_prefixer(fft_length, block_length)
+      test_cp = ofdm.cyclic_prefixer(fft_length, block_length)
       test_eps = foe(fft_length)
       self.connect(freq_shift_sym1, test_cp, test_eps, gr.file_sink(gr.sizeof_float, "data/eps_after.float"))
 
@@ -237,7 +231,7 @@ class timing_metric(gr.hier_block2):
     self.connect(self.timing_metric, self)
 
     # calculate epsilon from P(d), epsilon is normalized fractional frequency offset
-    #angle = gr.complex_to_arg()
+    #angle = gr.ofdm.complex_to_arg()
     #self.epsilon = gr.multiply_const_ff(1.0/math.pi)
     #self.connect(nominator, angle, self.epsilon)
 
@@ -259,8 +253,8 @@ class recursive_timing_metric( gr.hier_block2 ):
     input = (self, 0)
     output = (self, 0)
     
-    st1 = schmidl_tm_rec_stage1(fft_length)
-    st2 = schmidl_tm_rec_stage2(fft_length/2)
+    st1 = ofdm.schmidl_tm_rec_stage1(fft_length)
+    st2 = ofdm.schmidl_tm_rec_stage2(fft_length/2)
     
     self.connect(input, st1, st2, output)
     self.connect((st1, 1), (st2, 1))
@@ -281,7 +275,7 @@ class recursive_timing_metric_simple( gr.hier_block2 ):
     mixer = gr.multiply_cc()
     mix_delay = delay(gr.sizeof_gr_complex, fft_length/2+1)
     mix_diff = gr.sub_cc()
-    nominator = accumulator_cc()
+    nominator = ofdm.accumulator_cc()
     inpdelay = delay(gr.sizeof_gr_complex, fft_length/2)
     
     self.connect(self.input, inpdelay, 
@@ -294,7 +288,7 @@ class recursive_timing_metric_simple( gr.hier_block2 ):
     rmagsqrd = gr.complex_to_mag_squared()
     rm_delay = delay(gr.sizeof_float, fft_length+1)
     rm_diff = gr.sub_ff()
-    denom = accumulator_ff()
+    denom = ofdm.accumulator_ff()
     self.connect(self.input, rmagsqrd, rm_diff, gr.multiply_const_ff(0.5), denom)
     self.connect(rmagsqrd, rm_delay, (rm_diff, 1))
     
@@ -364,7 +358,7 @@ class modified_timing_metric_old(gr.hier_block2):
     self.connect(self.timing_metric, self)
 
     # calculate epsilon from P(d), epsilon is normalized fractional frequency offset
-    #angle = gr.complex_to_arg()
+    #angle = gr.ofdm.complex_to_arg()
     #self.epsilon = gr.multiply_const_ff(1.0/math.pi)
     #self.connect(nominator, angle, self.epsilon)
 
@@ -390,7 +384,7 @@ class coarse_frequency_offset_estimator(gr.hier_block2):
         gr.io_signature (1, 1, gr.sizeof_float))
 
     ## Preamble Extraction
-    sampler = vector_sampler(gr.sizeof_gr_complex, vlen)
+    sampler = ofdm.vector_sampler(gr.sizeof_gr_complex, vlen)
     self.connect(self, sampler)
     self.connect((self, 1), (sampler, 1))
 
@@ -404,11 +398,11 @@ class coarse_frequency_offset_estimator(gr.hier_block2):
     self.connect((splitter, 0), (conj_mult, 1))
 
     ## Sum of Products
-    psum = vector_sum_vcc(vlen/2)
+    psum = ofdm.vector_sum_vcc(vlen/2)
     self.connect((conj_mult, 0), psum)
 
     ## Complex to Angle
-    angle = complex_to_arg()
+    angle = ofdm.complex_to_arg()
     self.connect(psum, angle)
 
     ## Normalize
@@ -440,7 +434,7 @@ class snr_estimator(gr.hier_block2):
     snr_out = (self, 0)
 
     ## Preamble Extraction
-    sampler = vector_sampler(gr.sizeof_gr_complex, vlen)
+    sampler = ofdm.vector_sampler(gr.sizeof_gr_complex, vlen)
     self.connect(data_in, sampler)
     self.connect(trig_in, (sampler, 1))
     
@@ -468,7 +462,7 @@ class snr_estimator(gr.hier_block2):
     self.connect((splitter, 1), (vmult, 1))
 
     ## Sum of Products
-    psum = vector_sum_vcc(vlen/2)
+    psum = ofdm.vector_sum_vcc(vlen/2)
     self.connect(vmult, psum)
 
     ## Magnitude of P(d)
@@ -480,7 +474,7 @@ class snr_estimator(gr.hier_block2):
     self.connect(sampler, r_magsqrd)
 
     ## Sum of squared second half block
-    r_sum = vector_sum_vff(vlen)
+    r_sum = ofdm.vector_sum_vff(vlen)
     self.connect(r_magsqrd, r_sum)
 
     ## Square Root of Metric
@@ -491,7 +485,7 @@ class snr_estimator(gr.hier_block2):
     ## Denominator of SNR estimate
     denom = gr.add_const_ff(1)
     neg_m_sqrt = gr.multiply_const_ff(-1.0)
-    self.connect(m_sqrt, limit_vff(1, 1-2e-5, -1000), neg_m_sqrt, denom)
+    self.connect(m_sqrt, ofdm.limit_vff(1, 1-2e-5, -1000), neg_m_sqrt, denom)
 
     ## SNR estimate
     snr_est = gr.divide_ff()
@@ -515,12 +509,12 @@ class foe(gr.hier_block2):
     self.nominator = schmidl_nominator(fft_length)
 
     # sample nominator
-    sampler = vector_sampler(gr.sizeof_gr_complex, 1)
+    sampler = ofdm.vector_sampler(gr.sizeof_gr_complex, 1)
     self.connect(self.input, self.nominator, (sampler, 0))
     self.connect(self.time_sync, (sampler, 1))
 
     # calculate epsilon from P(d), epsilon is normalized fractional frequency offset
-    angle = complex_to_arg()
+    angle = ofdm.complex_to_arg()
     self.epsilon = gr.multiply_const_ff(1.0/math.pi)
 
     self.connect(sampler, angle, self.epsilon, self)

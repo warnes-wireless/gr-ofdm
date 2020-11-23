@@ -24,7 +24,7 @@ from gnuradio import eng_notation
 from .configparse import OptionParser
 from gnuradio import optfir
 
-from .station_configuration import station_configuration
+from station_configuration import station_configuration
 
 from math import log10
 from corba_servants import corba_data_buffer_servant
@@ -37,12 +37,11 @@ except:
 
 import sys
 
-from .transmit_path2 import transmit_path
-from ofdm import throughput_measure
-from .common_options import common_tx_rx_usrp_options
-from .gr_tools import log_to_file, ms_to_file
+from transmit_path2 import transmit_path
+from common_options import common_tx_rx_usrp_options
+from gr_tools import log_to_file, ms_to_file
 
-from . import fusb_options
+import fusb_options
 
 from omniORB import CORBA, PortableServer
 import CosNaming
@@ -184,7 +183,7 @@ class ofdm_tx (gr.top_block):
       
         
     if options.measure:
-      self.m = throughput_measure(gr.sizeof_gr_complex)
+      self.m = ofdm.throughput_measure(gr.sizeof_gr_complex)
       self.connect( self.m, self.dst )
       self.dst = self.m
         

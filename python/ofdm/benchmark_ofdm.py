@@ -34,12 +34,11 @@ import os
 
 from transmit_path import transmit_path
 from receive_path import receive_path
-from ofdm import throughput_measure, vector_sampler
-from . import common_options
-from .gr_tools import log_to_file, ms_to_file
-from .moms import moms
+import common_options
+from gr_tools import log_to_file, ms_to_file
+from moms import moms
 
-from . import fusb_options
+import fusb_options
 
 
 import ofdm as ofdm
@@ -52,7 +51,7 @@ import numpy
 import copy
 
 
-from . import channel
+import channel
 
 #import os
 #print 'Blocked waiting for GDB attach (pid = %d)' % (os.getpid(),)
@@ -148,7 +147,7 @@ class ofdm_benchmark (gr.top_block):
 
 
     if options.measure:
-      self.m = throughput_measure(gr.sizeof_gr_complex)
+      self.m = ofdm.throughput_measure(gr.sizeof_gr_complex)
       self.connect( self.m, self.dst )
       self.dst = self.m
 
@@ -299,7 +298,7 @@ class ofdm_benchmark (gr.top_block):
 #     fftlen = config.fft_length
 # 
 #     my_window = window.hamming(fftlen) #.blackmanharris(fftlen)
-#     rxs_sampler = vector_sampler(gr.sizeof_gr_complex,fftlen)
+#     rxs_sampler = ofdm.vector_sampler(gr.sizeof_gr_complex,fftlen)
 #     rxs_trigger = blocks.vector_source_b(concatenate([[1],[0]*199]),True)
 #     rxs_window = blocks.multiply_const_vcc(my_window)
 #     rxs_spectrum = gr.fft_vcc(fftlen,True,[],True)

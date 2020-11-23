@@ -21,7 +21,7 @@
 #
 
 from gnuradio import gr
-from ofdm import moms_ff
+import ofdm as ofdm
 
 
 ################################################################################
@@ -37,11 +37,11 @@ class moms_block(gr.hier_block2):
     cmplx_to_img   = gr.complex_to_imag()
 
     iirf_real = gr.iir_filter_ffd([1.5], [1, -0.5])
-    self.moms_real = moms_ff()
+    self.moms_real = ofdm.moms_ff()
     self.moms_real.set_init_ip_fraction(delay_num, delay_denom)
 
     iirf_imag = gr.iir_filter_ffd([1.5], [1, -0.5])
-    self.moms_imag = moms_ff()
+    self.moms_imag = ofdm.moms_ff()
     self.moms_imag.set_init_ip_fraction(delay_num, delay_denom)
 
     float_to_cmplx = gr.float_to_complex()

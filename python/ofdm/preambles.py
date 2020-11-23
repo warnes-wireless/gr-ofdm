@@ -22,17 +22,14 @@
 
 from math import sqrt, pi
 from numpy import concatenate, conjugate, array
-from .gr_tools import fft, ifft
+from gr_tools import fft, ifft
 from gnuradio import gr, blocks
 from cmath import exp
 from numpy import abs, concatenate
 import numpy
 import ofdm as ofdm
-from .station_configuration import *
-from ofdm import stream_controlled_mux, skip
+from station_configuration import *
 from numpy import *
-
-from ofdm import static_mux_c, static_mux_v
 
 class default_block_header (object):
   def __init__(self, data_subcarriers, fft_length, dc_null, options):
@@ -265,13 +262,13 @@ class default_block_header (object):
 
     # compute pilot subcarriers
     pilot_dist = subc/2/(self.pilot_subcarriers/2+1)
-    for i in range(1, self.pilot_subcarriers/2+1):
+    for i in range(1, int(self.pilot_subcarriers/2+1)):
       pos = pilot_dist*i
       self.pilot_tones.append(pos)
       self.pilot_tones.append(-pos)
     self.pilot_tones.sort()
     
-    subc_dc = subc/2
+    subc_dc = int(subc/2)
     
     tmp = [0.0]*subc
     tmp[subc_dc] = 1.0
@@ -284,7 +281,7 @@ class default_block_header (object):
 
     self.pilot_tone_map = [0.0]*subc
     for i in range(len(self.pilot_tones)):
-      self.pilot_tone_map[shifted_pilot_tones[i]] = self.pilot_subc_sym[i]
+      self.pilot_tone_map[int(shifted_pilot_tones[i])] = self.pilot_subc_sym[i]
     
     t = numpy.array( ifft( self.pilot_tone_map ) )
     assert( ( numpy.abs( t.imag ) < 1e-6 ).all() )
@@ -378,7 +375,7 @@ class pilot_block_inserter(gr.hier_block2):
     
 #    mux_ctrl = blocks.vector_source_s(mux_stream,True) #i.e. static
 #    mux = stream_controlled_mux(gr.sizeof_gr_complex*fft_length)
-    mux = static_mux_v(gr.sizeof_gr_complex*vlen, imux)
+    mux = ofdm.static_mux_v(gr.sizeof_gr_complex*vlen, imux)
 
 #    self.connect(mux_ctrl,mux)
     self.connect(self, (mux, 0)) # data stream
@@ -542,7 +539,7 @@ class pilot_block_filter(gr.hier_block2):
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char),
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char))
 
-    filt = skip(gr.sizeof_gr_complex*subcarriers, frame_length)# skip_known_symbols(frame_length,subcarriers)
+    filt = ofdm.skip(gr.sizeof_gr_complex*subcarriers, frame_length)# skip_known_symbols(frame_length,subcarriers)
     for x in config.training_data.pilotsym_pos:
       filt.skip_call(x)
 
@@ -572,7 +569,7 @@ class fbmc_inner_pilot_block_filter(gr.hier_block2):
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*vlen, gr.sizeof_char),
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*vlen, gr.sizeof_char))
 
-    filt = skip(gr.sizeof_gr_complex*vlen, frame_length)# skip_known_symbols(frame_length,subcarriers)
+    filt = ofdm.skip(gr.sizeof_gr_complex*vlen, frame_length)# skip_known_symbols(frame_length,subcarriers)
     for x in config.training_data.fbmc_pilotsym_pos_td:
       filt.skip_call(x)
 
@@ -605,7 +602,7 @@ class fbmc_pilot_block_filter(gr.hier_block2):
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char),
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char))
 
-    filt = skip(gr.sizeof_gr_complex*subcarriers, frame_length/2)# skip_known_symbols(frame_length,subcarriers)
+    filt = ofdm.skip(gr.sizeof_gr_complex*subcarriers, frame_length/2)# skip_known_symbols(frame_length,subcarriers)
     for x in config.training_data.fbmc_pilotsym_pos[:len(config.training_data.fbmc_pilotsym_pos)/2]:
       filt.skip_call(x)
 
@@ -662,7 +659,7 @@ class pilot_subcarrier_inserter (gr.hier_block2):
     v2s = blocks.vector_to_stream(gr.sizeof_gr_complex, subc)
     pilot_src = blocks.vector_source_c(config.training_data.pilot_subc_sym, True)
 
-    mux = static_mux_c(imux)
+    mux = ofdm.static_mux_c(imux)
     s2v = blocks.stream_to_vector(gr.sizeof_gr_complex, total_subc)
 
     # vector to stream, mux with pilot subcarrier symbols,
@@ -722,7 +719,7 @@ class pilot_subcarrier_inserter_zeroes (gr.hier_block2):
     v2s = blocks.vector_to_stream(gr.sizeof_gr_complex, subc)
     pilot_src = blocks.vector_source_c(pilot_subc_sym, True)
 
-    mux = static_mux_c(imux)
+    mux = ofdm.static_mux_c(imux)
     s2v = blocks.stream_to_vector(gr.sizeof_gr_complex, total_subc)
 
     # vector to stream, mux with pilot subcarrier symbols,
@@ -758,7 +755,7 @@ class pilot_subcarrier_filter (gr.hier_block2):
 
     # FIXME inefficient
 
-    skipcarrier = skip(itemsize, subc)
+    skipcarrier = ofdm.skip(itemsize, subc)
     for x in config.training_data.shifted_pilot_tones:
       skipcarrier.skip_call(x)
 

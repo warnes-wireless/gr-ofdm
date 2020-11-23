@@ -25,15 +25,15 @@ from gnuradio import fft as fft_blocks
 from gnuradio.eng_option import eng_option
 
 from optparse import OptionParser
-from .gr_tools import log_to_file, terminate_stream
+from gr_tools import log_to_file, terminate_stream
 
 import ofdm as ofdm
 import numpy
 import math
 from numpy import concatenate
 
-from .autocorrelator import autocorrelator
-from .station_configuration import station_configuration
+from autocorrelator import autocorrelator
+from station_configuration import station_configuration
 
 
 class ofdm_inner_receiver( gr.hier_block2 ):

@@ -25,7 +25,7 @@ import ofdm as ofdm
 import numpy
 
 from numpy import exp, concatenate
-from .gr_tools import fft
+from gr_tools import fft
 
 from .preambles import default_block_header
 

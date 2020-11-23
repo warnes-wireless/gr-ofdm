@@ -5,32 +5,22 @@ from gnuradio import eng_notation
 from gnuradio import gr, blocks
 from gnuradio import fft as fft_blocks
 from gnuradio import trellis
-from .gr_tools import log_to_file, unpack_array, terminate_stream
+from gr_tools import log_to_file, unpack_array, terminate_stream
 from numpy import concatenate
 
-#from ofdm import generic_mapper_mimo_bcv as generic_mapper_bcv
-from ofdm import generic_mapper_bcv
-from ofdm import puncture_bb, cyclic_prefixer, vector_padding, skip
 from ofdm import sqrt_vff
 from ofdm import stream_controlled_mux, reference_data_source_ib
-from .preambles import default_block_header
-from .preambles import pilot_subcarrier_inserter, pilot_block_inserter
-from .station_configuration import *
-from . import common_options
+from preambles import default_block_header
+from preambles import pilot_subcarrier_inserter, pilot_block_inserter
+from station_configuration import *
+import common_options
 import math, copy
 import numpy
 import ofdm as ofdm
 
-from ofdm import corba_multiplex_src_ss, corba_bitcount_src_si
-from ofdm import corba_id_src, corba_map_src_sv, corba_power_src_sv
-from ofdm import repetition_encoder_sb, corba_bitmap_src
-from ofdm import corba_power_allocator, stream_controlled_mux_b
-
 from random import seed, randint
 
 #from grc_wrapper.space_time_coder_grc import space_time_coder
-
-from ofdm import stc_encoder
 
 std_event_channel = "GNUradio_EventChannel" #TODO: flexible
 fo=ofdm.fsm(1, 2, [91, 121])
@@ -142,7 +132,7 @@ class transmit_path(gr.hier_block2):
     whitener_pn = [randint(0, 1) for i in range(used_id_bits*rep_id_bits)]
 
     ## ID Encoder
-    id_enc = self._id_encoder = repetition_encoder_sb(used_id_bits, rep_id_bits, whitener_pn)
+    id_enc = self._id_encoder = ofdm.repetition_encoder_sb(used_id_bits, rep_id_bits, whitener_pn)
     self.connect(id_src, id_enc)
 
     if options.log:
@@ -181,7 +171,7 @@ class transmit_path(gr.hier_block2):
     # Input 0: control stream
     # Input 1: encoded ID stream
     # Inputs 2..n: data streams
-    dmux = self._data_multiplexer = stream_controlled_mux_b()
+    dmux = self._data_multiplexer = ofdm.stream_controlled_mux_b()
     self.connect(mux_src, (dmux, 0))
     self.connect(id_enc, (dmux, 1))
                       
@@ -193,7 +183,7 @@ class transmit_path(gr.hier_block2):
       log_to_file(self, dmux_f, "data/dmux_out.float")
       
     ## Modulator
-    mod = self._modulator = generic_mapper_bcv(config.data_subcarriers, options.coding)
+    mod = self._modulator = ofdm.generic_mapper_bcv(config.data_subcarriers, options.coding)
 
 
 
@@ -226,7 +216,7 @@ class transmit_path(gr.hier_block2):
       ns_ip = ctrl.ns_ip
       ns_port = ctrl.ns_port
       evchan = ctrl.evchan
-      pa = self._power_allocator = corba_power_allocator(dsubc, \
+      pa = self._power_allocator = ofdm.corba_power_allocator(dsubc, \
           evchan, ns_ip, ns_port, True)
 
       self.connect(mod, (pa, 0))
@@ -244,7 +234,7 @@ class transmit_path(gr.hier_block2):
         
     pilot_subc = config.training_data.shifted_pilot_tones;
     print("pilot_subc", pilot_subc)
-    stc = stc_encoder( config.subcarriers, config.frame_data_blocks,  pilot_subc )
+    stc = ofdm.stc_encoder( config.subcarriers, config.frame_data_blocks,  pilot_subc )
     
     self.connect(psubc, stc)
     
@@ -258,10 +248,10 @@ class transmit_path(gr.hier_block2):
     ## Add virtual subcarriers
     if config.fft_length > config.subcarriers:
       vsubc = self._virtual_subcarrier_extender = \
-              vector_padding(config.subcarriers, config.fft_length)
+              ofdm.vector_padding(config.subcarriers, config.fft_length)
       self.connect(stc, vsubc)
       vsubc_2 = self._virtual_subcarrier_extender_2 = \
-              vector_padding(config.subcarriers, config.fft_length)
+              ofdm.vector_padding(config.subcarriers, config.fft_length)
       self.connect((stc, 1), vsubc_2)
     else:
       vsubc = self._virtual_subcarrier_extender = psubc
@@ -297,10 +287,10 @@ class transmit_path(gr.hier_block2):
       log_to_file(self, pblocks_2, "data/pilot_block_ins2_out.compl")
     
     ## Cyclic Prefix
-    cp = self._cyclic_prefixer = cyclic_prefixer(config.fft_length,
+    cp = self._cyclic_prefixer = ofdm.cyclic_prefixer(config.fft_length,
                                                  config.block_length)
     self.connect( pblocks, cp )
-    cp_2 = self._cyclic_prefixer_2 = cyclic_prefixer(config.fft_length,
+    cp_2 = self._cyclic_prefixer_2 = ofdm.cyclic_prefixer(config.fft_length,
                                                  config.block_length)
     self.connect( pblocks_2, cp_2 )
     
@@ -391,13 +381,13 @@ class transmit_path(gr.hier_block2):
         
         ## Puncturing
         if not options.nopunct:
-            puncturing = self._puncturing = puncture_bb(options.subcarriers)
+            puncturing = self._puncturing = ofdm.puncture_bb(options.subcarriers)
             #sah = gr.sample_and_hold_bb()
             #sah_trigger = blocks.vector_source_b([1,0],True)
             #decim_sah=gr.keep_one_in_n(gr.sizeof_char,2)
             self.connect(self._bitmap_trigger_puncturing, (puncturing, 2))
             frametrigger_bitmap_filter = blocks.vector_source_b([1, 0], True)
-            bitmap_filter = self._puncturing_bitmap_src_filter = skip(gr.sizeof_char*options.subcarriers, 2)# skip_known_symbols(frame_length,subcarriers)
+            bitmap_filter = self._puncturing_bitmap_src_filter = ofdm.skip(gr.sizeof_char*options.subcarriers, 2)# skip_known_symbols(frame_length,subcarriers)
             bitmap_filter.skip_call(0)
             #self.connect(self._bitmap_src_puncturing,bitmap_filter,(puncturing,1))
             self.connect(self._map_src, bitmap_filter, (puncturing, 1))
@@ -521,7 +511,7 @@ class ber_reference_source (gr.hier_block2):
     rand_string = rand_file.read()
     rand_file.close()
     data = [ord(rand_string[i]) for i in range(len(rand_string))]
-    ref_src = self._reference_data_source = reference_data_source_ib(list(data))
+    ref_src = self._reference_data_source = ofdm.reference_data_source_ib(list(data))
     self.connect(bc_src, ref_src)
 
     ## Setup Output
@@ -544,7 +534,7 @@ class common_power_allocator (gr.hier_block2):
     data = (self, 0)
     power = (self, 1)
 
-    to_ampl = sqrt_vff(subcarriers)
+    to_ampl = ofdm.sqrt_vff(subcarriers)
     f2c = gr.float_to_complex(subcarriers)
     adjust = operational_block
 
@@ -617,17 +607,17 @@ class corba_tx_control (gr.hier_block2):
 
 
     ## ID Source (root)
-    id_src = self._id_source = corba_id_src(evchan, ns_ip, ns_port)
+    id_src = self._id_source = ofdm.corba_id_src(evchan, ns_ip, ns_port)
     self.connect(id_src, id_out)
 
 
     ## Multiplex Source
-    mux_src = self._multiplex_source = corba_multiplex_src_ss(evchan, ns_ip, ns_port, coding)
+    mux_src = self._multiplex_source = ofdm.corba_multiplex_src_ss(evchan, ns_ip, ns_port, coding)
     self.connect(id_src, mux_src, mux_out)
 
 
     ## Map Source
-    map_src = self._bitmap_source = corba_bitmap_src(dsubc,
+    map_src = self._bitmap_source = ofdm.corba_bitmap_src(dsubc,
         0, evchan, ns_ip, ns_port)
     self.connect(id_src, map_src, bitmap_out)
 
@@ -655,7 +645,7 @@ class corba_tx_control (gr.hier_block2):
     port = self.cur_port
     self.cur_port += 1
 
-    bc_src = corba_bitcount_src_si(uid, self.evchan, self.ns_ip, self.ns_port, self.coding)
+    bc_src = ofdm.corba_bitcount_src_si(uid, self.evchan, self.ns_ip, self.ns_port, self.coding)
     self.connect(self._id_source, bc_src, (self, port))
     
     return port

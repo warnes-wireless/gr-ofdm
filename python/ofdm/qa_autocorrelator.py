@@ -27,7 +27,7 @@ from .preambles import morellimengali_designer, schmidl_ifo_designer
 from random import randint
 from numpy import sqrt, concatenate
 from numpy.random import randint, seed, random_integers
-from .gr_tools import log_to_file
+from gr_tools import log_to_file
 
 from .schmidl import recursive_timing_metric
 

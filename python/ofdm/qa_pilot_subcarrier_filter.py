@@ -24,7 +24,7 @@ from gnuradio import gr, gr_unittest
 import ofdm as ofdm
 from . import preambles
 from numpy import concatenate, reshape, zeros
-from .station_configuration import *
+from station_configuration import *
 
 class qa_pilot_subcarrier_filter (gr_unittest.TestCase):
   def setUp (self):

@@ -21,7 +21,7 @@
 #
 
 from gnuradio import eng_notation
-from . import preambles
+import preambles
 
 def add_options(normal, expert):
     def_data_blocks_per_frame = 9

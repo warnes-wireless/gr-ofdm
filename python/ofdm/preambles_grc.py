@@ -22,14 +22,13 @@
 
 from math import sqrt, pi
 from numpy import concatenate, conjugate, array
-from .gr_tools import fft, ifft
+from gr_tools import fft, ifft
 from gnuradio import gr, blocks
 from cmath import exp
 from numpy import abs, concatenate
 import numpy
 import ofdm as ofdm
-from .station_configuration import *
-from ofdm import stream_controlled_mux, skip
+from station_configuration import *
 from numpy import *
 
 from ofdm import static_mux_c, static_mux_v
@@ -495,7 +494,7 @@ class pilot_block_filter(gr.hier_block2):
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char),
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char))
 
-    filt = skip(gr.sizeof_gr_complex*subcarriers, frame_length)# skip_known_symbols(frame_length,subcarriers)
+    filt = ofdm.skip(gr.sizeof_gr_complex*subcarriers, frame_length)# skip_known_symbols(frame_length,subcarriers)
     for x in training_data.pilotsym_pos:
       filt.skip_call(x)
 
@@ -526,7 +525,7 @@ class fbmc_inner_pilot_block_filter(gr.hier_block2):
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*vlen, gr.sizeof_char),
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*vlen, gr.sizeof_char))
 
-    filt = skip(gr.sizeof_gr_complex*vlen, frame_length)# skip_known_symbols(frame_length,subcarriers)
+    filt = ofdm.skip(gr.sizeof_gr_complex*vlen, frame_length)# skip_known_symbols(frame_length,subcarriers)
     for x in config.training_data.fbmc_pilotsym_pos_td:
       filt.skip_call(x)
 
@@ -559,7 +558,7 @@ class fbmc_pilot_block_filter(gr.hier_block2):
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char),
         gr.io_signature2(2, 2, gr.sizeof_gr_complex*subcarriers, gr.sizeof_char))
 
-    filt = skip(gr.sizeof_gr_complex*subcarriers, frame_length/2)# skip_known_symbols(frame_length,subcarriers)
+    filt = ofdm.skip(gr.sizeof_gr_complex*subcarriers, frame_length/2)# skip_known_symbols(frame_length,subcarriers)
     for x in training_data.fbmc_pilotsym_pos[:len(training_data.fbmc_pilotsym_pos)/2]:
       filt.skip_call(x)
 
@@ -588,7 +587,7 @@ class fbmc_snr_filter(gr.hier_block2):
 
     
     skipping_symbols = [0] + list(range(training_data.fbmc_no_preambles/2, frame_length/2))
-    snr_est_filt = skip(gr.sizeof_gr_complex*subcarriers, frame_length/2)# skip_known_symbols(frame_length,subcarriers)
+    snr_est_filt = ofdm.skip(gr.sizeof_gr_complex*subcarriers, frame_length/2)# skip_known_symbols(frame_length,subcarriers)
     
     for x in skipping_symbols:
       snr_est_filt.skip_call(x)
@@ -620,7 +619,7 @@ class ofdm_snr_filter(gr.hier_block2):
 
     
     #skipping_symbols = [0] + range(training_data.fbmc_no_preambles/2,frame_length/2)
-    snr_est_filt = skip(gr.sizeof_gr_complex*subcarriers, frame_length)# skip_known_symbols(frame_length,subcarriers)
+    snr_est_filt = ofdm.skip(gr.sizeof_gr_complex*subcarriers, frame_length)# skip_known_symbols(frame_length,subcarriers)
     
     for x in range(1, frame_length):
       snr_est_filt.skip_call(x)
@@ -649,7 +648,7 @@ class scatterplot_subcarrier_filter(gr.hier_block2):
         gr.io_signature(1, 1, gr.sizeof_gr_complex*subcarriers))
 
     
-    scatter_id_filt = skip(gr.sizeof_gr_complex*subcarriers, data_blocks)
+    scatter_id_filt = ofdm.skip(gr.sizeof_gr_complex*subcarriers, data_blocks)
     scatter_id_filt.skip_call(0)
 
     self.connect(self, scatter_id_filt)
@@ -771,7 +770,7 @@ class pilot_subcarrier_filter (gr.hier_block2):
 
     # FIXME inefficient
 
-    skipcarrier = skip(itemsize, subc)
+    skipcarrier = ofdm.skip(itemsize, subc)
     for x in training_data.shifted_pilot_tones:
       skipcarrier.skip_call(x)
 

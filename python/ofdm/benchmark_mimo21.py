@@ -25,7 +25,7 @@ from gnuradio import eng_notation
 from .configparse import OptionParser
 from gnuradio import filter
 
-from .station_configuration import station_configuration
+from station_configuration import station_configuration
 
 from math import log10
 from corba_servants import corba_data_buffer_servant
@@ -34,14 +34,13 @@ from corba_servants import *
 
 import sys
 
-from .transmit_path2 import transmit_path
-from .receive_path21 import receive_path
-from ofdm import throughput_measure, vector_sampler, corba_rxbaseband_sink
-from .common_options import common_tx_rx_usrp_options
-from .gr_tools import log_to_file, ms_to_file
-from .moms import moms
+from transmit_path2 import transmit_path
+from receive_path21 import receive_path
+from common_options import common_tx_rx_usrp_options
+from gr_tools import log_to_file, ms_to_file
+from moms import moms
 
-from . import fusb_options
+import fusb_options
 
 from omniORB import CORBA, PortableServer
 import CosNaming
@@ -181,7 +180,7 @@ class ofdm_benchmark (gr.top_block):
     
     
     if options.measure:
-      self.m = throughput_measure(gr.sizeof_gr_complex)
+      self.m = ofdm.throughput_measure(gr.sizeof_gr_complex)
       self.connect( self.m, self.dst )
       self.dst = self.m
 
@@ -346,7 +345,7 @@ class ofdm_benchmark (gr.top_block):
   def publish_rx_baseband_measure(self):
     config = self.config
     vlen = config.fft_length
-    self.rx_baseband_sink = rx_sink = corba_rxbaseband_sink("alps", config.ns_ip,
+    self.rx_baseband_sink = rx_sink = ofdm.corba_rxbaseband_sink("alps", config.ns_ip,
                                     config.ns_port, vlen, config.rx_station_id)
 
       # 1. frame id
@@ -368,7 +367,7 @@ class ofdm_benchmark (gr.top_block):
     fftlen = config.fft_length
 
     my_window = window.hamming(fftlen) #.blackmanharris(fftlen)
-    rxs_sampler = vector_sampler(gr.sizeof_gr_complex, fftlen)
+    rxs_sampler = ofdm.vector_sampler(gr.sizeof_gr_complex, fftlen)
     rxs_trigger = gr.vector_source_b(concatenate([[1], [0]*199]), True)
     rxs_window = blocks.multiply_const_vcc(my_window)
     rxs_spectrum = gr.fft_vcc(fftlen, True, [], True)
@@ -392,7 +391,7 @@ class ofdm_benchmark (gr.top_block):
 
     fftlen = 256
     my_window = window.hamming(fftlen) #.blackmanharris(fftlen)
-    rxs_sampler = vector_sampler(gr.sizeof_gr_complex, fftlen)
+    rxs_sampler = ofdm.vector_sampler(gr.sizeof_gr_complex, fftlen)
     rxs_trigger = gr.vector_source_b(concatenate([[1], [0]*199]), True)
     rxs_window = blocks.multiply_const_vcc(my_window)
     rxs_spectrum = gr.fft_vcc(fftlen, True, [], True)

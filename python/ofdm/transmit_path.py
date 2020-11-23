@@ -33,7 +33,7 @@ import common_options
 import math, copy
 import numpy
 
-from .station_configuration import *
+from station_configuration import *
 
 from random import seed, randint, getrandbits
 

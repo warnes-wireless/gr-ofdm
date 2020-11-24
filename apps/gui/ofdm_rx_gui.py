@@ -171,12 +171,14 @@ class OFDMRxGUI(QtWidgets.QMainWindow):
 
 
         # plot picker
-        self.plot_picker = Qwt.QwtPlotPicker(Qwt.QwtPlot.xBottom,
-                               Qwt.QwtPlot.yLeft,
-                               Qwt.QwtPicker.PointSelection,
-                               Qwt.QwtPlotPicker.VLineRubberBand,
-                               Qwt.QwtPicker.AlwaysOff,
-                               self.gui.qwtPlotCSI.canvas())
+        self.plot_picker = Qwt.QwtPlotPicker(
+                                            Qwt.QwtPlot.xBottom,
+                                            Qwt.QwtPlot.yLeft,
+                                            Qwt.QwtPicker.PointSelection,
+                                            Qwt.QwtPlotPicker.VLineRubberBand,
+                                            Qwt.QwtPicker.AlwaysOff,
+                                            self.gui.qwtPlotCSI.canvas()
+                                            )
 
         #Signals
         self.connect(self.update_timer, QtCore.SIGNAL("timeout()"), self.probe_manager.watcher)

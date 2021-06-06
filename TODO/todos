@@ -1,0 +1,118 @@
+/home/mborawski/Dokumenty/gr-ofdm/lib/accumulator_cc_impl.cc: In member function ‘virtual int gr::ofdm::accumulator_cc_impl::work(int, gr_vector_const_void_star&, gr_vector_void_star&)’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/accumulator_cc_impl.cc:73:5: warning: no return statement in function returning non-void [-Wreturn-type]
+   73 |     }
+      |     ^
+      
+      [ 17%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/depuncture_bb_impl.cc.o
+/home/mborawski/Dokumenty/gr-ofdm/lib/depuncture_bb_impl.cc: In constructor ‘gr::ofdm::depuncture_bb_impl::depuncture_bb_impl(int, char)’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/depuncture_bb_impl.cc:62:44: warning: list-initializer for non-class type must not be parenthesized
+   62 |      , d_rep_per_mode( {2,4,1,8,2,4,3,2,4} )
+      |                                            ^
+[ 18%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/depuncture_ff_impl.cc.o
+/home/mborawski/Dokumenty/gr-ofdm/lib/depuncture_ff_impl.cc: In constructor ‘gr::ofdm::depuncture_ff_impl::depuncture_ff_impl(int, float)’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/depuncture_ff_impl.cc:62:44: warning: list-initializer for non-class type must not be parenthesized
+   62 |      , d_rep_per_mode( {2,4,1,8,2,4,3,2,4} )
+      |               
+      
+      
+      
+  [ 74%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/feedback_sink_vf_impl.cc.o
+/home/mborawski/Dokumenty/gr-ofdm/lib/feedback_sink_vf_impl.cc: In member function ‘void gr::ofdm::feedback_sink_vf_impl::send_snr(short int*, float*)’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/feedback_sink_vf_impl.cc:72:40: warning: ‘bool zmq::detail::socket_base::send(zmq::message_t&, int)’ is deprecated: from 4.3.1, use send taking message_t and send_flags [-Wdeprecated-declarations]
+   72 |         d_socket->send(msg, ZMQ_NOBLOCK);
+      |                                        ^
+In file included from /home/mborawski/Dokumenty/gr-ofdm/lib/feedback_sink_vf_impl.h:25,
+                 from /home/mborawski/Dokumenty/gr-ofdm/lib/feedback_sink_vf_impl.cc:26:
+/usr/include/zmq.hpp:1845:10: note: declared here
+ 1845 |     bool send(message_t &msg_,
+      |          ^~~~
+[ 74%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/vector_element_vff_impl.cc.o
+
+ 56%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/vector_sum_vff_impl.cc.o
+[ 56%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/viterbi_combined_fb_impl.cc.o
+[ 57%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/fsm.cc.o
+[ 58%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/itpp_tdl_channel_impl.cc.o
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc: In function ‘T2 gr::ofdm::enum_first_to_second(T1, gr::ofdm::enum_pair<T1, T2>*, int) [with T1 = gr::ofdm::CHANNEL_PROFILE; T2 = itpp::CHANNEL_PROFILE]’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc:362:5: warning: control reaches end of non-void function -Wreturn-type]
+  362 |     }
+      |     ^
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc: In function ‘T2 gr::ofdm::enum_first_to_second(T1, gr::ofdm::enum_pair<T1, T2>*, int) [with T1 = gr::ofdm::CORRELATED_METHOD; T2 = itpp::CORRELATED_METHOD]’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc:362:5: warning: control reaches end of non-void function -Wreturn-type]
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc: In function ‘T2 gr::ofdm::enum_first_to_second(T1, gr::ofdm::enum_pair<T1, T2>*, int) [with T1 = gr::ofdm::FADING_TYPE; T2 = itpp::FADING_TYPE]’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc:362:5: warning: control reaches end of non-void function -Wreturn-type]
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc: In function ‘T2 gr::ofdm::enum_first_to_second(T1, gr::ofdm::enum_pair<T1, T2>*, int) [with T1 = gr::ofdm::DOPPLER_SPECTRUM; T2 = itpp::DOPPLER_SPECTRUM]’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc:362:5: warning: control reaches end of non-void function -Wreturn-type]
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc: In function ‘T1 gr::ofdm::enum_second_to_first(T2, gr::ofdm::enum_pair<T1, T2>*, int) [with T1 = gr::ofdm::CORRELATED_METHOD; T2 = itpp::CORRELATED_METHOD]’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc:376:5: warning: control reaches end of non-void function -Wreturn-type]
+  376 |     }
+      |     ^
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc: In function ‘T1 gr::ofdm::enum_second_to_first(T2, gr::ofdm::enum_pair<T1, T2>*, int) [with T1 = gr::ofdm::FADING_TYPE; T2 = itpp::FADING_TYPE]’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/itpp_tdl_channel_impl.cc:376:5: warning: control reaches end of non-void function -Wreturn-type]
+[ 58%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/encoder_bb_impl.cc.o
+[ 59%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/reference_data_source_02_ib_impl.cc.o
+[ 59%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/allocation_src_impl.cc.o
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc: In constructor ‘gr::ofdm::allocation_src_impl::allocation_src_impl(int, int, bool, char*, char*)’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc:73:27: warning: list-initializer for non-class type must not be parenthesized
+   73 |         ,d_amplitude_abs(1)
+      |                           ^
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc:73:27: warning: list-initializer for non-class type must not be parenthesized
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc:131:59: warning: ‘void zmq::detail::socket_base::setsockopt(int, const void*, size_t)’ is deprecated: from 4.7.0, use `set` taking option from zmq::sockopt [-Wdeprecated-declarations]
+  131 |         d_socket_feedback->setsockopt(ZMQ_SUBSCRIBE, "", 0);
+      |                                                           ^
+In file included from /home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.h:28,
+                 from /home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc:28:
+/usr/include/zmq.hpp:1662:10: note: declared here
+ 1662 |     void setsockopt(int option_, const void *optval_, size_t optvallen_)
+      |          ^~~~~~~~~~
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc: In member function ‘void gr::ofdm::allocation_src_impl::send_allocation()’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc:194:40: warning: ‘bool zmq::detail::socket_base::send(zmq::message_t&, int)’ is deprecated: from 4.3.1, use send taking message_t and send_flags [-Wdeprecated-declarations]
+  194 |         d_socket->send(msg, ZMQ_NOBLOCK);
+      |                                        ^
+In file included from /home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.h:28,
+                 from /home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc:28:
+/usr/include/zmq.hpp:1845:10: note: declared here
+ 1845 |     bool send(message_t &msg_,
+      |          ^~~~
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc: In member function ‘void gr::ofdm::allocation_src_impl::recv_snr()’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc:210:45: warning: ‘bool zmq::detail::socket_base::recv(zmq::message_t*, int)’ is deprecated: from 4.3.1, use recv taking a reference to message_t and recv_flags [-Wdeprecated-declarations]
+  210 |                 d_socket_feedback->recv(&msg);
+      |                                             ^
+In file included from /home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.h:28,
+                 from /home/mborawski/Dokumenty/gr-ofdm/lib/allocation_src_impl.cc:28:
+/usr/include/zmq.hpp:1926:10: note: declared here
+ 1926 |     bool recv(message_t *msg_, int flags_ = 0)
+      |          ^~~~
+[ 60%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/allocation_buffer_impl.cc.o
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_buffer_impl.cc: In constructor ‘gr::ofdm::allocation_buffer_impl::allocation_buffer_impl(int, int, char*, bool)’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_buffer_impl.cc:54:46: warning: list-initializer for non-class type must not be parenthesized
+   54 |         ,d_bitspermode( {1,2,3,4,6,8,9,10,12})
+      |                                              ^
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_buffer_impl.cc:91:50: warning: ‘void zmq::detail::socket_base::setsockopt(int, const void*, size_t)’ is deprecated: from 4.7.0, use `set` taking option from zmq::sockopt [-Wdeprecated-declarations]
+   91 |         d_socket->setsockopt(ZMQ_SUBSCRIBE, "", 0);
+      |                                                  ^
+In file included from /home/mborawski/Dokumenty/gr-ofdm/lib/allocation_buffer_impl.h:28,
+                 from /home/mborawski/Dokumenty/gr-ofdm/lib/allocation_buffer_impl.cc:28:
+/usr/include/zmq.hpp:1662:10: note: declared here
+ 1662 |     void setsockopt(int option_, const void *optval_, size_t optvallen_)
+      |          ^~~~~~~~~~
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_buffer_impl.cc: In member function ‘void gr::ofdm::allocation_buffer_impl::recv_allocation()’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/allocation_buffer_impl.cc:118:36: warning: ‘bool zmq::detail::socket_base::recv(zmq::message_t*, int)’ is deprecated: from 4.3.1, use recv taking a reference to message_t and recv_flags [-Wdeprecated-declarations]
+  118 |                 d_socket->recv(&msg);
+      |                                    ^
+In file included from /home/mborawski/Dokumenty/gr-ofdm/lib/allocation_buffer_impl.h:28,
+                 from /home/mborawski/Dokumenty/gr-ofdm/lib/allocation_buffer_impl.cc:28:
+/usr/include/zmq.hpp:1926:10: note: declared here
+ 1926 |     bool recv(message_t *msg_, int flags_ = 0)
+      |          ^~~~
+[ 60%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/tx_mux_ctrl_impl.cc.o
+
+
+
+[ 38%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/puncture_bb_impl.cc.o
+/home/mborawski/Dokumenty/gr-ofdm/lib/puncture_bb_impl.cc: In constructor ‘gr::ofdm::puncture_bb_impl::puncture_bb_impl(int)’:
+/home/mborawski/Dokumenty/gr-ofdm/lib/puncture_bb_impl.cc:61:44: warning: list-initializer for non-class type must not be parenthesized
+   61 |      , d_rep_per_mode( {2,4,1,8,2,4,3,2,4} )
+      |                                            ^
+[ 38%] Building CXX object lib/CMakeFiles/gnuradio-ofdm.dir/reassemble_ofdm_frame_impl.cc.o
+
+
